@@ -1,12 +1,14 @@
 #!/usr/bin/python3
 
 from softwareinstaller.sources.flatpaksource import FlatpakSource
+from softwareinstaller.sources.pacmansource import PacmanSource
 
 class SoftwareService:
 
     def __init__(self):
         self.sources = [
-            FlatpakSource()
+            FlatpakSource(),
+            PacmanSource()
         ]
 
     def getsource(self, sourceid):
