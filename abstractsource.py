@@ -1,0 +1,46 @@
+#!/usr/bin/python3
+
+from softwareinstaller.app import App
+
+import re
+import subprocess
+
+class AbstractSource:
+
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
+    def search(self, name):
+        raise Exception("Must override this method")
+
+    def getapp(self, appid):
+        raise Exception("Must override this method")
+
+    def installapp(self, app):
+        raise Exception("Must override this method")
+
+    def removeapp(self, app):
+        raise Exception("Must override this method")
+    
+    def installed(self, app):
+        raise Exception("Must override this method")
+
+    def call(self, command, regex=None, converters=None):
+        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout = result.stdout.decode('utf-8').rstrip("\n")
+        stderr = result.stderr.decode('utf-8').rstrip("\n")
+        #print("{0}: [{1}] {2} | {3}".format(command, result.returncode, stdout, stderr))
+        if regex is None:
+            return
+        response = []
+        for line in stdout.splitlines():
+            match = regex.match(line)
+            if match:
+                result_line = match.groups()
+                if converters is not None:
+                    result_line = [converters[i](r) for i, r in enumerate(result_line)]
+                response.append(result_line)
+            else:
+                raise Exception("Line '{0}' did not match regex".format(line))
+        return response
