@@ -6,10 +6,11 @@ from softwareinstaller.sources.pacmansource import PacmanSource
 class SoftwareService:
 
     def __init__(self):
-        self.sources = [
-            FlatpakSource(),
-            PacmanSource()
+        all_sources = [
+        	FlatpakSource(),
+        	PacmanSource()
         ]
+        self.sources = [s for s in all_sources if s.test_installed()]
 
     def getsource(self, sourceid):
         for source in self.sources:

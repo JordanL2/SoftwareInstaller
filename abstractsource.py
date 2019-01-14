@@ -10,6 +10,9 @@ class AbstractSource:
         self.id = id
         self.name = name
 
+    def test_installed(self):
+    	raise Exception("Must override this method")
+
     def search(self, name):
         raise Exception("Must override this method")
 
