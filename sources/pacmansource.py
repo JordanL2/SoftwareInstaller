@@ -6,8 +6,8 @@ import re
 
 class PacmanSource(AbstractSource):
 
-    search_regex = re.compile(r'^[^\/]+\/(\S+) [^\,]+\,(.+)$')
-    description_regex = re.compile(r'^Description\s+\:\s+(.+)$')
+    search_regex = re.compile(r'^[^\/]+\/(\S+)\s+([^\,]+)\,(.+)$')
+    description_regex = re.compile(r'^([^\:]+?)\s+\:\s+(.+)$')
     installed_regex = re.compile(r'^(\S+)\s+(\S+)$')
 
     def __init__(self):
@@ -22,15 +22,21 @@ class PacmanSource(AbstractSource):
         table = self.call("pacman -Ss {0} | sed -e \"s/    //\" | paste -d, - -".format(name), self.search_regex, None, False)
         results = []
         for row in table:
-            results.append(App(self, row[0], row[0], row[1], row[0] in installedids))
+            results.append(App(self, row[0], row[0], row[2], row[1], row[0] in installedids))
         return results
 
     def getapp(self, appid):
         installedids = self._get_installed_ids()
 
-        table = self.call("pacman -Si {0} | grep '^Description'".format(appid), self.description_regex)
-        desc = table[0][0]
-        return App(self, appid, appid, desc, appid in installedids)
+        table = self.call("pacman -Si {0}".format(appid), self.description_regex, None, True)
+        desc = ''
+        version = ''
+        for row in table:
+            if row[0] == 'Description':
+                desc = row[1]
+            if row[0] == 'Version':
+                version = row[1]
+        return App(self, appid, appid, desc, version, appid in installedids)
 
     def install(self, app):
         self.call("pacman --noconfirm -S {0}".format(app.id))

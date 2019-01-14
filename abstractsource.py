@@ -11,7 +11,7 @@ class AbstractSource:
         self.name = name
 
     def test_installed(self):
-    	raise Exception("Must override this method")
+        raise Exception("Must override this method")
 
     def search(self, name):
         raise Exception("Must override this method")
@@ -41,6 +41,6 @@ class AbstractSource:
                     result_line = [converters[i](r) for i, r in enumerate(result_line)]
                 response.append(result_line)
             else:
-            	if not ignoreerrors:
-                	raise Exception("Line '{0}' did not match regex".format(line))
+                if not ignoreerrors:
+                    raise Exception("Line '{0}' did not match regex".format(line))
         return response

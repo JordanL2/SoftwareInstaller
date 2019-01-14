@@ -2,11 +2,12 @@
 
 class App:
 
-	def __init__(self, source, id, name, desc, installed):
+	def __init__(self, source, id, name, desc, version, installed):
 		self.source = source
 		self.id = id
 		self.name = name
 		self.desc = desc
+		self.version = version
 		self.installed = installed
 
 	def install(self):

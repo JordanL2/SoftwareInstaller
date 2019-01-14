@@ -6,7 +6,7 @@ import re
 
 class FlatpakSource(AbstractSource):
 
-    search_regex = re.compile(r'^(.+?)\s+\-\s+(.+)\s+(\S+)\s+(\S+)$')
+    search_regex = re.compile(r'^(.+?)\s+\-\s+(.+?)\s+(\S+)\s+(\S+)(?:\s+([0-9\.]+))?$')
 
     def __init__(self):
         super().__init__('flatpak', 'Flatpak')
@@ -17,11 +17,14 @@ class FlatpakSource(AbstractSource):
     def search(self, name):
         installedids = self._get_installed_ids()
 
-        table = self.call("flatpak search {0}  --columns=description,application,remotes".format(name), self.search_regex, None, True)
+        table = self.call("flatpak search {0} --columns=description,application,remotes,version".format(name), self.search_regex, None, True)
         results = []
         for row in table:
             id = row[3] + ':' + row[2]
-            results.append(App(self, id, row[0], row[1], id in installedids))
+            version = '-'
+            if len(row) > 4 and row[4] != None:
+                version = row[4]
+            results.append(App(self, id, row[0], row[1], version, id in installedids))
         return results
 
     def getapp(self, appid):
@@ -45,8 +48,15 @@ class FlatpakSource(AbstractSource):
         return (name[0:i], name[i + 1:])
 
     def _get_installed(self):
-        table = self.call("flatpak list --columns=description,application,origin", self.search_regex, None, True)
-        return [App(self, row[3] + ':' + row[2], row[0], row[1], False) for row in table]
+        table = self.call("flatpak list --columns=description,application,origin,version", self.search_regex, None, True)
+        results = []
+        for row in table:
+            id = row[3] + ':' + row[2]
+            version = '-'
+            if len(row) > 4 and row[4] != None:
+                version = row[4]
+            results.append(App(self, id, row[0], row[1], version, True))
+        return results
 
     def _get_installed_ids(self):
         installed = self._get_installed()
