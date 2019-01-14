@@ -22,17 +22,14 @@ class AbstractSource:
 
     def removeapp(self, app):
         raise Exception("Must override this method")
-    
-    def installed(self, app):
-        raise Exception("Must override this method")
 
-    def call(self, command, regex=None, converters=None):
+    def call(self, command, regex=None, converters=None, ignoreerrors=False):
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout = result.stdout.decode('utf-8').rstrip("\n")
         stderr = result.stderr.decode('utf-8').rstrip("\n")
         #print("{0}: [{1}] {2} | {3}".format(command, result.returncode, stdout, stderr))
         if regex is None:
-            return
+            return stdout
         response = []
         for line in stdout.splitlines():
             match = regex.match(line)
@@ -42,5 +39,6 @@ class AbstractSource:
                     result_line = [converters[i](r) for i, r in enumerate(result_line)]
                 response.append(result_line)
             else:
-                raise Exception("Line '{0}' did not match regex".format(line))
+            	if not ignoreerrors:
+                	raise Exception("Line '{0}' did not match regex".format(line))
         return response

@@ -14,15 +14,16 @@ if cmd == 'search':
 	results = service.search(name)
 	for sourceid in results.keys():
 		for result in results[sourceid]:
-			print(sourceid, '|', result.id, '|', result.name, '|', result.desc)
+			print(sourceid, '|', result.id, '|', result.name, '|', result.desc, '|', result.installed)
 
 elif cmd == 'show':
 
 	sourceid = sys.argv[2]
 	appid = sys.argv[3]
-	app = service.show(sourceid, appid)
+	app = service.getapp(sourceid, appid)
 	print('Name:', app.name)
 	print('Desc:', app.desc)
+	print('Installed:', app.installed)
 
 elif cmd == 'install':
 

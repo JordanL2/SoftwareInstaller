@@ -32,12 +32,12 @@ class SoftwareService:
 
 	def install(self, sourceid, appid):
 		app = self.getapp(sourceid, appid)
-		if app.installed():
+		if app.installed:
 			raise Exception("App is already installed")
 		app.install()
 		
 	def remove(self, sourceid, appid):
 		app = self.getapp(sourceid, appid)
-		if not app.installed():
+		if not app.installed:
 			raise Exception("App is not installed")
 		app.remove()
