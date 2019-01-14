@@ -2,7 +2,6 @@
 
 from softwareinstaller.app import App
 
-import re
 import subprocess
 
 class AbstractSource:
