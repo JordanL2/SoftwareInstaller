@@ -3,7 +3,6 @@
 from softwareinstaller.abstractsource import *
 
 import re
-import subprocess
 
 class FlatpakSource(AbstractSource):
 
