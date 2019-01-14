@@ -17,10 +17,10 @@ class AbstractSource:
     def getapp(self, appid):
         raise Exception("Must override this method")
 
-    def installapp(self, app):
+    def install(self, app):
         raise Exception("Must override this method")
 
-    def removeapp(self, app):
+    def remove(self, app):
         raise Exception("Must override this method")
 
     def call(self, command, regex=None, converters=None, ignoreerrors=False):

@@ -30,13 +30,13 @@ class FlatpakSource(AbstractSource):
                 return result
         return None
 
-    def installapp(self, app):
-        #TODO
-        pass
+    def install(self, app):
+        remote, id = self._split_id(app.id)
+        self.call("flatpak install -y {0} {1}".format(remote, id), None, None, True)
 
-    def removeapp(self, app):
-        #TODO
-        pass
+    def remove(self, app):
+        remote, id = self._split_id(app.id)
+        self.call("flatpak remove -y {0}".format(id), None, None, True)
 
     def _split_id(self, name):
         i = name.index(':')
