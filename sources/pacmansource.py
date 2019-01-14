@@ -6,7 +6,7 @@ import re
 
 class PacmanSource(AbstractSource):
 
-    search_regex = re.compile(r'^[^\/]+\/(\S+)\s+([^\,]+)\,(.+)$')
+    search_regex = re.compile(r'^[^\/]+\/(\S+)\s+([^\s\,]+)[^\,]*\,(.+)$')
     description_regex = re.compile(r'^([^\:]+?)\s+\:\s+(.+)$')
     installed_regex = re.compile(r'^(\S+)\s+(\S+)$')
 
