@@ -29,7 +29,8 @@ class AbstractSource:
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout = result.stdout.decode('utf-8').rstrip("\n")
         stderr = result.stderr.decode('utf-8').rstrip("\n")
-        #print("{0}: [{1}] {2} | {3}".format(command, result.returncode, stdout, stderr))
+        if result.returncode != 0:
+            raise Exception(stderr)
         if regex is None:
             return stdout
         response = []

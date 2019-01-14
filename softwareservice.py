@@ -41,12 +41,18 @@ class SoftwareService:
         if app.installed:
             raise Exception("App is already installed")
         app.install()
+        app = self.getapp(superid)
+        if not app.installed:
+            raise Exception("App was not installed")
         
     def remove(self, superid):
         app = self.getapp(superid)
         if not app.installed:
             raise Exception("App is not installed")
         app.remove()
+        app = self.getapp(superid)
+        if app.installed:
+            raise Exception("App was not removed")
 
     def _split_super_id(self, superid):
         i = superid.index(':')
