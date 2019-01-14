@@ -43,7 +43,7 @@ class FlatpakSource(AbstractSource):
         return (name[0:i], name[i + 1:])
 
     def _get_installed(self):
-        table = self.call("flatpak list --app --columns=description,application,origin", self.search_regex, None, True)
+        table = self.call("flatpak list --columns=description,application,origin", self.search_regex, None, True)
         return [App(self, row[3] + ':' + row[2], row[0], row[1], False) for row in table]
 
     def _get_installed_ids(self):
