@@ -20,7 +20,7 @@ if cmd == 'search':
 			installed = '[    -    ]'
 			if result.installed:
 				installed = '[INSTALLED]'
-			row = [installed, sourceid, result.id, result.name, result.desc]
+			row = [installed, result.source.name, result.superid(), result.name, result.desc]
 			for i in range(0, columns):
 				if len(row[i]) > maxwidth[i]:
 					maxwidth[i] = len(row[i])
@@ -30,24 +30,21 @@ if cmd == 'search':
 
 elif cmd == 'show':
 
-	sourceid = sys.argv[2]
-	appid = sys.argv[3]
-	app = service.getapp(sourceid, appid)
+	superid = sys.argv[2]
+	app = service.getapp(superid)
 	print('Name:', app.name)
 	print('Desc:', app.desc)
 	print('Installed:', app.installed)
 
 elif cmd == 'install':
 
-	sourceid = sys.argv[2]
-	appid = sys.argv[3]
-	service.install(sourceid, appid)
+	superid = sys.argv[2]
+	service.install(superid)
 
 elif cmd == 'remove':
 
-	sourceid = sys.argv[2]
-	appid = sys.argv[3]
-	service.remove(sourceid, appid)
+	superid = sys.argv[2]
+	service.remove(superid)
 
 else:
 	print("Unrecognised command '{0}'".format(cmd))

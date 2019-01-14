@@ -14,3 +14,6 @@ class App:
 
 	def remove(self):
 		self.source.remove(self)
+
+	def superid(self):
+		return self.source.id + ':' + self.id
