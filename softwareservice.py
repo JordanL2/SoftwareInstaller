@@ -2,13 +2,15 @@
 
 from softwareinstaller.sources.flatpaksource import FlatpakSource
 from softwareinstaller.sources.pacmansource import PacmanSource
+from softwareinstaller.sources.yaourtsource import YaourtSource
 
 class SoftwareService:
 
     def __init__(self):
         all_sources = [
         	FlatpakSource(),
-        	PacmanSource()
+        	PacmanSource(),
+            YaourtSource()
         ]
         self.sources = [s for s in all_sources if s.test_installed()]
 
