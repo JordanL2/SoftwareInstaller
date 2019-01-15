@@ -4,6 +4,7 @@ from softwareinstaller.abstractsource import *
 
 import re
 
+
 class YaourtSource(AbstractSource):
 
     search_regex = re.compile(r'^[^\/]+\/(\S+)\s+(\S+)\s+(\S+)\s+[^\,]+,(.+)$')

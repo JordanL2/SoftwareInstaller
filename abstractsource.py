@@ -4,6 +4,7 @@ from softwareinstaller.app import App
 
 import subprocess
 
+
 class AbstractSource:
 
     def __init__(self, id, name):

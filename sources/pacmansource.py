@@ -4,6 +4,7 @@ from softwareinstaller.abstractsource import *
 
 import re
 
+
 class PacmanSource(AbstractSource):
 
     search_regex = re.compile(r'^[^\/]+\/(\S+)\s+([^\s\,]+)[^\,]*\,(.+)$')

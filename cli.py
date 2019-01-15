@@ -4,73 +4,84 @@ from softwareinstaller.softwareservice import SoftwareService
 
 import sys
 
-service = SoftwareService()
+class SoftwareInstallerCLI:
 
-cmd = sys.argv[1]
+	def __init__(self):
+		self.service = SoftwareService()
 
-if cmd == 'search':
+	def do_command(self, cmd, args):
+		flags = [a for a in args if a.startswith('-')]
+		args = [a for a in args if not a.startswith('-')]
+		if cmd == 'search':
+			self.search(args, flags)
+		elif cmd == 'local':
+			self.local(args, flags)
+		elif cmd == 'show':
+			self.show(args, flags)
+		elif cmd == 'install':
+			self.install(args, flags)
+		elif cmd == 'remove':
+			self.remove(args, flags)
+		else:
+			print("Unrecognised command '{0}'".format(cmd))
 
-	name = sys.argv[2]
-	results = service.search(name)
-	table = []
-	columns = 7
-	maxwidth = [0] * columns
-	for sourceid in results.keys():
-		for result in results[sourceid]:
-			indicator = '   '
-			if result.installed != '':
-				indicator = '[I]'
-				if result.installed != result.version:
-					indicator = '[U]'
-			row = [indicator, result.source.name, result.superid(), result.name, result.version, result.installed, result.desc]
-			for i in range(0, columns):
-				if len(row[i]) > maxwidth[i]:
-					maxwidth[i] = len(row[i])
-			table.append(row)
-	for row in table:
-		print(str.join(' ', [format(row[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
+	def search(self, args, flags):
+		name = args.pop(0)
+		results = self.service.search(name)
+		self._outputresults(results, flags)
 
-elif cmd == 'local':
+	def local(self, args, flags):
+		name = None
+		if len(args) > 0:
+			name = args.pop(0)
+		results = self.service.local(name)
+		self._outputresults(results, flags)
 
-	name = None
-	if len(sys.argv) > 2:
-		name = sys.argv[2]
-	results = service.local(name)
-	table = []
-	columns = 7
-	maxwidth = [0] * columns
-	for sourceid in results.keys():
-		for result in results[sourceid]:
-			indicator = '[I]'
-			if result.installed != result.version:
-				indicator = '[U]'
-			row = [indicator, result.source.name, result.superid(), result.name, result.version, result.installed, result.desc]
-			for i in range(0, columns):
-				if len(row[i]) > maxwidth[i]:
-					maxwidth[i] = len(row[i])
-			table.append(row)
-	for row in table:
-		print(str.join(' ', [format(row[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
+	def show(self, args, flags):
+		superid = args.pop(0)
+		app = self.service.getapp(superid)
+		print('Name:', app.name)
+		print('Version:', app.version)
+		print('Desc:', app.desc)
+		if app.installed != '':
+			print('Installed:', app.installed)
 
-elif cmd == 'show':
+	def install(self, args, flags):
+		superid = args.pop(0)
+		self.service.install(superid)
 
-	superid = sys.argv[2]
-	app = service.getapp(superid)
-	print('Name:', app.name)
-	print('Version:', app.version)
-	print('Desc:', app.desc)
-	if app.installed != '':
-		print('Installed:', app.installed)
+	def remove(self, args, flags):
+		superid = args.pop(0)
+		self.service.remove(superid)
 
-elif cmd == 'install':
+	def _outputresults(self, results, flags):
+		table = []
+		columns = 7
+		maxwidth = [0] * columns
+		for sourceid in results.keys():
+			for result in results[sourceid]:
+				indicator = '   '
+				if '--csv' in flags:
+					indicator = ''
+				if result.installed != '':
+					indicator = '[I]'
+					if result.installed != result.version:
+						indicator = '[U]'
+				row = [indicator, result.source.name, result.superid(), result.name, result.version, result.installed, result.desc]
+				for i in range(0, columns):
+					if len(row[i]) > maxwidth[i]:
+						maxwidth[i] = len(row[i])
+				table.append(row)
+		if '--csv' in flags:
+			for row in table:
+				print(str.join(',', ["\"{0}\"".format(a) for a in row]))
+		else:
+			for row in table:
+				print(str.join(' ', [format(row[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
 
-	superid = sys.argv[2]
-	service.install(superid)
 
-elif cmd == 'remove':
-
-	superid = sys.argv[2]
-	service.remove(superid)
-
-else:
-	print("Unrecognised command '{0}'".format(cmd))
+cli = SoftwareInstallerCLI()
+scriptpath = sys.argv.pop(0)
+cmd = sys.argv.pop(0)
+args = sys.argv.copy()
+cli.do_command(cmd, args)
