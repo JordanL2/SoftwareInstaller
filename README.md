@@ -11,17 +11,17 @@ Sources currently supported:
 
 # Usage
 
-`search <NAME>`
+```search <NAME>```
 Search all sources for any package matching <NAME>.
 
-`local [<NAME>]`
+```local [<NAME>]```
 Search locally installed packages for any package matching <NAME>. <NAME> is optional, if not given returns all packages.
 
-`show <REF>`
+```show <REF>```
 Show information about a specific package.
 
-`install <REF>`
+```install <REF>```
 Install package.
 
-`remove <REF>`
+```remove <REF>```
 Uninstall package.
