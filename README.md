@@ -12,13 +12,13 @@ Sources currently supported:
 # Usage
 
 ```
-search <NAME>
+search <NAME> [--csv] [--status=N,I,U]
 ```
 Search all sources for any package matching `<NAME>`. The result table columns are:
 * Status indicator:
-	* Blank means uninstalled
-	* `[I]` means installed
-	* `[U]` means installed and an update is available.
+	* Blank - Uninstalled
+	* `[I]` - Installed, up to date
+	* `[U]` - Installed, an update is available.
 * Source
 * Reference - Unique identifier for the package, used in other commands below
 * Name
@@ -26,10 +26,19 @@ Search all sources for any package matching `<NAME>`. The result table columns a
 * Version installed locally, if any
 * Description
 
+If the --csv flag is present, outputs table in CSV format.
+
+The --status flag filters the results based on its installation status. Multiple status types are possible.
+* N - Not installed
+* I - Installed, up to date
+* U - Installed, an update is available
+
 ```
-local [<NAME>]
+local [<NAME>] [--csv] [--status=N,I,U]
 ```
 Search locally installed packages for any package matching `<NAME>`. `<NAME>` is optional, if not given returns all packages. The table format is the same as `search`.
+
+The --csv and --status flags work the same as they do for `search`.
 
 ```
 show <REF>

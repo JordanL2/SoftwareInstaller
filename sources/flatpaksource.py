@@ -22,7 +22,10 @@ class FlatpakSource(AbstractSource):
         results = []
         for row in table:
             id = row[4] + ':' + row[3]
-            results.append(App(self, id, row[1], row[2], row[0], installedids.get(id, '')))
+            version = row[0]
+            if version == '':
+                version = '[None]'
+            results.append(App(self, id, row[1], row[2], version, installedids.get(id, '')))
         return results
 
     def local(self, name):
@@ -31,7 +34,10 @@ class FlatpakSource(AbstractSource):
         for app in installed:
             if name == None or app.match(name):
                 remoteapp = self.getapp(app.id)
-                app.version = remoteapp.version
+                if remoteapp != None:
+                    app.version = remoteapp.version
+                else:
+                    app.version = '[Not Found]'
                 results.append(app)
         return results
 
@@ -60,7 +66,10 @@ class FlatpakSource(AbstractSource):
         results = []
         for row in table:
             id = row[4] + ':' + row[3]
-            results.append(App(self, id, row[1], row[2], None, row[0]))
+            version = row[0]
+            if version == '':
+                version = '[None]'
+            results.append(App(self, id, row[1], row[2], None, version))
         return results
 
     def _get_installed_ids(self):

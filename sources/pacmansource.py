@@ -26,6 +26,7 @@ class PacmanSource(AbstractSource):
             results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0], '')))
         return results
 
+    #TODO this won't return locally installed packages that aren't in the remote repo
     def local(self, name):
         if name == None:
             name = ''

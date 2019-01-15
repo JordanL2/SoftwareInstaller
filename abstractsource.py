@@ -8,7 +8,9 @@ import subprocess
 class AbstractSource:
 
     def __init__(self, id, name):
+        # Human readable identifer for the source, no spaces, preferably lowercase
         self.id = id
+        # Nicely formatted title for the source
         self.name = name
 
     # Checks if the source is installed and can be used.

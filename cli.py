@@ -4,6 +4,7 @@ from softwareinstaller.softwareservice import SoftwareService
 
 import sys
 
+
 class SoftwareInstallerCLI:
 
 	def __init__(self):
@@ -55,22 +56,40 @@ class SoftwareInstallerCLI:
 		self.service.remove(superid)
 
 	def _outputresults(self, results, flags):
+		defaultfilters = ['N', 'I', 'U']
+		filters = defaultfilters.copy()
+		for flag in flags:
+			if flag.startswith('--status='):
+				types = flag[9:]
+				filters = types.split(',')
+				for filter in filters:
+					if filter not in defaultfilters:
+						raise Exception("Unrecognised filter: {0}".format(filter))
+
 		table = []
 		columns = 7
 		maxwidth = [0] * columns
 		for sourceid in results.keys():
 			for result in results[sourceid]:
-				indicator = '   '
-				if '--csv' in flags:
-					indicator = ''
+				indicator = ''
 				if result.installed != '':
-					indicator = '[I]'
+					indicator = 'I'
 					if result.installed != result.version:
-						indicator = '[U]'
+						indicator = 'U'
+				if ((indicator == ''  and 'N' not in filters)
+				 or (indicator == 'I' and 'I' not in filters)
+				 or (indicator == 'U' and 'U' not in filters)):
+					continue
+				if indicator == '':
+					if '--csv' not in flags:
+						indicator = '   '
+				else:
+					indicator = "[{0}]".format(indicator)
 				row = [indicator, result.source.name, result.superid(), result.name, result.version, result.installed, result.desc]
-				for i in range(0, columns):
-					if len(row[i]) > maxwidth[i]:
-						maxwidth[i] = len(row[i])
+				if '--csv' not in flags:
+					for i in range(0, columns):
+						if len(row[i]) > maxwidth[i]:
+							maxwidth[i] = len(row[i])
 				table.append(row)
 		if '--csv' in flags:
 			for row in table:

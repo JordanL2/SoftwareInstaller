@@ -26,6 +26,7 @@ class YaourtSource(AbstractSource):
             results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0], '')))
         return results
 
+    #TODO what if a locally installed app isn't in remote repo? Will throw exception
     def local(self, name):
         installed = self._get_installed_ids()
         results = []
