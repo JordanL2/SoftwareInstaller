@@ -30,3 +30,11 @@ class App:
 		return (name.lower() in self.name.lower()
 			 or name.lower() in self.id.lower()
 			 or name.lower() in self.desc.lower())
+
+	def status(self):
+		indicator = 'N'
+		if self.installed != '':
+			indicator = 'I'
+			if self.installed != self.version and self.version != '[Not Found]':
+				indicator = 'U'
+		return indicator

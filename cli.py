@@ -78,16 +78,13 @@ class SoftwareInstallerCLI:
 		maxwidth = [0] * columns
 		for sourceid in results.keys():
 			for result in results[sourceid]:
-				indicator = ''
-				if result.installed != '':
-					indicator = 'I'
-					if result.installed != result.version:
-						indicator = 'U'
-				if ((indicator == ''  and 'N' not in filters)
+				indicator = result.status()
+				if ((indicator == 'N'  and 'N' not in filters)
 				 or (indicator == 'I' and 'I' not in filters)
 				 or (indicator == 'U' and 'U' not in filters)):
 					continue
-				if indicator == '':
+				if indicator == 'N':
+					indicator = ''
 					if '--csv' not in flags:
 						indicator = '   '
 				else:

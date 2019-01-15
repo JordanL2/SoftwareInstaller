@@ -26,28 +26,38 @@ class PacmanSource(AbstractSource):
             results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0], '')))
         return results
 
-    #TODO this won't return locally installed packages that aren't in the remote repo
     def local(self, name):
         if name == None:
             name = ''
-        results = [a for a in self.search(name) if a.installed != '']
+        remoteresults = dict([(a.id, a) for a in self.search('') if a.installed != ''])
+        results = []
+        installedids = self._get_installed_ids()
+        for id in installedids:
+            app = None
+            if id in remoteresults:
+                app = remoteresults[id]
+            else:
+                app = self.getapp(id, installedids, True)
+            if app != None and (name == None or app.match(name)):
+                results.append(app)
         return results
 
-    def getapp(self, appid, installedids=None):
+    def getapp(self, appid, installedids=None, skipremote=False):
         if installedids == None:
             installedids = self._get_installed_ids()
 
-        table = self._call("pacman -Si {0}".format(appid), self.description_regex, None, True)
         desc = None
         version = None
-        for row in table:
-            if row[0] == 'Description':
-                desc = row[1]
-            if row[0] == 'Version':
-                version = row[1]
+        if not skipremote:
+            table = self._call("pacman -Si {0}".format(appid), self.description_regex, None, True, [0, 1])
+            for row in table:
+                if row[0] == 'Description':
+                    desc = row[1]
+                if row[0] == 'Version':
+                    version = row[1]
         if version == None:
             version = '[Not Found]'
-            table = self._call("pacman -Qi {0}".format(appid), self.description_regex, None, True)
+            table = self._call("pacman -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
             for row in table:
                 if row[0] == 'Description':
                     desc = row[1]
