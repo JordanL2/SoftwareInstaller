@@ -20,7 +20,7 @@ Search all sources for any package matching `<NAME>`. The result table columns a
 	* `[I]` means installed
 	* `[U]` means installed and an update is available.
 * Source
-* Reference
+* Reference - Unique identifier for the package, used in other commands below
 * Name
 * Version available in remote source
 * Version installed locally, if any

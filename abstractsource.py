@@ -28,13 +28,13 @@ class AbstractSource:
     def remove(self, app):
         raise Exception("Must override this method")
 
-    def call(self, command, regex=None, converters=None, ignorenomatch=False, successcodes=None):
-        if successcodes == None:
+    def call(self, command, regex=None, converters=None, ignorenomatch=False, successcodes=0):
+        if successcodes == 0:
             successcodes = [0]
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout = result.stdout.decode('utf-8').rstrip("\n")
         stderr = result.stderr.decode('utf-8').rstrip("\n")
-        if result.returncode not in successcodes:
+        if successcodes != None and result.returncode not in successcodes:
             raise Exception("Command: {0}\nReturn Code: {1}\nStandard Output: {2}\nError Output: {3}".format(command, result.returncode, stdout, stderr))
         if regex is None:
             return stdout

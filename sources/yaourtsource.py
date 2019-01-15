@@ -14,7 +14,7 @@ class YaourtSource(AbstractSource):
         super().__init__('yaourt', 'Yaourt')
 
     def test_installed(self):
-        return self.call('which yaourt 2>/dev/null') != ''
+        return self.call('which yaourt 2>/dev/null', None, None, True, None) != ''
 
     def search(self, name):
         installedids = self._get_installed_ids()

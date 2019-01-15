@@ -14,7 +14,7 @@ class PacmanSource(AbstractSource):
         super().__init__('pacman', 'Pacman')
 
     def test_installed(self):
-        return self.call('which pacman 2>/dev/null') != ''
+        return self.call('which pacman 2>/dev/null', None, None, True, None) != ''
 
     def search(self, name):
         installedids = self._get_installed_ids()
