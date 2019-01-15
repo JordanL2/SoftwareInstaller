@@ -21,7 +21,7 @@ class FlatpakSource(AbstractSource):
         results = []
         for row in table:
             id = row[4] + ':' + row[3]
-            results.append(App(self, id, row[1], row[2], row[0], id in installedids))
+            results.append(App(self, id, row[1], row[2], row[0], installedids.get(id, '')))
         return results
 
     def getapp(self, appid):
@@ -49,12 +49,12 @@ class FlatpakSource(AbstractSource):
         results = []
         for row in table:
             id = row[4] + ':' + row[3]
-            results.append(App(self, id, row[1], row[2], row[0], True))
+            results.append(App(self, id, row[1], row[2], None, row[0]))
         return results
 
     def _get_installed_ids(self):
         installed = self._get_installed()
-        installedids = set()
+        installedids = {}
         for installedapp in installed:
-            installedids.add(installedapp.id)
+            installedids[installedapp.id] = installedapp.installed
         return installedids

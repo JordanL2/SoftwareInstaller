@@ -13,14 +13,16 @@ if cmd == 'search':
 	name = sys.argv[2]
 	results = service.search(name)
 	table = []
-	columns = 6
+	columns = 7
 	maxwidth = [0] * columns
 	for sourceid in results.keys():
 		for result in results[sourceid]:
-			installed = '[    -    ]'
-			if result.installed:
-				installed = '[INSTALLED]'
-			row = [installed, result.source.name, result.superid(), result.name, result.version, result.desc]
+			indicator = '   '
+			if result.installed != '':
+				indicator = '[I]'
+				if result.installed != result.version:
+					indicator = '[U]'
+			row = [indicator, result.source.name, result.superid(), result.name, result.version, result.installed, result.desc]
 			for i in range(0, columns):
 				if len(row[i]) > maxwidth[i]:
 					maxwidth[i] = len(row[i])
@@ -35,7 +37,8 @@ elif cmd == 'show':
 	print('Name:', app.name)
 	print('Version:', app.version)
 	print('Desc:', app.desc)
-	print('Installed:', app.installed)
+	if app.installed != '':
+		print('Installed:', app.installed)
 
 elif cmd == 'install':
 
