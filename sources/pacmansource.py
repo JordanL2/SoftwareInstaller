@@ -13,13 +13,13 @@ class PacmanSource(AbstractSource):
     def __init__(self):
         super().__init__('pacman', 'Pacman')
 
-    def test_installed(self):
-        return self.call('which pacman 2>/dev/null', None, None, True, None) != ''
+    def testinstalled(self):
+        return self._call('which pacman 2>/dev/null', None, None, True, None) != ''
 
     def search(self, name):
         installedids = self._get_installed_ids()
 
-        table = self.call("pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(name), self.search_regex, None, False)
+        table = self._call("pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(name), self.search_regex, None, False)
         results = []
         for row in table:
             results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0], '')))
@@ -34,7 +34,7 @@ class PacmanSource(AbstractSource):
     def getapp(self, appid):
         installedids = self._get_installed_ids()
 
-        table = self.call("pacman -Si {0}".format(appid), self.description_regex, None, True)
+        table = self._call("pacman -Si {0}".format(appid), self.description_regex, None, True)
         desc = ''
         version = ''
         for row in table:
@@ -45,11 +45,11 @@ class PacmanSource(AbstractSource):
         return App(self, appid, appid, desc, version, installedids.get(appid, ''))
 
     def install(self, app):
-        self.call("pacman --noconfirm -S {0}".format(app.id))
+        self._call("pacman --noconfirm -S {0}".format(app.id))
 
     def remove(self, app):
-        self.call("pacman --noconfirm -R {0}".format(app.id))
+        self._call("pacman --noconfirm -R {0}".format(app.id))
 
     def _get_installed_ids(self):
-        table = self.call("pacman -Q", self.installed_regex)
+        table = self._call("pacman -Q", self.installed_regex)
         return dict([(row[0], row[1]) for row in table])

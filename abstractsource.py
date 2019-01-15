@@ -14,7 +14,7 @@ class AbstractSource:
     # Returns:
     #     True - Source can be used
     #     False - Source can NOT be used
-    def test_installed(self):
+    def testinstalled(self):
         raise Exception("Must override this method")
 
     # Searches remote source for apps matching a string
@@ -27,7 +27,7 @@ class AbstractSource:
 
     # Searches locally installed packages from this source for apps matching a string
     # Input:
-    #     name - string to match
+    #     name - string to match, if None then return all locally installed packages from this source
     # Returns:
     #     list of App instances
     def local(self, name):
@@ -43,17 +43,17 @@ class AbstractSource:
 
     # Installs a specific app
     # Input:
-    #     appid - id of the app to install
+    #     app - App instance to be installed
     def install(self, app):
         raise Exception("Must override this method")
 
     # Uninstalls a specific app
     # Input:
-    #     appid - id of the app to uninstall
+    #     app - App instance to be installed
     def remove(self, app):
         raise Exception("Must override this method")
 
-    def call(self, command, regex=None, converters=None, ignorenomatch=False, successcodes=0):
+    def _call(self, command, regex=None, converters=None, ignorenomatch=False, successcodes=0):
         if successcodes == 0:
             successcodes = [0]
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

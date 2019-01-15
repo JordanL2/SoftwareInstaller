@@ -7,12 +7,12 @@ from softwareinstaller.sources.yaourtsource import YaourtSource
 class SoftwareService:
 
     def __init__(self):
-        all_sources = [
+        allsources = [
         	FlatpakSource(),
         	PacmanSource(),
             YaourtSource()
         ]
-        self.sources = [s for s in all_sources if s.test_installed()]
+        self.sources = [s for s in allsources if s.testinstalled()]
 
     def getsource(self, sourceid):
         for source in self.sources:
@@ -33,7 +33,7 @@ class SoftwareService:
         return results
 
     def getapp(self, superid):
-        sourceid, appid = self._split_super_id(superid)
+        sourceid, appid = self._split_superid(superid)
         source = self.getsource(sourceid)
         if source == None:
             raise Exception("No such sourceid")
@@ -60,6 +60,6 @@ class SoftwareService:
         if app.installed:
             raise Exception("App was not removed")
 
-    def _split_super_id(self, superid):
+    def _split_superid(self, superid):
         i = superid.index(':')
         return (superid[0:i], superid[i + 1:])
