@@ -28,7 +28,7 @@ class FlatpakSource(AbstractSource):
         installed = self._get_installed()
         results = []
         for app in installed:
-            if name == None or (name.lower() in app.name.lower() or name.lower() in app.id.lower() or name.lower() in app.desc.lower()):
+            if name == None or app.match(name):
                 remoteapp = self.getapp(app.id)
                 app.version = remoteapp.version
                 results.append(app)

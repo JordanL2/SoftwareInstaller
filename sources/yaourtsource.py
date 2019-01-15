@@ -30,7 +30,7 @@ class YaourtSource(AbstractSource):
         results = []
         for appid in installed.keys():
             app = self.getapp(appid)
-            if name == None or (name.lower() in app.name.lower() or name.lower() in app.id.lower() or name.lower() in app.desc.lower()):
+            if name == None or app.match(name):
                 results.append(app)
         return results
 

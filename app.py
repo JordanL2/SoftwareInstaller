@@ -18,3 +18,8 @@ class App:
 
 	def superid(self):
 		return self.source.id + ':' + self.id
+
+	def match(self, name):
+		return (name.lower() in self.name.lower()
+			 or name.lower() in self.id.lower()
+			 or name.lower() in self.desc.lower())
