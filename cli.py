@@ -30,6 +30,28 @@ if cmd == 'search':
 	for row in table:
 		print(str.join(' ', [format(row[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
 
+elif cmd == 'local':
+
+	name = None
+	if len(sys.argv) > 2:
+		name = sys.argv[2]
+	results = service.local(name)
+	table = []
+	columns = 7
+	maxwidth = [0] * columns
+	for sourceid in results.keys():
+		for result in results[sourceid]:
+			indicator = '[I]'
+			if result.installed != result.version:
+				indicator = '[U]'
+			row = [indicator, result.source.name, result.superid(), result.name, result.version, result.installed, result.desc]
+			for i in range(0, columns):
+				if len(row[i]) > maxwidth[i]:
+					maxwidth[i] = len(row[i])
+			table.append(row)
+	for row in table:
+		print(str.join(' ', [format(row[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
+
 elif cmd == 'show':
 
 	superid = sys.argv[2]

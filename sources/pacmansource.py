@@ -19,10 +19,16 @@ class PacmanSource(AbstractSource):
     def search(self, name):
         installedids = self._get_installed_ids()
 
-        table = self.call("pacman -Ss {0} | sed -e \"s/    //\" | paste -d, - -".format(name), self.search_regex, None, False)
+        table = self.call("pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(name), self.search_regex, None, False)
         results = []
         for row in table:
             results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0], '')))
+        return results
+
+    def local(self, name):
+        if name == None:
+            name = ''
+        results = [a for a in self.search(name) if a.installed != '']
         return results
 
     def getapp(self, appid):

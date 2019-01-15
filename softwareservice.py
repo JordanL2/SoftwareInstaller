@@ -26,6 +26,12 @@ class SoftwareService:
             results[source.id] = source.search(name)
         return results
 
+    def local(self, name):
+        results = {}
+        for source in self.sources:
+            results[source.id] = source.local(name)
+        return results
+
     def getapp(self, superid):
         sourceid, appid = self._split_super_id(superid)
         source = self.getsource(sourceid)

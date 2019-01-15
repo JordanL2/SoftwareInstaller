@@ -16,6 +16,9 @@ class AbstractSource:
     def search(self, name):
         raise Exception("Must override this method")
 
+    def local(self, name):
+        raise Exception("Must override this method")
+
     def getapp(self, appid):
         raise Exception("Must override this method")
 
@@ -30,6 +33,8 @@ class AbstractSource:
         stdout = result.stdout.decode('utf-8').rstrip("\n")
         stderr = result.stderr.decode('utf-8').rstrip("\n")
         if result.returncode != 0:
+            print(command)
+            print(result.returncode)
             raise Exception(stderr)
         if regex is None:
             return stdout

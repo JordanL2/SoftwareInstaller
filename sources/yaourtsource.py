@@ -19,10 +19,19 @@ class YaourtSource(AbstractSource):
     def search(self, name):
         installedids = self._get_installed_ids()
 
-        table = self.call("yaourt -Ss {0} | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\"".format(name), self.search_regex, None, False)
+        table = self.call("yaourt -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\" || true".format(name), self.search_regex, None, False)
         results = []
         for row in table:
             results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0], '')))
+        return results
+
+    def local(self, name):
+        installed = self._get_installed_ids()
+        results = []
+        for appid in installed.keys():
+            app = self.getapp(appid)
+            if name == None or (name.lower() in app.name.lower() or name.lower() in app.id.lower() or name.lower() in app.desc.lower()):
+                results.append(app)
         return results
 
     def getapp(self, appid):
@@ -45,5 +54,5 @@ class YaourtSource(AbstractSource):
         self.call("yaourt --noconfirm -R {0}".format(app.id))
 
     def _get_installed_ids(self):
-        table = self.call("yaourt -Q | grep \"^local/\"", self.installed_regex)
+        table = self.call("yaourt -Q | grep \"^local/\" || true", self.installed_regex)
         return dict([(row[0], row[1]) for row in table])

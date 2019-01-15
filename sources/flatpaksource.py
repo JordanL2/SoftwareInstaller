@@ -17,11 +17,21 @@ class FlatpakSource(AbstractSource):
     def search(self, name):
         installedids = self._get_installed_ids()
 
-        table = self.call("flatpak search {0} --columns=version,description,application,remotes".format(name), self.search_regex, None, True)
+        table = self.call("flatpak search \"{0}\" --columns=version,description,application,remotes".format(name), self.search_regex, None, True)
         results = []
         for row in table:
             id = row[4] + ':' + row[3]
             results.append(App(self, id, row[1], row[2], row[0], installedids.get(id, '')))
+        return results
+
+    def local(self, name):
+        installed = self._get_installed()
+        results = []
+        for app in installed:
+            if name == None or (name.lower() in app.name.lower() or name.lower() in app.id.lower() or name.lower() in app.desc.lower()):
+                remoteapp = self.getapp(app.id)
+                app.version = remoteapp.version
+                results.append(app)
         return results
 
     def getapp(self, appid):
