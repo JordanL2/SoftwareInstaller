@@ -11,7 +11,17 @@ Sources currently supported:
 
 # Usage
 
-* search NAME - Search all sources for any application / package matching NAME
-* show ID - Show information about application / package ID
-* install ID - Install application / package ID
-* remove ID - Uninstall application / package ID
+`search <NAME>`
+Search all sources for any package matching <NAME>.
+
+`local [<NAME>]`
+Search locally installed packages for any package matching <NAME>. <NAME> is optional, if not given returns all packages.
+
+`show <REF>`
+Show information about a specific package.
+
+`install <REF>`
+Install package.
+
+`remove <REF>`
+Uninstall package.
