@@ -14,12 +14,19 @@ Sources currently supported:
 ```
 search <NAME>
 ```
-Search all sources for any package matching <NAME>.
+Search all sources for any package matching `<NAME>`. The result table columns are:
+* Installation indicator - Blank is uninstalled, `[I]` means installed, '[U]' means installed and an update is available.
+* Source
+* Reference
+* Name
+* Version available in remote source
+* Version installed locally, if any
+* Description
 
 ```
 local [<NAME>]
 ```
-Search locally installed packages for any package matching <NAME>. <NAME> is optional, if not given returns all packages.
+Search locally installed packages for any package matching `<NAME>`. `<NAME>` is optional, if not given returns all packages. The table format is the same as `search`.
 
 ```
 show <REF>
