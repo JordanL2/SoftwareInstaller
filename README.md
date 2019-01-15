@@ -15,7 +15,10 @@ Sources currently supported:
 search <NAME>
 ```
 Search all sources for any package matching `<NAME>`. The result table columns are:
-* Installation indicator - Blank is uninstalled, `[I]` means installed, '[U]' means installed and an update is available.
+* Status indicator:
+	* Blank means uninstalled
+	* `[I]` means installed
+	* `[U]` means installed and an update is available.
 * Source
 * Reference
 * Name
