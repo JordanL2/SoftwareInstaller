@@ -10,21 +10,46 @@ class AbstractSource:
         self.id = id
         self.name = name
 
+    # Checks if the source is installed and can be used.
+    # Returns:
+    #     True - Source can be used
+    #     False - Source can NOT be used
     def test_installed(self):
         raise Exception("Must override this method")
 
+    # Searches remote source for apps matching a string
+    # Input:
+    #     name - string to match
+    # Returns:
+    #     list of App instances
     def search(self, name):
         raise Exception("Must override this method")
 
+    # Searches locally installed packages from this source for apps matching a string
+    # Input:
+    #     name - string to match
+    # Returns:
+    #     list of App instances
     def local(self, name):
         raise Exception("Must override this method")
 
+    # Gets info about a specific app
+    # Input:
+    #     appid - id of the app required
+    # Returns:
+    #     App instance
     def getapp(self, appid):
         raise Exception("Must override this method")
 
+    # Installs a specific app
+    # Input:
+    #     appid - id of the app to install
     def install(self, app):
         raise Exception("Must override this method")
 
+    # Uninstalls a specific app
+    # Input:
+    #     appid - id of the app to uninstall
     def remove(self, app):
         raise Exception("Must override this method")
 
