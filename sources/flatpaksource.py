@@ -33,20 +33,22 @@ class FlatpakSource(AbstractSource):
         results = []
         for app in installed:
             if name == None or app.match(name):
-                remoteapp = self.getapp(app.id)
-                if remoteapp != None:
-                    app.version = remoteapp.version
-                else:
-                    app.version = '[Not Found]'
+                remoteapp = self.getapp(app.id, installed)
+                app.version = remoteapp.version
                 results.append(app)
         return results
 
-    def getapp(self, appid):
+    def getapp(self, appid, installed=None):
         remote, id = self._split_id(appid)
         results = self.search(id)
         for result in results:
             if result.id == appid:
                 return result
+        if installed == None:
+            installed = self._get_installed()
+        for app in installed:
+            if app.id == appid:
+                return app
         return None
 
     def install(self, app):
@@ -69,7 +71,7 @@ class FlatpakSource(AbstractSource):
             version = row[0]
             if version == '':
                 version = '[None]'
-            results.append(App(self, id, row[1], row[2], None, version))
+            results.append(App(self, id, row[1], row[2], '[Not Found]', version))
         return results
 
     def _get_installed_ids(self):

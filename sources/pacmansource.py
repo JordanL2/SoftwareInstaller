@@ -37,15 +37,20 @@ class PacmanSource(AbstractSource):
         if installedids == None:
             installedids = self._get_installed_ids()
 
-        #TODO if this call doesn't return an app, check the local system instead
         table = self._call("pacman -Si {0}".format(appid), self.description_regex, None, True)
-        desc = ''
-        version = ''
+        desc = None
+        version = None
         for row in table:
             if row[0] == 'Description':
                 desc = row[1]
             if row[0] == 'Version':
                 version = row[1]
+        if version == None:
+            version = '[Not Found]'
+            table = self._call("pacman -Qi {0}".format(appid), self.description_regex, None, True)
+            for row in table:
+                if row[0] == 'Description':
+                    desc = row[1]
         return App(self, appid, appid, desc, version, installedids.get(appid, ''))
 
     def install(self, app):
