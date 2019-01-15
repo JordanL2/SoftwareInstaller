@@ -26,19 +26,20 @@ class YaourtSource(AbstractSource):
             results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0], '')))
         return results
 
-    #TODO what if a locally installed app isn't in remote repo? Will throw exception
     def local(self, name):
-        installed = self._get_installed_ids()
+        installedids = self._get_installed_ids()
         results = []
-        for appid in installed.keys():
-            app = self.getapp(appid)
+        for appid in installedids.keys():
+            app = self.getapp(appid, installedids)
             if name == None or app.match(name):
                 results.append(app)
         return results
 
-    def getapp(self, appid):
-        installedids = self._get_installed_ids()
+    def getapp(self, appid, installedids=None):
+        if installedids == None:
+            installedids = self._get_installed_ids()
 
+        #TODO if this call doesn't return an app, check the local system instead
         table = self._call("yaourt -Si {0}".format(appid), self.description_regex, None, True)
         desc = ''
         version = ''

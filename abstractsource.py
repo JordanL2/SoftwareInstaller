@@ -36,7 +36,7 @@ class AbstractSource:
     def local(self, name):
         raise Exception("Must override this method")
 
-    # Gets info about a specific app
+    # Gets info about a specific app. This should work whether the app is installed or not, and whether it's in the remote source or not.
     # Input:
     #     appid - id of the app required
     # Returns:

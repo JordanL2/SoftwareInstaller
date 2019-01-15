@@ -11,8 +11,17 @@ class SoftwareInstallerCLI:
 		self.service = SoftwareService()
 
 	def do_command(self, cmd, args):
-		flags = [a for a in args if a.startswith('-')]
+		flags_unparsed = [a for a in args if a.startswith('-')]
 		args = [a for a in args if not a.startswith('-')]
+		flags = {}
+		for flag in flags_unparsed:
+			if '=' in flag:
+				key = flag[0:flag.index('=')]
+				value = flag[flag.index('=') + 1:]
+				flags[key] = value
+			else:
+				flags[flag] = True
+
 		if cmd == 'search':
 			self.search(args, flags)
 		elif cmd == 'local':
@@ -58,13 +67,11 @@ class SoftwareInstallerCLI:
 	def _outputresults(self, results, flags):
 		defaultfilters = ['N', 'I', 'U']
 		filters = defaultfilters.copy()
-		for flag in flags:
-			if flag.startswith('--status='):
-				types = flag[9:]
-				filters = types.split(',')
-				for filter in filters:
-					if filter not in defaultfilters:
-						raise Exception("Unrecognised filter: {0}".format(filter))
+		if '--status' in flags:
+			filters = flags['--status'].split(',')
+			for filter in filters:
+				if filter not in defaultfilters:
+					raise Exception("Unrecognised filter: {0}".format(filter))
 
 		table = []
 		columns = 7
