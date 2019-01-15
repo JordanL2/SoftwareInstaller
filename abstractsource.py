@@ -28,14 +28,14 @@ class AbstractSource:
     def remove(self, app):
         raise Exception("Must override this method")
 
-    def call(self, command, regex=None, converters=None, ignoreerrors=False):
+    def call(self, command, regex=None, converters=None, ignorenomatch=False, successcodes=None):
+        if successcodes == None:
+            successcodes = [0]
         result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout = result.stdout.decode('utf-8').rstrip("\n")
         stderr = result.stderr.decode('utf-8').rstrip("\n")
-        if result.returncode != 0:
-            print(command)
-            print(result.returncode)
-            raise Exception(stderr)
+        if result.returncode not in successcodes:
+            raise Exception("Command: {0}\nReturn Code: {1}\nStandard Output: {2}\nError Output: {3}".format(command, result.returncode, stdout, stderr))
         if regex is None:
             return stdout
         response = []
@@ -46,7 +46,6 @@ class AbstractSource:
                 if converters is not None:
                     result_line = [converters[i](r) for i, r in enumerate(result_line)]
                 response.append(result_line)
-            else:
-                if not ignoreerrors:
-                    raise Exception("Line '{0}' did not match regex".format(line))
+            elif not ignorenomatch:
+                raise Exception("Line '{0}' did not match regex".format(line))
         return response
