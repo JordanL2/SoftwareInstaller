@@ -42,6 +42,7 @@ class PacmanSource(AbstractSource):
                 results.append(app)
         return results
 
+    #TODO this should return None if appid not found at all
     def getapp(self, appid, installedids=None, skipremote=False):
         if installedids == None:
             installedids = self._get_installed_ids()
@@ -68,6 +69,11 @@ class PacmanSource(AbstractSource):
 
     def remove(self, app):
         self._call("pacman --noconfirm -R {0}".format(app.id))
+
+    def update(self, apps, autoconfirm):
+        #TODO
+        print("Updating:", [a.id for a in apps])
+        return None
 
     def _get_installed_ids(self):
         table = self._call("pacman -Q", self.installed_regex)

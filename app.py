@@ -3,6 +3,8 @@
 
 class App:
 
+	statuses = ('N', 'I', 'U')
+
 	def __init__(self, source, id, name, desc, version, installed):
 		# Reference to the source this came from
 		self.source = source

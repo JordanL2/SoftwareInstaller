@@ -56,6 +56,17 @@ class AbstractSource:
     def remove(self, app):
         raise Exception("Must override this method")
 
+    # Updates the given list of apps. If the source cannot only update specific apps, and the list of apps that will be updated has changed:
+    #     If autoconfirm, just update everything
+    #     Else, return the new list of apps the source will update
+    # Input:
+    #     apps - list of App instances to update
+    #     autoconfirm - boolean, if true, don't bother checking if the list of apps matches the list that will be updated
+    # Returns:
+    #     list of App instances if the list has changed, otherwise None
+    def update(self, apps, autoconfirm):
+        raise Exception("Must override this method")
+
     def _call(self, command, regex=None, converters=None, ignorenomatch=False, successcodes=0):
         if successcodes == 0:
             successcodes = [0]

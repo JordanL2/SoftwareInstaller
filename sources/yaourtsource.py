@@ -35,6 +35,7 @@ class YaourtSource(AbstractSource):
                 results.append(app)
         return results
 
+    #TODO this throws exception if appid not found
     def getapp(self, appid, installedids=None):
         if installedids == None:
             installedids = self._get_installed_ids()
@@ -60,6 +61,11 @@ class YaourtSource(AbstractSource):
 
     def remove(self, app):
         self._call("yaourt --noconfirm -R {0}".format(app.id))
+
+    def update(self, apps, autoconfirm):
+        #TODO
+        print("Updating:", [a.id for a in apps])
+        return None
 
     def _get_installed_ids(self):
         table = self._call("yaourt -Q | grep \"^local/\"", self.installed_regex, None, False, [0, 1])

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from softwareinstaller.app import App
 from softwareinstaller.sources.flatpaksource import FlatpakSource
 from softwareinstaller.sources.pacmansource import PacmanSource
 from softwareinstaller.sources.yaourtsource import YaourtSource
@@ -21,16 +22,26 @@ class SoftwareService:
                 return source
         return None
 
-    def search(self, name):
+    def search(self, name, statusfilter=None):
+        if statusfilter == None:
+            statusfilter = App.statuses
         results = {}
         for source in self.sources:
-            results[source.id] = source.search(name)
+            sourceresults = source.search(name)
+            sourceresults = [a for a in sourceresults if a.status() in statusfilter]
+            if len(sourceresults) > 0:
+                results[source.id] = sourceresults
         return results
 
-    def local(self, name):
+    def local(self, name=None, statusfilter=None):
+        if statusfilter == None:
+            statusfilter = App.statuses
         results = {}
         for source in self.sources:
-            results[source.id] = source.local(name)
+            sourceresults = source.local(name)
+            sourceresults = [a for a in sourceresults if a.status() in statusfilter]
+            if len(sourceresults) > 0:
+                results[source.id] = sourceresults
         return results
 
     def getapp(self, superid):
@@ -60,6 +71,16 @@ class SoftwareService:
         app = self.getapp(superid)
         if app.installed:
             raise Exception("App was not removed")
+
+    def update(self, apps, autoconfirm):
+        for sourceid in apps.copy().keys():
+            source = self.getsource(sourceid)
+            updatedlist = source.update(apps[sourceid], autoconfirm)
+            if updatedlist != None:
+                apps[sourceid] = updatedlist
+                return apps
+            del apps[sourceid]
+        return None
 
     def _split_superid(self, superid):
         i = superid.index(':')
