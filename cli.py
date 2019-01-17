@@ -32,8 +32,19 @@ class SoftwareInstallerCLI:
 			self.install(args, flags)
 		elif cmd == 'remove':
 			self.remove(args, flags)
+		elif cmd == 'help' or cmd == '--help':
+			self.help()
 		else:
 			print("Unrecognised command '{0}'".format(cmd))
+			print()
+			self.help()
+
+	def help(self):
+		print("search <NAME> [--csv] [--status=N,I,U]")
+		print("local [<NAME>] [--csv] [--status=N,I,U]")
+		print("show <REF>")
+		print("install <REF>")
+		print("remove <REF>")
 
 	def search(self, args, flags):
 		name = args.pop(0)
@@ -79,9 +90,7 @@ class SoftwareInstallerCLI:
 		for sourceid in results.keys():
 			for result in results[sourceid]:
 				indicator = result.status()
-				if ((indicator == 'N'  and 'N' not in filters)
-				 or (indicator == 'I' and 'I' not in filters)
-				 or (indicator == 'U' and 'U' not in filters)):
+				if indicator not in filters:
 					continue
 				if indicator == 'N':
 					indicator = ''
@@ -105,6 +114,9 @@ class SoftwareInstallerCLI:
 
 cli = SoftwareInstallerCLI()
 scriptpath = sys.argv.pop(0)
-cmd = sys.argv.pop(0)
-args = sys.argv.copy()
-cli.do_command(cmd, args)
+if len(sys.argv) == 0:
+	cli.help()
+else:
+	cmd = sys.argv.pop(0)
+	args = sys.argv.copy()
+	cli.do_command(cmd, args)
