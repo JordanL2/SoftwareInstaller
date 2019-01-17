@@ -22,6 +22,11 @@ class SoftwareInstallerCLI:
 				flags[key] = value
 			else:
 				flags[flag] = True
+		if '--test' in flags:
+			self.service.testmode()
+			print("BEGIN STATE")
+			self._outputresults(self.service.local(None, None), flags)
+			print("-----")
 
 		if cmd == 'search':
 			self.search(args, flags)
@@ -41,6 +46,10 @@ class SoftwareInstallerCLI:
 			print("Unrecognised command '{0}'".format(cmd))
 			print()
 			self.help()
+		if '--test' in flags:
+			print("-----")
+			print("END STATE")
+			self._outputresults(self.service.local(None, None), flags)
 
 	def help(self):
 		print("search <NAME> [--csv] [--status=N,I,U]")
@@ -50,25 +59,13 @@ class SoftwareInstallerCLI:
 		print("remove <REF>")
 
 	def search(self, args, flags):
-		filters = None
-		if '--status' in flags:
-			filters = flags['--status'].split(',')
-			for filter in filters:
-				if filter not in App.statuses:
-					raise Exception("Unrecognised filter: {0}".format(filter))
-		
+		filters = self._get_status_flag(flags)
 		name = args.pop(0)
 		results = self.service.search(name, filters)
 		self._outputresults(results, flags)
 
 	def local(self, args, flags):
-		filters = None
-		if '--status' in flags:
-			filters = flags['--status'].split(',')
-			for filter in filters:
-				if filter not in App.statuses:
-					raise Exception("Unrecognised filter: {0}".format(filter))
-		
+		filters = self._get_status_flag(flags)
 		name = None
 		if len(args) > 0:
 			name = args.pop(0)
@@ -104,11 +101,12 @@ class SoftwareInstallerCLI:
 				if app.source.id not in apps:
 					apps[app.source.id] = []
 				apps[app.source.id].append(app)
-			for app in apps:
-				if app.status() != 'U':
-					if app.status() == 'N':
-						raise Exception("App {0} requested to be updated, but app is not installed".format(app.id))
-					raise Exception("App {0} requested to be updated, but no update available".format(app.id))
+			for sourceid in apps.keys():
+				for app in apps[sourceid]:
+					if app.status() != 'U':
+						if app.status() == 'N':
+							raise Exception("App {0} requested to be updated, but app is not installed".format(app.id))
+						raise Exception("App {0} requested to be updated, but no update available".format(app.id))
 		else:
 			apps = self.service.local(None, ['U'])
 		while apps != None and len(apps) > 0:
@@ -146,6 +144,15 @@ class SoftwareInstallerCLI:
 		else:
 			for row in table:
 				print(str.join(' ', [format(row[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
+
+	def _get_status_flag(self, flags):
+		if '--status' in flags:
+			filters = flags['--status'].split(',')
+			for filter in filters:
+				if filter not in App.statuses:
+					raise Exception("Unrecognised filter: {0}".format(filter))
+			return filters
+		return None
 
 
 cli = SoftwareInstallerCLI()

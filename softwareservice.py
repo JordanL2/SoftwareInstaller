@@ -4,6 +4,7 @@ from softwareinstaller.app import App
 from softwareinstaller.sources.flatpaksource import FlatpakSource
 from softwareinstaller.sources.pacmansource import PacmanSource
 from softwareinstaller.sources.yaourtsource import YaourtSource
+from softwareinstaller.sources.testsource import TestSource
 
 
 class SoftwareService:
@@ -81,6 +82,9 @@ class SoftwareService:
                 return apps
             del apps[sourceid]
         return None
+
+    def testmode(self):
+        self.sources = [TestSource()]
 
     def _split_superid(self, superid):
         i = superid.index(':')
