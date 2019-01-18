@@ -63,7 +63,8 @@ class TestSource(AbstractSource):
         return app
 
     def install(self, app):
-        self.installed[app.id] = app.copy()
+        app = app.copy()
+        self.installed[app.id] = app
         app.installed = app.version
 
     def remove(self, app):

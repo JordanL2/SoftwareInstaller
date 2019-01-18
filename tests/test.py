@@ -67,13 +67,13 @@ class TestSoftwareService(unittest.TestCase):
 
     # GETAPP
 
-    def test_getapp_local(self):
+    def test_getapp_installed(self):
         app = self.service.getapp('test:test1')
         self.assertEqual(app.name, 'Test1')
         self.assertEqual(app.version, '0.1')
         self.assertEqual(app.installed, '0.1')
 
-    def test_getapp_remote(self):
+    def test_getapp_not_installed(self):
         app = self.service.getapp('test:test6')
         self.assertEqual(app.name, 'Test6')
         self.assertEqual(app.version, '0.5')
@@ -85,7 +85,7 @@ class TestSoftwareService(unittest.TestCase):
         self.assertEqual(app.version, '[Not Found]')
         self.assertEqual(app.installed, '0.3')
 
-    def test_getapp_local_update(self):
+    def test_getapp_installed_update(self):
         app = self.service.getapp('test:test3')
         self.assertEqual(app.name, 'Test3')
         self.assertEqual(app.version, '0.2')
@@ -94,6 +94,43 @@ class TestSoftwareService(unittest.TestCase):
     def test_getapp_notfound(self):
         with self.assertRaises(Exception):
             app = self.service.getapp('test:wibble')
+
+
+    # INSTALL
+
+    def test_install_not_installed(self):
+        self.assertFalse('test' in self.service.local('test6'))
+        self.service.install('test:test6')
+        self.assertEqual(self.service.local('test6')['test'][0].id, 'test6')
+
+    def test_install_already_installed(self):
+        with self.assertRaises(Exception):
+            self.service.install('test:test1')
+
+    def test_install_not_found(self):
+        with self.assertRaises(Exception):
+            self.service.install('test:wibble')
+
+
+    # REMOVE
+
+    def test_remove_installed(self):
+        self.assertTrue('test' in self.service.local('test1'))
+        self.service.remove('test:test1')
+        self.assertFalse('test' in self.service.local('test1'))
+
+    def test_remove_not_installed(self):
+        with self.assertRaises(Exception):
+            self.service.remove('test:test6')
+
+    def test_remove_not_found(self):
+        with self.assertRaises(Exception):
+            self.service.remove('test:wibble')
+
+    
+    # UPDATE
+    
+    #TODO
 
 
 if __name__ == '__main__':
