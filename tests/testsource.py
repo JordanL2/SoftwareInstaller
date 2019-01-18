@@ -42,7 +42,7 @@ class TestSource(AbstractSource):
         results = []
         for app in self.installed.values():
             app = app.copy()
-            if name == None or app.match(name):
+            if name is None or app.match(name):
                 remoteapp = self.getapp(app.id)
                 app.version = remoteapp.version
                 results.append(app)
@@ -55,7 +55,7 @@ class TestSource(AbstractSource):
             app.version = '[Not Found]'
         if appid in self.remote:
             remoteapp = self.remote[appid]
-            if app == None:
+            if app is None:
                 remoteapp.installed = ''
                 return remoteapp.copy()
             else:

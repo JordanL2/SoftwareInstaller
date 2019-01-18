@@ -31,12 +31,12 @@ class YaourtSource(AbstractSource):
         results = []
         for appid in installedids.keys():
             app = self.getapp(appid, installedids)
-            if name == None or app.match(name):
+            if name is None or app.match(name):
                 results.append(app)
         return results
 
     def getapp(self, appid, installedids=None):
-        if installedids == None:
+        if installedids is None:
             installedids = self._get_installed_ids()
 
         table = self._call("yaourt -Si {0}".format(appid), self.description_regex, None, True, [0, 1])
@@ -47,13 +47,13 @@ class YaourtSource(AbstractSource):
                 desc = row[1]
             if row[0] == 'Version':
                 version = row[1]
-        if version == None:
+        if version is None:
             version = '[Not Found]'
             table = self._call("yaourt -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
             for row in table:
                 if row[0] == 'Description':
                     desc = row[1]
-            if desc == None:
+            if desc is None:
                 return None
         return App(self, appid, appid, desc, version, installedids.get(appid, ''))
 

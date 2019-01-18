@@ -24,7 +24,7 @@ class SoftwareService:
         return None
 
     def search(self, name, statusfilter=None):
-        if statusfilter == None:
+        if statusfilter is None:
             statusfilter = App.statuses
         results = {}
         for source in self.sources:
@@ -35,9 +35,9 @@ class SoftwareService:
         return results
 
     def local(self, name=None, statusfilter=None, sources=None):
-        if statusfilter == None:
+        if statusfilter is None:
             statusfilter = App.statuses
-        if sources == None:
+        if sources is None:
             sources = self.sources
         results = {}
         for source in sources:
@@ -50,10 +50,10 @@ class SoftwareService:
     def getapp(self, superid):
         sourceid, appid = self._split_superid(superid)
         source = self.getsource(sourceid)
-        if source == None:
+        if source is None:
             raise Exception("No such sourceid")
         app = source.getapp(appid)
-        if app == None:
+        if app is None:
             raise Exception("No such appid")
         return app
 
@@ -79,7 +79,7 @@ class SoftwareService:
         for sourceid in apps.copy().keys():
             source = self.getsource(sourceid)
             updatedlist = source.update(apps[sourceid], autoconfirm)
-            if updatedlist != None:
+            if updatedlist is not None:
                 apps[sourceid] = updatedlist
                 return apps
             

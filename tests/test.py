@@ -241,5 +241,6 @@ class TestSourceNewUpdateAvailable(TestSource):
         self.remote[apps[0].id].version = '1.0'
         return None
 
+
 if __name__ == '__main__':
     unittest.main()

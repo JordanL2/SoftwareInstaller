@@ -32,7 +32,7 @@ class FlatpakSource(AbstractSource):
         installed = self._get_installed()
         results = []
         for app in installed:
-            if name == None or app.match(name):
+            if name is None or app.match(name):
                 remoteapp = self.getapp(app.id, installed)
                 app.version = remoteapp.version
                 results.append(app)
@@ -44,7 +44,7 @@ class FlatpakSource(AbstractSource):
         for result in results:
             if result.id == appid:
                 return result
-        if installed == None:
+        if installed is None:
             installed = self._get_installed()
         for app in installed:
             if app.id == appid:

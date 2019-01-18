@@ -109,14 +109,14 @@ class SoftwareInstallerCLI:
 						raise Exception("App {0} requested to be updated, but no update available".format(app.id))
 		else:
 			apps = self.service.local(None, ['U'])
-		while apps != None and len(apps) > 0:
+		while apps is not None and len(apps) > 0:
 			if not autoconfirm and not specific:
 				self._outputresults(apps, flags)
 				text = input("CONFIRM? [Y/n]: ")
 				if text.lower() != 'y':
 					sys.exit()
 			apps = self.service.update(apps, autoconfirm)
-			if apps != None and len(apps) > 0:
+			if apps is not None and len(apps) > 0:
 				print("WARNING: Some sources cannot only update specific apps, so the list of apps that will be updated has changed.")
 
 	def _outputresults(self, results, flags):

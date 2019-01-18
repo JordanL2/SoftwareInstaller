@@ -27,7 +27,7 @@ class PacmanSource(AbstractSource):
         return results
 
     def local(self, name):
-        if name == None:
+        if name is None:
             name = ''
         remoteresults = dict([(a.id, a) for a in self.search('') if a.installed != ''])
         results = []
@@ -38,12 +38,12 @@ class PacmanSource(AbstractSource):
                 app = remoteresults[id]
             else:
                 app = self.getapp(id, installedids, True)
-            if app != None and (name == None or app.match(name)):
+            if app is not None and (name is None or app.match(name)):
                 results.append(app)
         return results
 
     def getapp(self, appid, installedids=None, skipremote=False):
-        if installedids == None:
+        if installedids is None:
             installedids = self._get_installed_ids()
 
         desc = None
@@ -55,13 +55,13 @@ class PacmanSource(AbstractSource):
                     desc = row[1]
                 if row[0] == 'Version':
                     version = row[1]
-        if version == None:
+        if version is None:
             version = '[Not Found]'
             table = self._call("pacman -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
             for row in table:
                 if row[0] == 'Description':
                     desc = row[1]
-            if desc == None:
+            if desc is None:
                 return None
         return App(self, appid, appid, desc, version, installedids.get(appid, ''))
 
