@@ -4,7 +4,7 @@ from softwareinstaller.app import App
 from softwareinstaller.sources.flatpaksource import FlatpakSource
 from softwareinstaller.sources.pacmansource import PacmanSource
 from softwareinstaller.sources.yaourtsource import YaourtSource
-from softwareinstaller.sources.testsource import TestSource
+from softwareinstaller.tests.testsource import TestSource
 
 
 class SoftwareService:
@@ -90,7 +90,7 @@ class SoftwareService:
                     if app.id in foundids and app.version == foundids[app.id]:
                         print(app.version)
                         raise Exception("App {0} wasn't successfully updated".format(app.id))
-            
+
             del apps[sourceid]
         return None
 
