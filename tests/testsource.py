@@ -75,5 +75,4 @@ class TestSource(AbstractSource):
             if app.id not in self.remote:
                 raise Exception("Could not update {0} - not available in remote")
             self.installed[app.id].installed = self.remote[app.id].version
-            self.remote[app.id].version = '1.0'
         return None
