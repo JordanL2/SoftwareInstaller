@@ -6,6 +6,7 @@ from softwareinstaller.tests.testsource import TestSource
 
 import unittest
 
+
 class TestSoftwareService(unittest.TestCase):
 
     def setUp(self):
@@ -19,35 +20,35 @@ class TestSoftwareService(unittest.TestCase):
     # SEARCH
 
     def test_search(self):
-        results = self.service.search('test')
+        results = self.service.search('app')
         self.assertEqual(len(results['test1']), 6)
         self.assertEqual(len(results['test2']), 6)
 
-        results = self.service.search('st5')
+        results = self.service.search('pp5')
         self.assertFalse('test1' in results)
         self.assertFalse('test2' in results)
 
-        results = self.service.search('st6')
+        results = self.service.search('pp6')
         self.assertEqual(len(results['test1']), 1)
         self.assertEqual(len(results['test2']), 1)
 
     def test_search_notinstalled(self):
-        results = self.service.search('test', ['N'])
+        results = self.service.search('app', ['N'])
         self.assertEqual(len(results['test1']), 2)
         self.assertEqual(len(results['test2']), 2)
 
     def test_search_installed(self):
-        results = self.service.search('test', ['I'])
+        results = self.service.search('app', ['I'])
         self.assertEqual(len(results['test1']), 2)
         self.assertEqual(len(results['test2']), 2)
 
     def test_search_update(self):
-        results = self.service.search('test', ['U'])
+        results = self.service.search('app', ['U'])
         self.assertEqual(len(results['test1']), 2)
         self.assertEqual(len(results['test2']), 2)
 
     def test_search_I_and_U(self):
-        results = self.service.search('test', ['I', 'U'])
+        results = self.service.search('app', ['I', 'U'])
         self.assertEqual(len(results['test1']), 4)
         self.assertEqual(len(results['test2']), 4)
 
@@ -59,30 +60,30 @@ class TestSoftwareService(unittest.TestCase):
         self.assertEqual(len(results['test1']), 5)
         self.assertEqual(len(results['test2']), 5)
 
-        results = self.service.local('st5')
+        results = self.service.local('pp5')
         self.assertEqual(len(results['test1']), 1)
         self.assertEqual(len(results['test2']), 1)
 
-        results = self.service.local('st6')
+        results = self.service.local('pp6')
         self.assertFalse('test1' in results)
         self.assertFalse('test2' in results)
 
     def test_local_notinstalled(self):
-        results = self.service.local('test', ['N'])
+        results = self.service.local('app', ['N'])
         self.assertFalse('test1' in results)
 
     def test_local_installed(self):
-        results = self.service.local('test', ['I'])
+        results = self.service.local('app', ['I'])
         self.assertEqual(len(results['test1']), 3)
         self.assertEqual(len(results['test2']), 3)
 
     def test_local_update(self):
-        results = self.service.local('test', ['U'])
+        results = self.service.local('app', ['U'])
         self.assertEqual(len(results['test1']), 2)
         self.assertEqual(len(results['test2']), 2)
 
     def test_local_I_and_U(self):
-        results = self.service.local('test', ['I', 'U'])
+        results = self.service.local('app', ['I', 'U'])
         self.assertEqual(len(results['test1']), 5)
         self.assertEqual(len(results['test2']), 5)
 
@@ -90,29 +91,29 @@ class TestSoftwareService(unittest.TestCase):
     # GETAPP
 
     def test_getapp_installed(self):
-        app = self.service.getapp('test1:test1')
-        self.assertEqual(app.name, 'Test1')
+        app = self.service.getapp('test1:app1')
+        self.assertEqual(app.name, 'Test App 1')
         self.assertEqual(app.desc, 'Test1 desc')
         self.assertEqual(app.version, '0.1')
         self.assertEqual(app.installed, '0.1')
 
     def test_getapp_not_installed(self):
-        app = self.service.getapp('test1:test6')
-        self.assertEqual(app.name, 'Test6')
+        app = self.service.getapp('test1:app6')
+        self.assertEqual(app.name, 'Test App 6')
         self.assertEqual(app.desc, 'Test6 desc')
         self.assertEqual(app.version, '0.5')
         self.assertEqual(app.installed, '')
 
     def test_getapp_local_notremote(self):
-        app = self.service.getapp('test1:test5')
-        self.assertEqual(app.name, 'Test5')
+        app = self.service.getapp('test1:app5')
+        self.assertEqual(app.name, 'Test App 5')
         self.assertEqual(app.desc, 'Test5 desc')
         self.assertEqual(app.version, '[Not Found]')
         self.assertEqual(app.installed, '0.3')
 
     def test_getapp_installed_update(self):
-        app = self.service.getapp('test1:test3')
-        self.assertEqual(app.name, 'Test3')
+        app = self.service.getapp('test1:app3')
+        self.assertEqual(app.name, 'Test App 3')
         self.assertEqual(app.desc, 'Test3 desc')
         self.assertEqual(app.version, '0.2')
         self.assertEqual(app.installed, '0.1')
@@ -125,15 +126,15 @@ class TestSoftwareService(unittest.TestCase):
     # INSTALL
 
     def test_install_not_installed(self):
-        self.assertFalse('test1' in self.service.local('test6'))
-        self.assertFalse('test2' in self.service.local('test6'))
-        self.service.install('test1:test6')
-        self.assertEqual(self.service.local('test6')['test1'][0].id, 'test6')
-        self.assertFalse('test2' in self.service.local('test6'))
+        self.assertFalse('test1' in self.service.local('app6'))
+        self.assertFalse('test2' in self.service.local('app6'))
+        self.service.install('test1:app6')
+        self.assertEqual(self.service.local('app6')['test1'][0].id, 'app6')
+        self.assertFalse('test2' in self.service.local('app6'))
 
     def test_install_already_installed(self):
         with self.assertRaises(Exception):
-            self.service.install('test:test1')
+            self.service.install('test:app1')
 
     def test_install_not_found(self):
         with self.assertRaises(Exception):
@@ -143,15 +144,15 @@ class TestSoftwareService(unittest.TestCase):
     # REMOVE
 
     def test_remove_installed(self):
-        self.assertTrue('test1' in self.service.local('test1'))
-        self.assertTrue('test2' in self.service.local('test1'))
-        self.service.remove('test1:test1')
-        self.assertFalse('test' in self.service.local('test1'))
-        self.assertTrue('test2' in self.service.local('test1'))
+        self.assertTrue('test1' in self.service.local('app1'))
+        self.assertTrue('test2' in self.service.local('app1'))
+        self.service.remove('test1:app1')
+        self.assertFalse('test' in self.service.local('app1'))
+        self.assertTrue('test2' in self.service.local('app1'))
 
     def test_remove_not_installed(self):
         with self.assertRaises(Exception):
-            self.service.remove('test1:test6')
+            self.service.remove('test1:app6')
 
     def test_remove_not_found(self):
         with self.assertRaises(Exception):
@@ -174,7 +175,7 @@ class TestSoftwareService(unittest.TestCase):
         self.assertTrue(len(toupdate) > 0)
         results = self.service.update(toupdate, False)
         self.assertTrue('test1' in results)
-        self.assertEqual(results['test1'][0].id, 'test4')
+        self.assertEqual(results['test1'][0].id, 'app4')
         self.assertTrue('test2' in results)
 
     def test_update_listchanged2(self):
@@ -184,7 +185,7 @@ class TestSoftwareService(unittest.TestCase):
         results = self.service.update(toupdate, False)
         self.assertFalse('test1' in results)
         self.assertTrue('test2' in results)
-        self.assertEqual(results['test2'][0].id, 'test4')
+        self.assertEqual(results['test2'][0].id, 'app4')
 
     def test_update_listchanged_autoconfirm(self):
         self.service.sources[0] = TestSourceUpdateListChanges('test1', 'TestSource1')
@@ -221,7 +222,7 @@ class TestSourceUpdateListChanges(TestSource):
 
     def update(self, apps, autoconfirm):
         if not autoconfirm:
-            return [App(self, 'test4', 'Test4', 'Test4 desc', '0.5', '0.3'),]
+            return [App(self, 'app4', 'Test App 4', 'Test4 desc', '0.5', '0.3'),]
         for app in apps:
             if app.id not in self.remote:
                 raise Exception("Could not update {0} - not available in remote")

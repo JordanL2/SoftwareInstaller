@@ -2,6 +2,7 @@
 
 from softwareinstaller.softwareservice import SoftwareService
 from softwareinstaller.app import App
+from softwareinstaller.tests.testsource import TestSource
 
 import sys
 
@@ -23,7 +24,7 @@ class SoftwareInstallerCLI:
 			else:
 				flags[flag] = True
 		if '--test' in flags:
-			self.service.testmode()
+			self.service.sources = [TestSource('test1', 'TestSource1'), TestSource('test2', 'TestSource2')]
 			print("BEGIN STATE")
 			self._outputresults(self.service.local(None, None), flags)
 			print("-----")

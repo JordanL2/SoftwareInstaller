@@ -10,19 +10,19 @@ class TestSource(AbstractSource):
     def __init__(self, id='test', name='TestSource'):
         super().__init__(id, name)
         self.installed = dict([(a.id, a) for a in [
-            App(self, 'test1', 'Test1', 'Test1 desc', '0.1', '0.1'),
-            App(self, 'test2', 'Test2', 'Test2 desc', '0.2', '0.2'),
-            App(self, 'test3', 'Test3', 'Test3 desc', '0.2', '0.1'),
-            App(self, 'test4', 'Test4', 'Test4 desc', '0.4', '0.3'),
-            App(self, 'test5', 'Test5', 'Test5 desc', None, '0.3'),
+            App(self, 'app1', 'Test App 1', 'Test1 desc', '0.1', '0.1'),
+            App(self, 'app2', 'Test App 2', 'Test2 desc', '0.2', '0.2'),
+            App(self, 'app3', 'Test App 3', 'Test3 desc', '0.2', '0.1'),
+            App(self, 'app4', 'Test App 4', 'Test4 desc', '0.4', '0.3'),
+            App(self, 'app5', 'Test App 5', 'Test5 desc', None, '0.3'),
         ]])
         self.remote = dict([(a.id, a) for a in [
-            App(self, 'test1', 'Test1', 'Test1 desc', '0.1', None),
-            App(self, 'test2', 'Test2', 'Test2 desc', '0.2', None),
-            App(self, 'test3', 'Test3', 'Test3 desc', '0.2', None),
-            App(self, 'test4', 'Test4', 'Test4 desc', '0.4', None),
-            App(self, 'test6', 'Test6', 'Test6 desc', '0.5', None),
-            App(self, 'test7', 'Test7', 'Test7 desc', '0.6', None),
+            App(self, 'app1', 'Test App 1', 'Test1 desc', '0.1', None),
+            App(self, 'app2', 'Test App 2', 'Test2 desc', '0.2', None),
+            App(self, 'app3', 'Test App 3', 'Test3 desc', '0.2', None),
+            App(self, 'app4', 'Test App 4', 'Test4 desc', '0.4', None),
+            App(self, 'app6', 'Test App 6', 'Test6 desc', '0.5', None),
+            App(self, 'app7', 'Test App 7', 'Test7 desc', '0.6', None),
         ]])
 
     def testinstalled(self):
