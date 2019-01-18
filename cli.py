@@ -122,27 +122,34 @@ class SoftwareInstallerCLI:
 
 	def _outputresults(self, results, flags):
 		table = []
-		columns = 7
-		maxwidth = [0] * columns
+		header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'VERSION', 'INSTALLED', 'DESCRIPTION']
+		columns = len(header)
+		maxwidth = [len(header[i]) for i in range(0, columns)]
+		csv = '--csv' in flags
+		noheader = '--noheader' in flags
 		for sourceid in results.keys():
 			for result in results[sourceid]:
 				indicator = result.status()
 				if indicator == 'N':
 					indicator = ''
-					if '--csv' not in flags:
+					if not csv:
 						indicator = '   '
 				else:
 					indicator = "[{0}]".format(indicator)
 				row = [indicator, result.source.name, result.superid(), result.name, result.version, result.installed, result.desc]
-				if '--csv' not in flags:
+				if not csv:
 					for i in range(0, columns):
 						if len(row[i]) > maxwidth[i]:
 							maxwidth[i] = len(row[i])
 				table.append(row)
-		if '--csv' in flags:
+		if csv:
+			if not noheader:
+				print(str.join(' ', ["\"{0}\"".format(a) for a in header]))
 			for row in table:
 				print(str.join(',', ["\"{0}\"".format(a) for a in row]))
 		else:
+			if not noheader:
+				print(str.join(' ', [format(header[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
 			for row in table:
 				print(str.join(' ', [format(row[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
 

@@ -12,21 +12,17 @@ Sources currently supported:
 # Usage
 
 ```
-search <NAME> [--csv] [--status=N,I,U]
+search <NAME> [--csv] [--noheader] [--status=N,I,U]
 ```
-Search all sources for any package matching `<NAME>`. The result table columns are:
-* Status indicator:
+Search all sources for any package matching `<NAME>`.
+Status indicator:
 	* Blank - Uninstalled
 	* `[I]` - Installed, up to date
 	* `[U]` - Installed, an update is available.
-* Source
-* Reference - Unique identifier for the package, used in other commands below
-* Name
-* Version available in remote source
-* Version installed locally, if any
-* Description
 
 If the --csv flag is present, outputs table in CSV format.
+
+The --noheader flag suppresses the header row.
 
 The --status flag filters the results based on its installation status. Multiple status types are possible.
 * N - Not installed
@@ -34,11 +30,11 @@ The --status flag filters the results based on its installation status. Multiple
 * U - Installed, an update is available
 
 ```
-local [<NAME>] [--csv] [--status=N,I,U]
+local [<NAME>] [--csv] [--noheader] [--status=N,I,U]
 ```
 Search locally installed packages for any package matching `<NAME>`. `<NAME>` is optional, if not given returns all packages. The table format is the same as `search`.
 
-The --csv and --status flags work the same as they do for `search`.
+The --csv, --noheader and --status flags work the same as they do for `search`.
 
 ```
 show <REF>
