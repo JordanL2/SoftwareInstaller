@@ -7,8 +7,8 @@ import re
 
 class TestSource(AbstractSource):
 
-    def __init__(self):
-        super().__init__('test', 'TestSource')
+    def __init__(self, id='test', name='TestSource'):
+        super().__init__(id, name)
         self.installed = dict([(a.id, a) for a in [
             App(self, 'test1', 'Test1', 'Test1 desc', '0.1', '0.1'),
             App(self, 'test2', 'Test2', 'Test2 desc', '0.2', '0.2'),
