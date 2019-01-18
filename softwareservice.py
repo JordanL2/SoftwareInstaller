@@ -88,7 +88,6 @@ class SoftwareService:
                 foundids = dict([(a.id, a.version) for a in apps_still_to_be_updated[sourceid]])
                 for app in apps[sourceid]:
                     if app.id in foundids and app.version == foundids[app.id]:
-                        print(app.version)
                         raise Exception("App {0} wasn't successfully updated".format(app.id))
 
             del apps[sourceid]

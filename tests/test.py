@@ -92,24 +92,28 @@ class TestSoftwareService(unittest.TestCase):
     def test_getapp_installed(self):
         app = self.service.getapp('test1:test1')
         self.assertEqual(app.name, 'Test1')
+        self.assertEqual(app.desc, 'Test1 desc')
         self.assertEqual(app.version, '0.1')
         self.assertEqual(app.installed, '0.1')
 
     def test_getapp_not_installed(self):
         app = self.service.getapp('test1:test6')
         self.assertEqual(app.name, 'Test6')
+        self.assertEqual(app.desc, 'Test6 desc')
         self.assertEqual(app.version, '0.5')
         self.assertEqual(app.installed, '')
 
     def test_getapp_local_notremote(self):
         app = self.service.getapp('test1:test5')
         self.assertEqual(app.name, 'Test5')
+        self.assertEqual(app.desc, 'Test5 desc')
         self.assertEqual(app.version, '[Not Found]')
         self.assertEqual(app.installed, '0.3')
 
     def test_getapp_installed_update(self):
         app = self.service.getapp('test1:test3')
         self.assertEqual(app.name, 'Test3')
+        self.assertEqual(app.desc, 'Test3 desc')
         self.assertEqual(app.version, '0.2')
         self.assertEqual(app.installed, '0.1')
 
