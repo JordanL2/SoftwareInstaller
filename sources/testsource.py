@@ -31,6 +31,7 @@ class TestSource(AbstractSource):
     def search(self, name):
         results = []
         for app in self.remote.values():
+            app = app.copy()
             if app.match(name):
                 localapp = self.getapp(app.id)
                 app.installed = localapp.installed
@@ -40,6 +41,7 @@ class TestSource(AbstractSource):
     def local(self, name):
         results = []
         for app in self.installed.values():
+            app = app.copy()
             if name == None or app.match(name):
                 remoteapp = self.getapp(app.id)
                 app.version = remoteapp.version
@@ -49,19 +51,19 @@ class TestSource(AbstractSource):
     def getapp(self, appid, installed=None):
         app = None
         if appid in self.installed:
-            app = self.installed[appid]
+            app = self.installed[appid].copy()
             app.version = '[Not Found]'
         if appid in self.remote:
             remoteapp = self.remote[appid]
             if app == None:
                 remoteapp.installed = ''
-                return remoteapp
+                return remoteapp.copy()
             else:
                 app.version = remoteapp.version
         return app
 
     def install(self, app):
-        self.installed[app.id] = app
+        self.installed[app.id] = app.copy()
         app.installed = app.version
 
     def remove(self, app):
@@ -72,4 +74,5 @@ class TestSource(AbstractSource):
             if app.id not in self.remote:
                 raise Exception("Could not update {0} - not available in remote")
             self.installed[app.id].installed = self.remote[app.id].version
+            self.remote[app.id].version = '1.0'
         return None

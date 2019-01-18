@@ -34,11 +34,13 @@ class SoftwareService:
                 results[source.id] = sourceresults
         return results
 
-    def local(self, name=None, statusfilter=None):
+    def local(self, name=None, statusfilter=None, sources=None):
         if statusfilter == None:
             statusfilter = App.statuses
+        if sources == None:
+            sources = self.sources
         results = {}
-        for source in self.sources:
+        for source in sources:
             sourceresults = source.local(name)
             sourceresults = [a for a in sourceresults if a.status() in statusfilter]
             if len(sourceresults) > 0:
@@ -80,6 +82,15 @@ class SoftwareService:
             if updatedlist != None:
                 apps[sourceid] = updatedlist
                 return apps
+            
+            apps_still_to_be_updated = self.local(None, ['U'], [source])
+            if sourceid in apps_still_to_be_updated:
+                foundids = dict([(a.id, a.version) for a in apps_still_to_be_updated[sourceid]])
+                for app in apps[sourceid]:
+                    if app.id in foundids and app.version == foundids[app.id]:
+                        print(app.version)
+                        raise Exception("App {0} wasn't successfully updated".format(app.id))
+            
             del apps[sourceid]
         return None
 

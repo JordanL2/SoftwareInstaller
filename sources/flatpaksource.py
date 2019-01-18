@@ -38,7 +38,6 @@ class FlatpakSource(AbstractSource):
                 results.append(app)
         return results
 
-    #TODO this throws exception if appid doesn't contain a colon
     def getapp(self, appid, installed=None):
         remote, id = self._split_id(appid)
         results = self.search(id)
@@ -65,9 +64,11 @@ class FlatpakSource(AbstractSource):
         print("Updating:", [a.id for a in apps])
         return None
 
-    def _split_id(self, name):
-        i = name.index(':')
-        return (name[0:i], name[i + 1:])
+    def _split_id(self, appid):
+        if ':' not in appid:
+            raise Exception("{0} is not a valid Flatpak app ID".format(appid))
+        i = appid.index(':')
+        return (appid[0:i], appid[i + 1:])
 
     def _get_installed(self):
         table = self._call("flatpak list --columns=version,description,application,origin", self.search_regex, None, True)

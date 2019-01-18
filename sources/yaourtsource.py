@@ -35,12 +35,11 @@ class YaourtSource(AbstractSource):
                 results.append(app)
         return results
 
-    #TODO this throws exception if appid not found
     def getapp(self, appid, installedids=None):
         if installedids == None:
             installedids = self._get_installed_ids()
 
-        table = self._call("yaourt -Si {0}".format(appid), self.description_regex, None, True)
+        table = self._call("yaourt -Si {0}".format(appid), self.description_regex, None, True, [0, 1])
         desc = None
         version = None
         for row in table:
@@ -50,10 +49,12 @@ class YaourtSource(AbstractSource):
                 version = row[1]
         if version == None:
             version = '[Not Found]'
-            table = self._call("yaourt -Qi {0}".format(appid), self.description_regex, None, True)
+            table = self._call("yaourt -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
             for row in table:
                 if row[0] == 'Description':
                     desc = row[1]
+            if desc == None:
+                return None
         return App(self, appid, appid, desc, version, installedids.get(appid, ''))
 
     def install(self, app):

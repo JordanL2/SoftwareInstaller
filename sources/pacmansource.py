@@ -42,7 +42,6 @@ class PacmanSource(AbstractSource):
                 results.append(app)
         return results
 
-    #TODO this should return None if appid not found at all
     def getapp(self, appid, installedids=None, skipremote=False):
         if installedids == None:
             installedids = self._get_installed_ids()
@@ -62,6 +61,8 @@ class PacmanSource(AbstractSource):
             for row in table:
                 if row[0] == 'Description':
                     desc = row[1]
+            if desc == None:
+                return None
         return App(self, appid, appid, desc, version, installedids.get(appid, ''))
 
     def install(self, app):
