@@ -17,7 +17,7 @@ class PacmanSource(AbstractSource):
         self.executor = CommandExecutor()
 
     def testinstalled(self):
-        return self.executor.call('which pacman 2>/dev/null', None, None, True, None) != ''
+        return self.executor.call('which pacman 2>/dev/null') != ''
 
     def search(self, name):
         installedids = self._get_installed_ids()
