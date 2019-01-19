@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from softwareinstaller.abstractsource import *
+from softwareinstaller.commandexecutor import CommandExecutor
 
 import re
 
@@ -13,14 +14,15 @@ class PacmanSource(AbstractSource):
 
     def __init__(self):
         super().__init__('pacman', 'Pacman')
+        self.executor = CommandExecutor()
 
     def testinstalled(self):
-        return self._call('which pacman 2>/dev/null', None, None, True, None) != ''
+        return self.executor.call('which pacman 2>/dev/null', None, None, True, None) != ''
 
     def search(self, name):
         installedids = self._get_installed_ids()
 
-        table = self._call("pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(name), self.search_regex, None, False)
+        table = self.executor.call("pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(name), self.search_regex, None, False)
         results = []
         for row in table:
             results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0], '')))
@@ -49,7 +51,7 @@ class PacmanSource(AbstractSource):
         desc = None
         version = None
         if not skipremote:
-            table = self._call("pacman -Si {0}".format(appid), self.description_regex, None, True, [0, 1])
+            table = self.executor.call("pacman -Si {0}".format(appid), self.description_regex, None, True, [0, 1])
             for row in table:
                 if row[0] == 'Description':
                     desc = row[1]
@@ -57,7 +59,7 @@ class PacmanSource(AbstractSource):
                     version = row[1]
         if version is None:
             version = '[Not Found]'
-            table = self._call("pacman -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
+            table = self.executor.call("pacman -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
             for row in table:
                 if row[0] == 'Description':
                     desc = row[1]
@@ -66,10 +68,10 @@ class PacmanSource(AbstractSource):
         return App(self, appid, appid, desc, version, installedids.get(appid, ''))
 
     def install(self, app):
-        self._call("pacman --noconfirm -S {0}".format(app.id))
+        self.executor.call("pacman --noconfirm -S {0}".format(app.id))
 
     def remove(self, app):
-        self._call("pacman --noconfirm -R {0}".format(app.id))
+        self.executor.call("pacman --noconfirm -R {0}".format(app.id))
 
     def update(self, apps, autoconfirm):
         #TODO
@@ -77,5 +79,5 @@ class PacmanSource(AbstractSource):
         return None
 
     def _get_installed_ids(self):
-        table = self._call("pacman -Q", self.installed_regex)
+        table = self.executor.call("pacman -Q", self.installed_regex)
         return dict([(row[0], row[1]) for row in table])

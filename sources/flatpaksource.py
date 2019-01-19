@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from softwareinstaller.abstractsource import *
+from softwareinstaller.commandexecutor import CommandExecutor
 
 import re
 
@@ -11,14 +12,15 @@ class FlatpakSource(AbstractSource):
 
     def __init__(self):
         super().__init__('flatpak', 'Flatpak')
+        self.executor = CommandExecutor()
 
     def testinstalled(self):
-        return self._call('which flatpak 2>/dev/null', None, None, True, None) != ''
+        return self.executor.call('which flatpak 2>/dev/null', None, None, True, None) != ''
 
     def search(self, name):
         installedids = self._get_installed_ids()
 
-        table = self._call("flatpak search \"{0}\" --columns=version,description,application,remotes".format(name), self.search_regex, None, True)
+        table = self.executor.call("flatpak search \"{0}\" --columns=version,description,application,remotes".format(name), self.search_regex, None, True)
         results = []
         for row in table:
             id = row[4] + ':' + row[3]
@@ -53,11 +55,11 @@ class FlatpakSource(AbstractSource):
 
     def install(self, app):
         remote, id = self._split_id(app.id)
-        self._call("flatpak install -y {0} {1}".format(remote, id))
+        self.executor.call("flatpak install -y {0} {1}".format(remote, id))
 
     def remove(self, app):
         remote, id = self._split_id(app.id)
-        self._call("flatpak remove -y {0}".format(id))
+        self.executor.call("flatpak remove -y {0}".format(id))
 
     def update(self, apps, autoconfirm):
         #TODO
@@ -71,7 +73,7 @@ class FlatpakSource(AbstractSource):
         return (appid[0:i], appid[i + 1:])
 
     def _get_installed(self):
-        table = self._call("flatpak list --columns=version,description,application,origin", self.search_regex, None, True)
+        table = self.executor.call("flatpak list --columns=version,description,application,origin", self.search_regex, None, True)
         results = []
         for row in table:
             id = row[4] + ':' + row[3]
