@@ -76,13 +76,13 @@ class SoftwareInstallerCLI:
 	def show(self, args, flags):
 		superid = args.pop(0)
 		app = self.service.getapp(superid)
-		print('Name:', app.name)
-		print('Version:', app.version)
-		print('Desc:', app.desc)
-		if app.installed != '':
+		print('     Name:', app.name)
+		print('     Desc:', app.desc)
+		print('  Version:', app.version)
+		if app.installed is not None:
 			print('Installed:', app.installed)
 		status = {'N': 'Not installed', 'I': 'Installed, up to date', 'U': 'Installed, update available'}[app.status()]
-		print('Status:', status)
+		print('   Status:', status)
 
 	def install(self, args, flags):
 		superid = args.pop(0)

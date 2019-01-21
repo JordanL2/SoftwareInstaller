@@ -73,8 +73,10 @@ class FlatpakSource(AbstractSource):
             match = self.name_description_regex.match(line)
             if match:
                 row = match.groups()
-                app.name = row[0]
-                app.desc = row[1]
+                if app.name == '':
+                    app.name = row[0]
+                if app.desc == '':
+                    app.desc = row[1]
             match = self.description_regex.match(line)
             if match:
                 row = match.groups()
