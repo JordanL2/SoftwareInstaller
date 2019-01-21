@@ -8,7 +8,7 @@ import re
 
 class FlatpakSource(AbstractSource):
 
-    ids_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+([^\-]+?)\s+\-\s+(.+)$')
+    ids_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+(.+)$')
     description_regex = re.compile(r'^\s*([^\:]+?)\:\s+(.+)$')
     name_description_regex = re.compile(r'^([^\-]+)\s+\-\s+(.+)$')
 
@@ -26,7 +26,7 @@ class FlatpakSource(AbstractSource):
         table = self.executor.call("flatpak search \"{0}\" --columns=remotes,application,branch,description".format(name), self.ids_regex, None, True)
         results = []
         for row in table:
-            appid = row[0] + ":" + row[1] + ":" + row[2]
+            appid = self._make_id(row[0], row[1], row[2])
             app = self.getapp(appid)
             if app is None:
                 raise Exception("Could not find app {0} in results".format(appid))
@@ -101,6 +101,9 @@ class FlatpakSource(AbstractSource):
             self.executor.call("flatpak update --assumeyes {0}".format(id))
         return None
 
+    def _make_id(self, remote, id, branch):
+        return "{0}:{1}:{2}".format(remote, id, branch)
+
     def _split_id(self, appid):
         if ':' not in appid:
             raise Exception("{0} is not a valid Flatpak app ID".format(appid))
@@ -114,8 +117,15 @@ class FlatpakSource(AbstractSource):
         table = self.executor.call("flatpak list --columns=origin,application,branch,description", self.ids_regex, None, True)
         results = {}
         for row in table:
-            appid = row[0] + ":" + row[1] + ":" + row[2]
-            results[appid] = FlatpakApp(self, appid, row[3], row[4], None, None, None, None)
+            appid = self._make_id(row[0], row[1], row[2])
+            name = row[3]
+            desc = ''
+            match = self.name_description_regex.match(name)
+            if match:
+                matchgroups = match.groups()
+                name = matchgroups[0]
+                desc = matchgroups[1]
+            results[appid] = FlatpakApp(self, appid, name, desc, None, None, None, None)
         return results
 
 
