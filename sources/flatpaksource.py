@@ -98,10 +98,9 @@ class FlatpakSource(AbstractSource):
         self.executor.call("flatpak remove -y {0}".format(id))
 
     def update(self, apps, autoconfirm):
-        #TODO
-        print("Updating:", [a.id for a in apps])
-        #for app in apps:
-        #    self.executor.call("flatpak update --assumeyes {0}".format(app.id))
+        for app in apps:
+            remote, id = self._split_id(app.id)
+            self.executor.call("flatpak update --assumeyes {0}".format(id))
         return None
 
     def _split_id(self, appid):

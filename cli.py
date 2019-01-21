@@ -158,7 +158,7 @@ class SoftwareInstallerCLI:
 			for row in table:
 				print(str.join(',', ["\"{0}\"".format(a) for a in row]))
 		else:
-			if not noheader:
+			if not noheader and len(table) > 0:
 				print(str.join(' ', [format(header[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
 			for row in table:
 				print(str.join(' ', [format(row[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
