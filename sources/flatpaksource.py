@@ -8,7 +8,10 @@ import re
 
 class FlatpakSource(AbstractSource):
 
-    search_regex = re.compile(r'^(\S*)\s+(.+?)\s+\-\s+(.+?)\s+(\S+)\s+(\S+)$')
+    #search_regex = re.compile(r'^(\S*)\s+(.+?)\s+\-\s+(.+?)\s+(\S+)\s+(\S+)\s+(\S+)$')
+    ids_regex = re.compile(r'^(\S+)\s+(\S+)$')
+    description_regex = re.compile(r'^\s*([^\:]+?)\:\s+(.+)$')
+    name_description_regex = re.compile(r'^([^\-]+)\s+\-\s+(.+)$')
 
     def __init__(self):
         super().__init__('flatpak', 'Flatpak')
@@ -21,38 +24,62 @@ class FlatpakSource(AbstractSource):
         pass
 
     def search(self, name):
-        installedids = self._get_installed_ids()
-
-        table = self.executor.call("flatpak search \"{0}\" --columns=version,description,application,remotes".format(name), self.search_regex, None, True)
+        table = self.executor.call("flatpak search \"{0}\" --columns=application,remotes".format(name), self.ids_regex, None, True)
         results = []
         for row in table:
-            id = row[4] + ':' + row[3]
-            version = row[0]
-            results.append(App(self, id, row[1], row[2], version, installedids.get(id, None)))
+            appid = row[1] + ':' + row[0]
+            app = self.getapp(appid)
+            if app is None:
+                print(appid)
+            results.append(app)
         return results
 
     def local(self, name):
-        installed = self._get_installed()
+        installedids = self._get_installed_ids()
         results = []
-        for app in installed:
+        for id in installedids:
+            app = self.getapp(id)
+            if app is None:
+                print(appid)
             if name is None or app.match(name):
-                remoteapp = self.getapp(app.id, installed)
-                app.version = remoteapp.version
                 results.append(app)
         return results
 
-    def getapp(self, appid, installed=None):
+    def getapp(self, appid):
         remote, id = self._split_id(appid)
-        results = self.search(id)
-        for result in results:
-            if result.id == appid:
-                return result
-        if installed is None:
-            installed = self._get_installed()
-        for app in installed:
-            if app.id == appid:
-                return app
-        return None
+        app = FlatpakApp(self, appid, '', '', None, None, None, None, None)
+
+        table = self.executor.call("flatpak info {0} | head -n2 | tail -n1".format(id), self.name_description_regex, None, True, [0, 1])
+        for row in table:
+            app.name = row[0]
+            app.desc = row[1]
+        table = self.executor.call("flatpak info {0}".format(id), self.description_regex, None, True, [0, 1])
+        for row in table:
+            if row[0] == 'Version':
+                app.installed = row[1]
+            if row[0] == 'Commit':
+                app.local_checksum = row[1]
+            if row[0] == 'Branch':
+                app.branch = row[1]
+
+        table = self.executor.call("flatpak remote-info {0} {1} | head -n2 | tail -n1".format(remote, id), self.name_description_regex, None, True, [0, 1])
+        for row in table:
+            if app.name == '':
+                app.name = row[0]
+            if app.desc == '':
+                app.desc = row[1]
+        table = self.executor.call("flatpak remote-info {0} {1}".format(remote, id), self.description_regex, None, True, [0, 1])
+        for row in table:
+            if row[0] == 'Version':
+                app.version = row[1]
+            if row[0] == 'Commit':
+                app.remote_checksum = row[1]
+            if row[0] == 'Branch' and app.branch is None:
+                app.branch = row[1]
+        
+        if app.branch is None:
+            return None
+        return app
 
     def install(self, app):
         remote, id = self._split_id(app.id)
@@ -75,18 +102,26 @@ class FlatpakSource(AbstractSource):
         i = appid.index(':')
         return (appid[0:i], appid[i + 1:])
 
-    def _get_installed(self):
-        table = self.executor.call("flatpak list --columns=version,description,application,origin", self.search_regex, None, True)
+    def _get_installed_ids(self):
+        table = self.executor.call("flatpak list --columns=application,origin", self.ids_regex, None, True)
         results = []
         for row in table:
-            id = row[4] + ':' + row[3]
-            version = row[0]
-            results.append(App(self, id, row[1], row[2], None, version))
+            results.append(row[1] + ":" + row[0])
         return results
 
-    def _get_installed_ids(self):
-        installed = self._get_installed()
-        installedids = {}
-        for installedapp in installed:
-            installedids[installedapp.id] = installedapp.installed
-        return installedids
+
+class FlatpakApp(App):
+
+    def __init__(self, source, id, name, desc, version, installed, remote_checksum, local_checksum, branch):
+        super().__init__(source, id, name, desc, version, installed)
+        self.remote_checksum = remote_checksum
+        self.local_checksum = local_checksum
+        self.branch = branch
+
+    def status(self):
+        indicator = 'N'
+        if self.installed is not None:
+            indicator = 'I'
+            if self.remote_checksum != self.local_checksum:
+                indicator = 'U'
+        return indicator

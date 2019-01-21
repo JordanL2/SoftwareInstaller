@@ -81,6 +81,8 @@ class SoftwareInstallerCLI:
 		print('Desc:', app.desc)
 		if app.installed != '':
 			print('Installed:', app.installed)
+		status = {'N': 'Not installed', 'I': 'Installed, up to date', 'U': 'Installed, update available'}[app.status()]
+		print('Status:', status)
 
 	def install(self, args, flags):
 		superid = args.pop(0)
