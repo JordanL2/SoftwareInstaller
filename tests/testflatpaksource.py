@@ -80,7 +80,7 @@ No matches found
         self.assertEqual(results[1].name, 'Scans to PDF')
         self.assertEqual(results[1].desc, 'Create small, searchable PDFs from scanned documents')
         self.assertEqual(results[1].version, '0.0.8')
-        self.assertEqual(results[1].installed, '')
+        self.assertEqual(results[1].installed, None)
 
 
     # LOCAL
@@ -102,7 +102,7 @@ No matches found
         self.assertEqual(results[0].id, 'flathub:org.kde.krita')
         self.assertEqual(results[0].name, 'Krita')
         self.assertEqual(results[0].desc, 'Digital Painting, Creative Freedom')
-        self.assertEqual(results[0].version, '[Not Found]')
+        self.assertEqual(results[0].version, None)
         self.assertEqual(results[0].installed, '4.1.7.101')
 
 

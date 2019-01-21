@@ -136,7 +136,15 @@ class SoftwareInstallerCLI:
 						indicator = '   '
 				else:
 					indicator = "[{0}]".format(indicator)
-				row = [indicator, result.source.name, result.superid(), result.name, result.version, result.installed, result.desc]
+				row = [
+					indicator,
+					result.source.name,
+					result.superid(),
+					result.name,
+					(result.version if result.version is not None else '[Not Found]'),
+					(result.installed if result.installed is not None else ''),
+					result.desc
+				]
 				if not csv:
 					for i in range(0, columns):
 						if len(row[i]) > maxwidth[i]:

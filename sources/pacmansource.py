@@ -28,7 +28,7 @@ class PacmanSource(AbstractSource):
         table = self.executor.call("pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(name), self.search_regex, None, False)
         results = []
         for row in table:
-            results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0], '')))
+            results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0], None)))
         return results
 
     def local(self, name):
@@ -61,7 +61,7 @@ class PacmanSource(AbstractSource):
                 if row[0] == 'Version':
                     version = row[1]
         if version is None:
-            version = '[Not Found]'
+            version = None
             table = self.executor.call("pacman -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
             for row in table:
                 if row[0] == 'Description':

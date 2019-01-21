@@ -28,9 +28,7 @@ class FlatpakSource(AbstractSource):
         for row in table:
             id = row[4] + ':' + row[3]
             version = row[0]
-            if version == '':
-                version = '[None]'
-            results.append(App(self, id, row[1], row[2], version, installedids.get(id, '')))
+            results.append(App(self, id, row[1], row[2], version, installedids.get(id, None)))
         return results
 
     def local(self, name):
@@ -67,6 +65,8 @@ class FlatpakSource(AbstractSource):
     def update(self, apps, autoconfirm):
         #TODO
         print("Updating:", [a.id for a in apps])
+        #for app in apps:
+        #    self.executor.call("flatpak update --assumeyes {0}".format(app.id))
         return None
 
     def _split_id(self, appid):
@@ -81,9 +81,7 @@ class FlatpakSource(AbstractSource):
         for row in table:
             id = row[4] + ':' + row[3]
             version = row[0]
-            if version == '':
-                version = '[None]'
-            results.append(App(self, id, row[1], row[2], '[Not Found]', version))
+            results.append(App(self, id, row[1], row[2], None, version))
         return results
 
     def _get_installed_ids(self):

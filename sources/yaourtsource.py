@@ -29,7 +29,7 @@ class YaourtSource(AbstractSource):
         table = self.executor.call("yaourt -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\"".format(name), self.search_regex, None, False, [0, 1])
         results = []
         for row in table:
-            results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0], '')))
+            results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0], None)))
         return results
 
     def local(self, name):
@@ -54,7 +54,7 @@ class YaourtSource(AbstractSource):
             if row[0] == 'Version':
                 version = row[1]
         if version is None:
-            version = '[Not Found]'
+            version = None
             table = self.executor.call("yaourt -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
             for row in table:
                 if row[0] == 'Description':

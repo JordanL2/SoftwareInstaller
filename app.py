@@ -38,8 +38,8 @@ class App:
 
 	def status(self):
 		indicator = 'N'
-		if self.installed != '':
+		if self.installed is not None:
 			indicator = 'I'
-			if self.installed != self.version and self.version != '[Not Found]':
+			if self.installed != self.version and self.version is not None:
 				indicator = 'U'
 		return indicator

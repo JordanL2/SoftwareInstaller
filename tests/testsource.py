@@ -55,11 +55,11 @@ class TestSource(AbstractSource):
         app = None
         if appid in self.installed:
             app = self.installed[appid].copy()
-            app.version = '[Not Found]'
+            app.version = None
         if appid in self.remote:
             remoteapp = self.remote[appid]
             if app is None:
-                remoteapp.installed = ''
+                remoteapp.installed = None
                 return remoteapp.copy()
             else:
                 app.version = remoteapp.version
