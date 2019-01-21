@@ -27,6 +27,7 @@ class SoftwareService:
             statusfilter = App.statuses
         results = {}
         for source in self.sources:
+            source.refresh()
             sourceresults = source.search(name)
             sourceresults = [a for a in sourceresults if a.status() in statusfilter]
             if len(sourceresults) > 0:
@@ -40,6 +41,7 @@ class SoftwareService:
             sources = self.sources
         results = {}
         for source in sources:
+            source.refresh()
             sourceresults = source.local(name)
             sourceresults = [a for a in sourceresults if a.status() in statusfilter]
             if len(sourceresults) > 0:
@@ -51,6 +53,7 @@ class SoftwareService:
         source = self.getsource(sourceid)
         if source is None:
             raise Exception("No such sourceid")
+        source.refresh()
         app = source.getapp(appid)
         if app is None:
             raise Exception("No such appid")

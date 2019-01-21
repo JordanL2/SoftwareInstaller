@@ -28,6 +28,9 @@ class TestSource(AbstractSource):
     def testinstalled(self):
         return True
 
+    def refresh(self):
+        pass
+
     def search(self, name):
         results = []
         for app in self.remote.values():

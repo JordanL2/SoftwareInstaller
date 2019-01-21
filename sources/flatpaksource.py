@@ -17,6 +17,9 @@ class FlatpakSource(AbstractSource):
     def testinstalled(self):
         return self.executor.call('which flatpak 2>/dev/null') != ''
 
+    def refresh(self):
+        pass
+
     def search(self, name):
         installedids = self._get_installed_ids()
 

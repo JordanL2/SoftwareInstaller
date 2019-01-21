@@ -19,6 +19,9 @@ class PacmanSource(AbstractSource):
     def testinstalled(self):
         return self.executor.call('which pacman 2>/dev/null') != ''
 
+    def refresh(self):
+        self.executor.call("pacman -Sy")
+
     def search(self, name):
         installedids = self._get_installed_ids()
 
@@ -74,8 +77,7 @@ class PacmanSource(AbstractSource):
         self.executor.call("pacman --noconfirm -R {0}".format(app.id))
 
     def update(self, apps, autoconfirm):
-        #TODO
-        print("Updating:", [a.id for a in apps])
+        self.executor.call("pacman -Syu --noconfirm")
         return None
 
     def _get_installed_ids(self):

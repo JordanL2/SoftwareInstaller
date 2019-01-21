@@ -18,6 +18,10 @@ class AbstractSource:
     def testinstalled(self):
         raise Exception("Must override this method")
 
+    # Refreshes the list of remotely available apps
+    def refresh(self):
+        raise Exception("Must override this method")
+
     # Searches remote source for apps matching a string
     # Input:
     #     name - string to match

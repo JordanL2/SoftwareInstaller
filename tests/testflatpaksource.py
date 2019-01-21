@@ -52,6 +52,15 @@ Version Description                                                         Appl
 0.0.8   Scans to PDF - Create small, searchable PDFs from scanned documents com.github.unrud.djpdf flathub
 ''',
 
+                'flatpak search "org.gimp.GIMP" --columns=version,description,application,remotes': '''
+Version Description                                                         Application   Remotes
+2.10.8  GNU Image Manipulation Program - Create images and edit photographs org.gimp.GIMP flathub
+''',
+
+                'flatpak search "org.kde.krita" --columns=version,description,application,remotes': '''
+No matches found
+''',
+
             })
 
 
@@ -60,18 +69,41 @@ Version Description                                                         Appl
     def test_search(self):
         results = self.source.search('gimp')
         self.assertEqual(len(results), 2)
-        
+
         self.assertEqual(results[0].id, 'flathub:org.gimp.GIMP')
         self.assertEqual(results[0].name, 'GNU Image Manipulation Program')
         self.assertEqual(results[0].desc, 'Create images and edit photographs')
         self.assertEqual(results[0].version, '2.10.8')
         self.assertEqual(results[0].installed, '2.10.7')
-        
+
         self.assertEqual(results[1].id, 'flathub:com.github.unrud.djpdf')
         self.assertEqual(results[1].name, 'Scans to PDF')
         self.assertEqual(results[1].desc, 'Create small, searchable PDFs from scanned documents')
         self.assertEqual(results[1].version, '0.0.8')
         self.assertEqual(results[1].installed, '')
+
+
+    # LOCAL
+
+    def test_local(self):
+        results = self.source.local('gimp')
+        self.assertEqual(len(results), 1)
+
+        self.assertEqual(results[0].id, 'flathub:org.gimp.GIMP')
+        self.assertEqual(results[0].name, 'GNU Image Manipulation Program')
+        self.assertEqual(results[0].desc, 'Create images and edit photographs')
+        self.assertEqual(results[0].version, '2.10.8')
+        self.assertEqual(results[0].installed, '2.10.7')
+
+    def test_local_notremote(self):
+        results = self.source.local('krita')
+        self.assertEqual(len(results), 1)
+
+        self.assertEqual(results[0].id, 'flathub:org.kde.krita')
+        self.assertEqual(results[0].name, 'Krita')
+        self.assertEqual(results[0].desc, 'Digital Painting, Creative Freedom')
+        self.assertEqual(results[0].version, '[Not Found]')
+        self.assertEqual(results[0].installed, '4.1.7.101')
 
 
 if __name__ == '__main__':

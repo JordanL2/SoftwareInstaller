@@ -19,6 +19,10 @@ class YaourtSource(AbstractSource):
     def testinstalled(self):
         return self.executor.call('which yaourt 2>/dev/null') != ''
 
+    def refresh(self):
+        #TODO
+        pass
+
     def search(self, name):
         installedids = self._get_installed_ids()
 
