@@ -77,6 +77,7 @@ class PacmanSource(AbstractSource):
         self.executor.call("pacman --noconfirm -R {0}".format(app.id))
 
     def update(self, apps, autoconfirm):
+        #TODO if the list of packages to be updated has changed, return the new list of packages
         self.executor.call("pacman -Syu --noconfirm")
         return None
 

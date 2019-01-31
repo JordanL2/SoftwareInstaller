@@ -4,6 +4,7 @@ from softwareinstaller.abstractsource import *
 from softwareinstaller.commandexecutor import CommandExecutor
 
 import re
+import os
 
 
 class YaourtSource(AbstractSource):
@@ -70,8 +71,9 @@ class YaourtSource(AbstractSource):
         self.executor.call("yaourt --noconfirm -R {0}".format(app.id))
 
     def update(self, apps, autoconfirm):
-        #TODO
-        print("Updating:", [a.id for a in apps])
+        user = os.environ['USER']
+        for app in apps:
+            self.executor.call("sudo -u {0} yaourt -S {1} --noconfirm".format(user, app.id))
         return None
 
     def _get_installed_ids(self):
