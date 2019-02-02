@@ -21,8 +21,7 @@ class YaourtSource(AbstractSource):
         return self.executor.call('which yaourt 2>/dev/null') != ''
 
     def refresh(self):
-        #TODO
-        pass
+        self.executor.call("yaourt -Sy")
 
     def search(self, name):
         installedids = self._get_installed_ids()
