@@ -143,3 +143,6 @@ class FlatpakApp(App):
             if self.remote_checksum != self.local_checksum and self.remote_checksum is not None:
                 indicator = 'U'
         return indicator
+
+    def isinstalled(self):
+        return (self.local_checksum is not None);

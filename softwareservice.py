@@ -61,20 +61,20 @@ class SoftwareService:
 
     def install(self, superid):
         app = self.getapp(superid)
-        if app.installed:
+        if app.isinstalled():
             raise Exception("App is already installed")
         app.install()
         app = self.getapp(superid)
-        if not app.installed:
+        if not app.isinstalled():
             raise Exception("App was not installed")
         
     def remove(self, superid):
         app = self.getapp(superid)
-        if not app.installed:
+        if not app.isinstalled():
             raise Exception("App is not installed")
         app.remove()
         app = self.getapp(superid)
-        if app.installed:
+        if app.isinstalled():
             raise Exception("App was not removed")
 
     def update(self, apps, autoconfirm):

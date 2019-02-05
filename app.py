@@ -43,3 +43,6 @@ class App:
 			if self.installed != self.version and self.version is not None:
 				indicator = 'U'
 		return indicator
+
+	def isinstalled(self):
+		return (self.installed is not None);
