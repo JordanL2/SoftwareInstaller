@@ -4,7 +4,6 @@ from softwareinstaller.abstractsource import *
 from softwareinstaller.commandexecutor import CommandExecutor
 
 import re
-import os
 
 
 class YaourtSource(AbstractSource):
