@@ -17,7 +17,7 @@ class PacmanSource(AbstractSource):
         self.executor = CommandExecutor()
 
     def testinstalled(self):
-        return self.executor.call('which pacman 2>/dev/null') != ''
+        return self.executor.call('which pacman 2>/dev/null', None, None, None, [0, 1]) != ''
 
     def refresh(self):
         self.executor.call("pacman -Sy")

@@ -124,7 +124,7 @@ class SoftwareInstallerCLI:
 
 	def _outputresults(self, results, flags):
 		table = []
-		header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'VERSION', 'INSTALLED', 'DESCRIPTION']
+		header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'DESCRIPTION']
 		columns = len(header)
 		maxwidth = [len(header[i]) for i in range(0, columns)]
 		csv = '--csv' in flags

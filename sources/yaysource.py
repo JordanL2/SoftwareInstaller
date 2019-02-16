@@ -6,26 +6,26 @@ from softwareinstaller.commandexecutor import CommandExecutor
 import re
 
 
-class YaourtSource(AbstractSource):
+class YaySource(AbstractSource):
 
     search_regex = re.compile(r'^[^\/]+\/(\S+)\s+(\S+)\s+(\S+)\s+[^\,]+,(.+)$')
     description_regex = re.compile(r'^([^\:]+?)\s+\:\s+(.+)$')
     installed_regex = re.compile(r'^local\/(\S+)\s+(\S+)$')
 
     def __init__(self):
-        super().__init__('yaourt', 'Yaourt')
+        super().__init__('yay', 'Yay')
         self.executor = CommandExecutor()
 
     def testinstalled(self):
-        return self.executor.call('which yaourt 2>/dev/null', None, None, None, [0, 1]) != ''
+        return self.executor.call('which yay 2>/dev/null', None, None, None, [0, 1]) != ''
 
     def refresh(self):
-        self.executor.call("yaourt -Sy")
+        self.executor.call("yay -Sy")
 
     def search(self, name):
         installedids = self._get_installed_ids()
 
-        table = self.executor.call("yaourt -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\"".format(name), self.search_regex, None, False, [0, 1])
+        table = self.executor.call("yay -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\"".format(name), self.search_regex, None, False, [0, 1])
         results = []
         for row in table:
             results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0])))
@@ -44,7 +44,7 @@ class YaourtSource(AbstractSource):
         if installedids is None:
             installedids = self._get_installed_ids()
 
-        table = self.executor.call("yaourt -Si {0}".format(appid), self.description_regex, None, True, [0, 1])
+        table = self.executor.call("yay -Si {0}".format(appid), self.description_regex, None, True, [0, 1])
         desc = None
         version = None
         for row in table:
@@ -54,7 +54,7 @@ class YaourtSource(AbstractSource):
                 version = row[1]
         if version is None:
             version = None
-            table = self.executor.call("yaourt -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
+            table = self.executor.call("yay -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
             for row in table:
                 if row[0] == 'Description':
                     desc = row[1]
@@ -64,17 +64,17 @@ class YaourtSource(AbstractSource):
 
     def install(self, app):
         user = self.executor.call("who am i | awk '{print $1}'")
-        self.executor.call("sudo -u {0} yaourt --noconfirm -S {1}".format(user, app.id))
+        self.executor.call("sudo -u {0} yay --noconfirm -S {1}".format(user, app.id))
 
     def remove(self, app):
-        self.executor.call("yaourt --noconfirm -R {0}".format(app.id))
+        self.executor.call("yay --noconfirm -R {0}".format(app.id))
 
     def update(self, apps, autoconfirm):
         user = self.executor.call("who am i | awk '{print $1}'")
         for app in apps:
-            self.executor.call("sudo -u {0} yaourt -S {1} --noconfirm".format(user, app.id))
+            self.executor.call("sudo -u {0} yay -S {1} --noconfirm".format(user, app.id))
         return None
 
     def _get_installed_ids(self):
-        table = self.executor.call("yaourt -Q | grep \"^local/\"", self.installed_regex, None, False, [0, 1])
+        table = self.executor.call("yay -Q | grep \"^local/\"", self.installed_regex, None, False, [0, 1])
         return dict([(row[0], row[1]) for row in table])

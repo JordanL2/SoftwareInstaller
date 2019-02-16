@@ -4,17 +4,37 @@ from softwareinstaller.app import App
 from softwareinstaller.sources.flatpaksource import FlatpakSource
 from softwareinstaller.sources.pacmansource import PacmanSource
 from softwareinstaller.sources.yaourtsource import YaourtSource
+from softwareinstaller.sources.yaysource import YaySource
 
 
 class SoftwareService:
 
     def __init__(self):
         allsources = [
-        	FlatpakSource(),
-        	PacmanSource(),
-            YaourtSource()
+            
+            # Flatpak sources
+        	[ 
+                FlatpakSource(),
+            ],
+
+            # Standard repo sources
+            [
+        	   PacmanSource(),
+            ],
+
+            # Arch AUR sources
+            [
+                YaySource(),
+                YaourtSource(),
+            ],
+
         ]
-        self.sources = [s for s in allsources if s.testinstalled()]
+        self.sources = []
+        for sourcegroup in allsources:
+            for source in sourcegroup:
+                if source.testinstalled():
+                    self.sources.append(source)
+                    break
 
     def getsource(self, sourceid):
         for source in self.sources:

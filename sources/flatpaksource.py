@@ -17,7 +17,7 @@ class FlatpakSource(AbstractSource):
         self.executor = CommandExecutor()
 
     def testinstalled(self):
-        return self.executor.call('which flatpak 2>/dev/null') != ''
+        return self.executor.call('which flatpak 2>/dev/null', None, None, None, [0, 1]) != ''
 
     def refresh(self):
         pass
