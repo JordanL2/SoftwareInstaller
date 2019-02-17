@@ -15,6 +15,7 @@ class PacmanSource(AbstractSource):
     def __init__(self):
         super().__init__('pacman', 'Pacman')
         self.executor = CommandExecutor()
+        self.native_only = True #TODO - only set this when an AUR source is in use
 
     def testinstalled(self):
         return self.executor.call('which pacman 2>/dev/null', None, None, None, [0, 1]) != ''
@@ -41,7 +42,7 @@ class PacmanSource(AbstractSource):
             app = None
             if id in remoteresults:
                 app = remoteresults[id]
-            else:
+            elif not self.native_only:
                 app = self.getapp(id, installedids, True)
             if app is not None and (name is None or app.match(name)):
                 results.append(app)
@@ -82,5 +83,8 @@ class PacmanSource(AbstractSource):
         return None
 
     def _get_installed_ids(self):
-        table = self.executor.call("pacman -Q", self.installed_regex)
+        cmd = "pacman -Q"
+        if self.native_only:
+            cmd += 'n'
+        table = self.executor.call(cmd, self.installed_regex)
         return dict([(row[0], row[1]) for row in table])

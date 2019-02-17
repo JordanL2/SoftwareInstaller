@@ -63,14 +63,14 @@ class YaourtSource(AbstractSource):
         return App(self, appid, appid, desc, version, installedids.get(appid))
 
     def install(self, app):
-        user = self.executor.call("who am i | awk '{print $1}'")
+        user = self.executor.getuser()
         self.executor.call("sudo -u {0} yaourt --noconfirm -S {1}".format(user, app.id))
 
     def remove(self, app):
         self.executor.call("yaourt --noconfirm -R {0}".format(app.id))
 
     def update(self, apps, autoconfirm):
-        user = self.executor.call("who am i | awk '{print $1}'")
+        user = self.executor.getuser()
         for app in apps:
             self.executor.call("sudo -u {0} yaourt -S {1} --noconfirm".format(user, app.id))
         return None

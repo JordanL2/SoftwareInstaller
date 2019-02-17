@@ -10,7 +10,7 @@ class YaySource(AbstractSource):
 
     search_regex = re.compile(r'^[^\/]+\/(\S+)\s+(\S+)\s+(\S+)\s+[^\,]+,(.+)$')
     description_regex = re.compile(r'^([^\:]+?)\s+\:\s+(.+)$')
-    installed_regex = re.compile(r'^local\/(\S+)\s+(\S+)$')
+    installed_regex = re.compile(r'^(\S+)\s+(\S+)$')
 
     def __init__(self):
         super().__init__('yay', 'Yay')
@@ -63,18 +63,18 @@ class YaySource(AbstractSource):
         return App(self, appid, appid, desc, version, installedids.get(appid))
 
     def install(self, app):
-        user = self.executor.call("who am i | awk '{print $1}'")
+        user = self.executor.getuser()
         self.executor.call("sudo -u {0} yay --noconfirm -S {1}".format(user, app.id))
 
     def remove(self, app):
         self.executor.call("yay --noconfirm -R {0}".format(app.id))
 
     def update(self, apps, autoconfirm):
-        user = self.executor.call("who am i | awk '{print $1}'")
+        user = self.executor.getuser()
         for app in apps:
             self.executor.call("sudo -u {0} yay -S {1} --noconfirm".format(user, app.id))
         return None
 
     def _get_installed_ids(self):
-        table = self.executor.call("yay -Q | grep \"^local/\"", self.installed_regex, None, False, [0, 1])
+        table = self.executor.call("yay -Qm", self.installed_regex, None, False, [0, 1])
         return dict([(row[0], row[1]) for row in table])

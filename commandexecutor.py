@@ -26,3 +26,6 @@ class CommandExecutor:
             elif not ignorenomatch:
                 raise Exception("Line '{0}' did not match regex".format(line))
         return response
+
+    def getuser(self):
+        return self.call("who am i | awk '{print $1}'")
