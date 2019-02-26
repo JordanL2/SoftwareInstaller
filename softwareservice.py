@@ -42,11 +42,13 @@ class SoftwareService:
                 return source
         return None
 
-    def search(self, name, statusfilter=None):
+    def search(self, name, statusfilter=None, sources=None):
         if statusfilter is None:
             statusfilter = App.statuses
         results = {}
-        for source in self.sources:
+        if sources is None:
+            sources = self.sources
+        for source in sources:
             source.refresh()
             sourceresults = source.search(name)
             sourceresults = [a for a in sourceresults if a.status() in statusfilter]

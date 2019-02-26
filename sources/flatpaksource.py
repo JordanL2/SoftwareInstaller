@@ -30,8 +30,10 @@ class FlatpakSource(AbstractSource):
             appid = self._make_id(row[0], row[1], row[2])
             app = self.getapp(appid)
             if app is None:
-                raise Exception("Could not find app {0} in results".format(appid))
-            results.append(app)
+                if len(appid.split('.')) >= 3: # Workaround due to some flatpak apps having invalid IDs
+                    raise Exception("Could not find app {0} in results".format(appid))
+            else:
+                results.append(app)
         return results
 
     def local(self, name):
@@ -42,8 +44,10 @@ class FlatpakSource(AbstractSource):
             if name is None or localapp.match(name):
                 app = self.getapp(appid)
                 if app is None:
-                    raise Exception("Could not find app {0} in results".format(appid))
-                results.append(app)
+                    if len(appid.split('.')) >= 3: # Workaround due to some flatpak apps having invalid IDs
+                        raise Exception("Could not find app {0} in results".format(appid))
+                else:
+                    results.append(app)
         return results
 
     def getapp(self, appid):

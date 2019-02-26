@@ -56,7 +56,7 @@ class SoftwareInstallerCLI:
 		print("search <NAME> [--csv] [--status=N,I,U]")
 		print("local [<NAME>] [--csv] [--status=N,I,U]")
 		print("show <REF>")
-		print("install <REF>")
+		print("install <REF> [--user]")
 		print("remove <REF>")
 
 	def search(self, args, flags):
@@ -81,7 +81,8 @@ class SoftwareInstallerCLI:
 		print('  Version:', app.version)
 		if app.installed is not None:
 			print('Installed:', app.installed)
-		print('      For:', ('Local user' if app.user else 'System'))
+		if app.isinstalled():
+			print('      For:', ('Local user' if app.user else 'System'))
 		status = {'N': 'Not installed', 'I': 'Installed, up to date', 'U': 'Installed, update available'}[app.status()]
 		print('   Status:', status)
 
@@ -146,7 +147,7 @@ class SoftwareInstallerCLI:
 					result.name,
 					(result.version if result.version is not None else '[Not Found]'),
 					(result.installed if result.installed is not None else ''),
-					('USER' if result.user else 'SYSTEM'),
+					(('USER' if result.user else 'SYSTEM') if result.isinstalled() else ''),
 					result.desc
 				]
 				if not csv:
