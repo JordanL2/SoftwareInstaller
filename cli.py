@@ -87,7 +87,7 @@ class SoftwareInstallerCLI:
 
 	def install(self, args, flags):
 		superid = args.pop(0)
-		self.service.install(superid)
+		self.service.install(superid, ('--user' in flags))
 
 	def remove(self, args, flags):
 		superid = args.pop(0)

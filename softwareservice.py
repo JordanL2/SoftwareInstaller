@@ -79,10 +79,11 @@ class SoftwareService:
             raise Exception("No such appid")
         return app
 
-    def install(self, superid):
+    def install(self, superid, user=False):
         app = self.getapp(superid)
         if app.isinstalled():
             raise Exception("App is already installed")
+        app.user = user
         app.install()
         app = self.getapp(superid)
         if not app.isinstalled():

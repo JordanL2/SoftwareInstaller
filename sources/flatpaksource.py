@@ -48,13 +48,13 @@ class FlatpakSource(AbstractSource):
 
     def getapp(self, appid):
         remote, id, branch = self._split_id(appid)
-        app = FlatpakApp(self, appid, '', '', None, None, None, None, False)
+        app = FlatpakApp(self, appid, '', '', None, None, False, None, None)
 
         output = self.executor.call("sudo -u {0} flatpak info {1}".format(self.user, id), None, None, True, [0, 1])
         for line in output.splitlines():
-            app.user = True
             match = self.name_description_regex.match(line)
             if match:
+                app.user = True
                 row = match.groups()
                 if app.name == '':
                     app.name = row[0]
@@ -72,6 +72,7 @@ class FlatpakSource(AbstractSource):
         for line in output.splitlines():
             match = self.name_description_regex.match(line)
             if match:
+                app.user = False
                 row = match.groups()
                 if app.name == '':
                     app.name = row[0]
@@ -108,16 +109,25 @@ class FlatpakSource(AbstractSource):
 
     def install(self, app):
         remote, id, branch = self._split_id(app.id)
-        self.executor.call("flatpak install -y {0} {1}".format(remote, id))
+        if app.user:
+            self.executor.call("sudo -u {0} flatpak --user install -y {1} {2}".format(self.user, remote, id))
+        else:
+            self.executor.call("flatpak install -y {0} {1}".format(remote, id))
 
     def remove(self, app):
         remote, id, branch = self._split_id(app.id)
-        self.executor.call("flatpak remove -y {0}".format(id))
+        if app.user:
+            self.executor.call("sudo -u {0} flatpak --user remove -y {1}".format(self.user, id))
+        else:
+            self.executor.call("flatpak remove -y {0}".format(id))
 
     def update(self, apps, autoconfirm):
         for app in apps:
             remote, id, branch = self._split_id(app.id)
-            self.executor.call("flatpak update --assumeyes {0}".format(id))
+            if app.user:
+                self.executor.call("sudo -u {0} flatpak --user update --assumeyes {1}".format(self.user, id))
+            else:
+                self.executor.call("flatpak update --assumeyes {0}".format(id))
         return None
 
     def _make_id(self, remote, id, branch):
@@ -143,7 +153,7 @@ class FlatpakSource(AbstractSource):
                 matchgroups = match.groups()
                 name = matchgroups[0]
                 desc = matchgroups[1]
-            results[appid] = FlatpakApp(self, appid, name, desc, None, None, None, None, (i >= systemapps))
+            results[appid] = FlatpakApp(self, appid, name, desc, None, None, (i >= systemapps), None, None)
         return results
 
 
