@@ -29,7 +29,7 @@ class PacmanSource(AbstractSource):
         table = self.executor.call("pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(name), self.search_regex, None, False)
         results = []
         for row in table:
-            results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0])))
+            results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0]), False))
         return results
 
     def local(self, name):
@@ -69,7 +69,7 @@ class PacmanSource(AbstractSource):
                     desc = row[1]
             if desc is None:
                 return None
-        return App(self, appid, appid, desc, version, installedids.get(appid))
+        return App(self, appid, appid, desc, version, installedids.get(appid), False)
 
     def install(self, app):
         self.executor.call("pacman --noconfirm -S {0}".format(app.id))

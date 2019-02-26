@@ -5,7 +5,7 @@ class App:
 
 	statuses = ('N', 'I', 'U')
 
-	def __init__(self, source, id, name, desc, version, installed):
+	def __init__(self, source, id, name, desc, version, installed, user):
 		# Reference to the source this came from
 		self.source = source
 		# Unique identifier within the source (does NOT contain source ID)
@@ -18,9 +18,11 @@ class App:
 		self.version = version
 		# Version installed locally, '' if not installed
 		self.installed = installed
+		# Installed just for local user, False means it's installed to the system
+		self.user = user
 
 	def copy(self):
-		return App(self.source, self.id, self.name, self.desc, self.version, self.installed)
+		return App(self.source, self.id, self.name, self.desc, self.version, self.installed, self.user)
 
 	def install(self):
 		self.source.install(self)

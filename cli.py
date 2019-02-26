@@ -81,6 +81,7 @@ class SoftwareInstallerCLI:
 		print('  Version:', app.version)
 		if app.installed is not None:
 			print('Installed:', app.installed)
+		print('      For:', ('Local user' if app.user else 'System'))
 		status = {'N': 'Not installed', 'I': 'Installed, up to date', 'U': 'Installed, update available'}[app.status()]
 		print('   Status:', status)
 
@@ -124,7 +125,7 @@ class SoftwareInstallerCLI:
 
 	def _outputresults(self, results, flags):
 		table = []
-		header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'DESCRIPTION']
+		header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR', 'DESCRIPTION']
 		columns = len(header)
 		maxwidth = [len(header[i]) for i in range(0, columns)]
 		csv = '--csv' in flags
@@ -145,6 +146,7 @@ class SoftwareInstallerCLI:
 					result.name,
 					(result.version if result.version is not None else '[Not Found]'),
 					(result.installed if result.installed is not None else ''),
+					('USER' if result.user else 'SYSTEM'),
 					result.desc
 				]
 				if not csv:

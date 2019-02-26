@@ -15,6 +15,7 @@ class FlatpakSource(AbstractSource):
     def __init__(self):
         super().__init__('flatpak', 'Flatpak')
         self.executor = CommandExecutor()
+        self.user = self.executor.getuser()
 
     def testinstalled(self):
         return self.executor.call('which flatpak 2>/dev/null', None, None, None, [0, 1]) != ''
@@ -47,7 +48,25 @@ class FlatpakSource(AbstractSource):
 
     def getapp(self, appid):
         remote, id, branch = self._split_id(appid)
-        app = FlatpakApp(self, appid, '', '', None, None, None, None)
+        app = FlatpakApp(self, appid, '', '', None, None, None, None, False)
+
+        output = self.executor.call("sudo -u {0} flatpak info {1}".format(self.user, id), None, None, True, [0, 1])
+        for line in output.splitlines():
+            app.user = True
+            match = self.name_description_regex.match(line)
+            if match:
+                row = match.groups()
+                if app.name == '':
+                    app.name = row[0]
+                if app.desc == '':
+                    app.desc = row[1]
+            match = self.description_regex.match(line)
+            if match:
+                row = match.groups()
+                if row[0] == 'Version':
+                    app.installed = row[1]
+                if row[0] == 'Commit':
+                    app.local_checksum = row[1]
 
         output = self.executor.call("flatpak info {0}".format(id), None, None, True, [0, 1])
         for line in output.splitlines():
@@ -105,18 +124,17 @@ class FlatpakSource(AbstractSource):
         return "{0}:{1}:{2}".format(remote, id, branch)
 
     def _split_id(self, appid):
-        if ':' not in appid:
+        elements = appid.split(':')
+        if len(elements) != 3:
             raise Exception("{0} is not a valid Flatpak app ID".format(appid))
-        i = appid.index(':')
-        if ':' not in appid[i + 1:]:
-            raise Exception("{0} is not a valid Flatpak app ID".format(appid))
-        ii = appid.index(':', i + 1)
-        return (appid[0:i], appid[i + 1:ii], appid[ii + 1:])
+        return elements
 
     def _get_installed_ids(self):
         table = self.executor.call("flatpak list --columns=origin,application,branch,description", self.ids_regex, None, True)
+        systemapps = len(table)
+        table += self.executor.call("sudo -u {0} flatpak list --columns=origin,application,branch,description".format(self.user), self.ids_regex, None, True)
         results = {}
-        for row in table:
+        for i, row in enumerate(table):
             appid = self._make_id(row[0], row[1], row[2])
             name = row[3]
             desc = ''
@@ -125,14 +143,14 @@ class FlatpakSource(AbstractSource):
                 matchgroups = match.groups()
                 name = matchgroups[0]
                 desc = matchgroups[1]
-            results[appid] = FlatpakApp(self, appid, name, desc, None, None, None, None)
+            results[appid] = FlatpakApp(self, appid, name, desc, None, None, None, None, (i >= systemapps))
         return results
 
 
 class FlatpakApp(App):
 
-    def __init__(self, source, id, name, desc, version, installed, remote_checksum, local_checksum):
-        super().__init__(source, id, name, desc, version, installed)
+    def __init__(self, source, id, name, desc, version, installed, user, remote_checksum, local_checksum):
+        super().__init__(source, id, name, desc, version, installed, user)
         self.remote_checksum = remote_checksum
         self.local_checksum = local_checksum
 

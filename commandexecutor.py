@@ -28,4 +28,4 @@ class CommandExecutor:
         return response
 
     def getuser(self):
-        return self.call("who am i | awk '{print $1}'")
+        return self.call("logname")
