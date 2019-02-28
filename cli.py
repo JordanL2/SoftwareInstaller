@@ -33,8 +33,8 @@ class SoftwareInstallerCLI:
 			self.search(args, flags)
 		elif cmd == 'local':
 			self.local(args, flags)
-		elif cmd == 'show':
-			self.show(args, flags)
+		elif cmd == 'info':
+			self.info(args, flags)
 		elif cmd == 'install':
 			self.install(args, flags)
 		elif cmd == 'remove':
@@ -53,27 +53,35 @@ class SoftwareInstallerCLI:
 			self._outputresults(self.service.local(None, None), flags)
 
 	def help(self):
-		print("search <NAME> [--csv] [--status=N,I,U]")
-		print("local [<NAME>] [--csv] [--status=N,I,U]")
-		print("show <REF>")
+		print("search <NAME> [--csv] [--status=N,I,U] [--source=<SOURCE1>[,<SOURCEN>]]")
+		print("local [<NAME>] [--csv] [--status=N,I,U] [--source=<SOURCE1>[,<SOURCEN>]]")
+		print("info <REF>")
 		print("install <REF> [--user]")
 		print("remove <REF>")
 
 	def search(self, args, flags):
 		filters = self._get_status_flag(flags)
-		name = args.pop(0)
-		results = self.service.search(name, filters)
+		name = None
+		if len(args) > 0:
+			name = ' '.join(args)
+		sources = None
+		if '--sources' in flags:
+			sources = [self.service.getsource(s) for s in flags['--sources'].split(',')]
+		results = self.service.search(name, filters, sources)
 		self._outputresults(results, flags)
 
 	def local(self, args, flags):
 		filters = self._get_status_flag(flags)
 		name = None
 		if len(args) > 0:
-			name = args.pop(0)
-		results = self.service.local(name, filters)
+			name = ' '.join(args)
+		sources = None
+		if '--sources' in flags:
+			sources = [self.service.getsource(s) for s in flags['--sources'].split(',')]
+		results = self.service.local(name, filters, sources)
 		self._outputresults(results, flags)
 
-	def show(self, args, flags):
+	def info(self, args, flags):
 		superid = args.pop(0)
 		app = self.service.getapp(superid)
 		print('     Name:', app.name)
