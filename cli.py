@@ -23,11 +23,6 @@ class SoftwareInstallerCLI:
 				flags[key] = value
 			else:
 				flags[flag] = True
-		if '--test' in flags:
-			self.service.sources = [TestSource('test1', 'TestSource1'), TestSource('test2', 'TestSource2')]
-			print("BEGIN STATE")
-			self._outputresults(self.service.local(None, None), flags)
-			print("-----")
 
 		if cmd == 'search':
 			self.search(args, flags)
@@ -47,10 +42,6 @@ class SoftwareInstallerCLI:
 			print("Unrecognised command '{0}'".format(cmd))
 			print()
 			self.help()
-		if '--test' in flags:
-			print("-----")
-			print("END STATE")
-			self._outputresults(self.service.local(None, None), flags)
 
 	def help(self):
 		print("search <NAME> [--csv] [--status=N,I,U] [--source=<SOURCE1>[,<SOURCEN>]]")
@@ -65,8 +56,8 @@ class SoftwareInstallerCLI:
 		if len(args) > 0:
 			name = ' '.join(args)
 		sources = None
-		if '--sources' in flags:
-			sources = [self.service.getsource(s) for s in flags['--sources'].split(',')]
+		if '--source' in flags:
+			sources = [self.service.getsource(s) for s in flags['--source'].split(',')]
 		results = self.service.search(name, filters, sources)
 		self._outputresults(results, flags)
 
@@ -76,8 +67,8 @@ class SoftwareInstallerCLI:
 		if len(args) > 0:
 			name = ' '.join(args)
 		sources = None
-		if '--sources' in flags:
-			sources = [self.service.getsource(s) for s in flags['--sources'].split(',')]
+		if '--source' in flags:
+			sources = [self.service.getsource(s) for s in flags['--source'].split(',')]
 		results = self.service.local(name, filters, sources)
 		self._outputresults(results, flags)
 
