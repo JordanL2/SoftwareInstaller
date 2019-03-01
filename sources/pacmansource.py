@@ -30,7 +30,7 @@ class PacmanSource(AbstractSource):
         for term in terms[1:]:
             search_string += " | grep -i \"{0}\"".format(term)
 
-        table = self.executor.call(search_string, self.search_regex, None, False)
+        table = self.executor.call(search_string, self.search_regex, None, False, [0, 1])
         results = []
         for row in table:
             results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0]), False))

@@ -28,7 +28,7 @@ class FlatpakSource(AbstractSource):
         for term in terms[1:]:
             search_string += " | grep -i \"{0}\"".format(term)
 
-        table = self.executor.call(search_string, self.ids_regex, None, True)
+        table = self.executor.call(search_string, self.ids_regex, None, True, [0, 1])
         results = []
         for row in table:
             appid = self._make_id(row[0], row[1], row[2])
