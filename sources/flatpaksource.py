@@ -24,7 +24,11 @@ class FlatpakSource(AbstractSource):
         pass
 
     def search(self, name):
-        table = self.executor.call("flatpak search \"{0}\" --columns=remotes,application,branch,description".format(name), self.ids_regex, None, True)
+        name_parts = name.split(' ')
+        search_string = "flatpak search \"{0}\" --columns=remotes,application,branch,description".format(name_parts[0])
+        for name_part in name_parts[1:]:
+            search_string += " | grep -i \"{0}\"".format(name_part)
+        table = self.executor.call(search_string, self.ids_regex, None, True)
         results = []
         for row in table:
             appid = self._make_id(row[0], row[1], row[2])

@@ -26,7 +26,12 @@ class PacmanSource(AbstractSource):
     def search(self, name):
         installedids = self._get_installed_ids()
 
-        table = self.executor.call("pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(name), self.search_regex, None, False)
+        name_parts = name.split(' ')
+        search_string = "pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(name_parts[0])
+        for name_part in name_parts[1:]:
+            search_string += " | grep -i \"{0}\"".format(name_part)
+
+        table = self.executor.call(search_string, self.search_regex, None, False)
         results = []
         for row in table:
             results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0]), False))

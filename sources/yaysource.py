@@ -25,7 +25,12 @@ class YaySource(AbstractSource):
     def search(self, name):
         installedids = self._get_installed_ids()
 
-        table = self.executor.call("yay -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\"".format(name), self.search_regex, None, False, [0, 1])
+        name_parts = name.split(' ')
+        search_string = "yay -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\"".format(name_parts[0])
+        for name_part in name_parts[1:]:
+            search_string += " | grep -i \"{0}\"".format(name_part)
+
+        table = self.executor.call(search_string, self.search_regex, None, False, [0, 1])
         results = []
         for row in table:
             results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0]), False))

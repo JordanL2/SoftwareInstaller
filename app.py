@@ -34,9 +34,10 @@ class App:
 		return self.source.id + ':' + self.id
 
 	def match(self, name):
-		return (name.lower() in self.name.lower()
-			 or name.lower() in self.id.lower()
-			 or name.lower() in self.desc.lower())
+		for name_part in name.split(' '):
+			if not (name_part.lower() in self.name.lower() or name_part.lower() in self.id.lower() or name_part.lower() in self.desc.lower()):
+				return False
+		return True
 
 	def status(self):
 		indicator = 'N'
