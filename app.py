@@ -33,9 +33,9 @@ class App:
 	def superid(self):
 		return self.source.id + ':' + self.id
 
-	def match(self, name):
-		for name_part in name.split(' '):
-			if not (name_part.lower() in self.name.lower() or name_part.lower() in self.id.lower() or name_part.lower() in self.desc.lower()):
+	def match(self, terms):
+		for term in terms:
+			if not (term.lower() in self.name.lower() or term.lower() in self.id.lower() or term.lower() in self.desc.lower()):
 				return False
 		return True
 

@@ -23,11 +23,11 @@ class FlatpakSource(AbstractSource):
     def refresh(self):
         pass
 
-    def search(self, name):
-        name_parts = name.split(' ')
-        search_string = "flatpak search \"{0}\" --columns=remotes,application,branch,description".format(name_parts[0])
-        for name_part in name_parts[1:]:
-            search_string += " | grep -i \"{0}\"".format(name_part)
+    def search(self, terms):
+        search_string = "flatpak search \"{0}\" --columns=remotes,application,branch,description".format(terms[0])
+        for term in terms[1:]:
+            search_string += " | grep -i \"{0}\"".format(term)
+
         table = self.executor.call(search_string, self.ids_regex, None, True)
         results = []
         for row in table:
@@ -40,12 +40,12 @@ class FlatpakSource(AbstractSource):
                 results.append(app)
         return results
 
-    def local(self, name):
+    def local(self, terms):
         installedids = self._get_installed_ids()
         results = []
         for appid in installedids:
             localapp = installedids[appid]
-            if name is None or localapp.match(name):
+            if terms is None or localapp.match(terms):
                 app = self.getapp(appid)
                 if app is None:
                     if len(appid.split('.')) >= 3: # Workaround due to some flatpak apps having invalid IDs

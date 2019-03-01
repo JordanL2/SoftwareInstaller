@@ -23,13 +23,12 @@ class PacmanSource(AbstractSource):
     def refresh(self):
         self.executor.call("pacman -Sy")
 
-    def search(self, name):
+    def search(self, terms):
         installedids = self._get_installed_ids()
 
-        name_parts = name.split(' ')
-        search_string = "pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(name_parts[0])
-        for name_part in name_parts[1:]:
-            search_string += " | grep -i \"{0}\"".format(name_part)
+        search_string = "pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(terms[0])
+        for term in terms[1:]:
+            search_string += " | grep -i \"{0}\"".format(term)
 
         table = self.executor.call(search_string, self.search_regex, None, False)
         results = []
@@ -37,10 +36,8 @@ class PacmanSource(AbstractSource):
             results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0]), False))
         return results
 
-    def local(self, name):
-        if name is None:
-            name = ''
-        remoteresults = dict([(a.id, a) for a in self.search('') if a.installed != ''])
+    def local(self, terms):
+        remoteresults = dict([(a.id, a) for a in self.search(['']) if a.installed != ''])
         results = []
         installedids = self._get_installed_ids()
         for id in installedids:
@@ -49,7 +46,7 @@ class PacmanSource(AbstractSource):
                 app = remoteresults[id]
             elif not self.native_only:
                 app = self.getapp(id, installedids, True)
-            if app is not None and (name is None or app.match(name)):
+            if app is not None and (terms is None or app.match(terms)):
                 results.append(app)
         return results
 

@@ -42,7 +42,7 @@ class SoftwareService:
                 return source
         return None
 
-    def search(self, name, statusfilter=None, sources=None):
+    def search(self, terms, statusfilter=None, sources=None):
         if statusfilter is None:
             statusfilter = App.statuses
         results = {}
@@ -50,13 +50,13 @@ class SoftwareService:
             sources = self.sources
         for source in sources:
             source.refresh()
-            sourceresults = source.search(name)
+            sourceresults = source.search(terms)
             sourceresults = [a for a in sourceresults if a.status() in statusfilter]
             if len(sourceresults) > 0:
                 results[source.id] = sourceresults
         return results
 
-    def local(self, name=None, statusfilter=None, sources=None):
+    def local(self, terms=None, statusfilter=None, sources=None):
         if statusfilter is None:
             statusfilter = App.statuses
         if sources is None:
@@ -64,7 +64,7 @@ class SoftwareService:
         results = {}
         for source in sources:
             source.refresh()
-            sourceresults = source.local(name)
+            sourceresults = source.local(terms)
             sourceresults = [a for a in sourceresults if a.status() in statusfilter]
             if len(sourceresults) > 0:
                 results[source.id] = sourceresults

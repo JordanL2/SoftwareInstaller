@@ -22,13 +22,12 @@ class YaySource(AbstractSource):
     def refresh(self):
         self.executor.call("yay -Sy")
 
-    def search(self, name):
+    def search(self, terms):
         installedids = self._get_installed_ids()
 
-        name_parts = name.split(' ')
-        search_string = "yay -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\"".format(name_parts[0])
-        for name_part in name_parts[1:]:
-            search_string += " | grep -i \"{0}\"".format(name_part)
+        search_string = "yay -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\"".format(terms[0])
+        for term in terms[1:]:
+            search_string += " | grep -i \"{0}\"".format(term)
 
         table = self.executor.call(search_string, self.search_regex, None, False, [0, 1])
         results = []
@@ -36,12 +35,12 @@ class YaySource(AbstractSource):
             results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0]), False))
         return results
 
-    def local(self, name):
+    def local(self, terms):
         installedids = self._get_installed_ids()
         results = []
         for appid in installedids.keys():
             app = self.getapp(appid, installedids)
-            if name is None or app.match(name):
+            if terms is None or app.match(terms):
                 results.append(app)
         return results
 

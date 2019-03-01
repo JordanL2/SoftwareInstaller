@@ -52,24 +52,18 @@ class SoftwareInstallerCLI:
 
 	def search(self, args, flags):
 		filters = self._get_status_flag(flags)
-		name = None
-		if len(args) > 0:
-			name = ' '.join(args)
 		sources = None
 		if '--source' in flags:
 			sources = [self.service.getsource(s) for s in flags['--source'].split(',')]
-		results = self.service.search(name, filters, sources)
+		results = self.service.search(args, filters, sources)
 		self._outputresults(results, flags)
 
 	def local(self, args, flags):
 		filters = self._get_status_flag(flags)
-		name = None
-		if len(args) > 0:
-			name = ' '.join(args)
 		sources = None
 		if '--source' in flags:
 			sources = [self.service.getsource(s) for s in flags['--source'].split(',')]
-		results = self.service.local(name, filters, sources)
+		results = self.service.local(args, filters, sources)
 		self._outputresults(results, flags)
 
 	def info(self, args, flags):
