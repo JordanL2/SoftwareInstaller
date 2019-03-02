@@ -9,20 +9,24 @@ import sys
 
 class SoftwareInstallerCLI:
 
+
 	def __init__(self):
 		self.service = SoftwareService()
+		self.valid_flags = set(['--status', '--source', '--csv', '--user'])
 
 	def do_command(self, cmd, args):
 		flags_unparsed = [a for a in args if a.startswith('-')]
 		args = [a for a in args if not a.startswith('-')]
 		flags = {}
 		for flag in flags_unparsed:
+			key = flag
+			value = True
 			if '=' in flag:
 				key = flag[0:flag.index('=')]
 				value = flag[flag.index('=') + 1:]
-				flags[key] = value
-			else:
-				flags[flag] = True
+			if key not in self.valid_flags:
+				raise Exception("Invalid flag: {0}".format(key))
+			flags[key] = value
 
 		if cmd == 'search':
 			self.search(args, flags)
@@ -44,8 +48,8 @@ class SoftwareInstallerCLI:
 			self.help()
 
 	def help(self):
-		print("search <NAME> [--csv] [--status=N,I,U] [--source=<SOURCE1>[,<SOURCEN>]]")
-		print("local [<NAME>] [--csv] [--status=N,I,U] [--source=<SOURCE1>[,<SOURCEN>]]")
+		print("search <TERM>... [--csv] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]]")
+		print("local [<TERM>...] [--csv] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]]")
 		print("info <REF>")
 		print("install <REF> [--user]")
 		print("remove <REF>")
