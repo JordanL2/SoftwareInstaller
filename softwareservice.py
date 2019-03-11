@@ -3,7 +3,6 @@
 from softwareinstaller.app import App
 from softwareinstaller.sources.flatpaksource import FlatpakSource
 from softwareinstaller.sources.pacmansource import PacmanSource
-from softwareinstaller.sources.yaourtsource import YaourtSource
 from softwareinstaller.sources.yaysource import YaySource
 
 
@@ -11,11 +10,6 @@ class SoftwareService:
 
     def __init__(self):
         allsources = [
-            
-            # Flatpak sources
-        	[ 
-                FlatpakSource(),
-            ],
 
             # Standard repo sources
             [
@@ -25,9 +19,13 @@ class SoftwareService:
             # Arch AUR sources
             [
                 YaySource(),
-                YaourtSource(),
             ],
 
+            # Flatpak sources
+            [ 
+                FlatpakSource(),
+            ],
+            
         ]
         self.sources = []
         for sourcegroup in allsources:
