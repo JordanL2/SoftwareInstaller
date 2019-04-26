@@ -132,10 +132,12 @@ class FlatpakSource(AbstractSource):
     def update(self, apps, autoconfirm):
         for app in apps:
             remote, id, branch = self._split_id(app.id)
-            if app.user:
-                self.executor.call("sudo -u {0} flatpak --user update --assumeyes {1}".format(self.user, id))
-            else:
-                self.executor.call("flatpak update --assumeyes {0}".format(id))
+            self.executor.call("sudo -u {0} flatpak --user update --assumeyes {1}".format(self.user, id))
+            # It seems update should be run as the normal user, even when it's a system update
+            #if app.user:
+            #    self.executor.call("sudo -u {0} flatpak --user update --assumeyes {1}".format(self.user, id))
+            #else:
+            #    self.executor.call("flatpak update --assumeyes {0}".format(id))
         return None
 
     def _make_id(self, remote, id, branch):
