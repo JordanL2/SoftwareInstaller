@@ -8,7 +8,7 @@ import re
 
 class YaySource(AbstractSource):
 
-    search_regex = re.compile(r'^[^\/]+\/(\S+)\s+(\S+)\s+(\S+)\s+[^\,]+,(.+)$')
+    search_regex = re.compile(r'^[^\/]+\/(\S+)\s+(\S+)\s+(\S+)\s+[^\,]+,(.*)$')
     description_regex = re.compile(r'^([^\:]+?)\s+\:\s+(.+)$')
     installed_regex = re.compile(r'^(\S+)\s+(\S+)$')
 
