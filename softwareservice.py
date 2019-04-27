@@ -1,9 +1,12 @@
 #!/usr/bin/python3
 
 from softwareinstaller.app import App
+
 from softwareinstaller.sources.flatpaksource import FlatpakSource
 from softwareinstaller.sources.pacmansource import PacmanSource
 from softwareinstaller.sources.yaysource import YaySource
+
+from softwareinstaller.notifiers.pkconnotifier import PkconNotifier
 
 
 class SoftwareService:
@@ -33,6 +36,14 @@ class SoftwareService:
                 if source.testinstalled():
                     self.sources.append(source)
                     break
+
+        allnotifiers = [
+            PkconNotifier(),
+        ]
+        self.notifiers = []
+        for notifier in allnotifiers:
+            if notifier.testinstalled():
+                self.notifiers.append(notifier)
 
     def getsource(self, sourceid):
         for source in self.sources:
@@ -114,6 +125,10 @@ class SoftwareService:
                         raise Exception("App {0} wasn't successfully updated".format(app.id))
 
             del apps[sourceid]
+
+        for notifier in self.notifiers:
+            notifier.notify()
+
         return None
 
     def _split_superid(self, superid):
