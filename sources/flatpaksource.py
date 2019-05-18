@@ -58,7 +58,7 @@ class FlatpakSource(AbstractSource):
         remote, id, branch = self._split_id(appid)
         app = FlatpakApp(self, appid, '', '', None, None, False, None, None)
 
-        output = self.executor.call("sudo -u {0} flatpak info {1}".format(self.user, id), None, None, True, [0, 1])
+        output = self.executor.call("sudo -u {0} flatpak info {1}//{2}".format(self.user, id, branch), None, None, True, [0, 1])
         for line in output.splitlines():
             match = self.name_description_regex.match(line)
             if match:
@@ -76,7 +76,7 @@ class FlatpakSource(AbstractSource):
                 if row[0] == 'Commit':
                     app.local_checksum = row[1]
 
-        output = self.executor.call("flatpak info {0}".format(id), None, None, True, [0, 1])
+        output = self.executor.call("flatpak info {0}//{1}".format(id, branch), None, None, True, [0, 1])
         for line in output.splitlines():
             match = self.name_description_regex.match(line)
             if match:
