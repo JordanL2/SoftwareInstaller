@@ -53,6 +53,7 @@ class SoftwareInstallerCLI:
 		print("info <REF>")
 		print("install <REF> [--user]")
 		print("remove <REF>")
+		print("update [<REF>...] [-y]")
 
 	def search(self, args, flags):
 		filters = self._get_status_flag(flags)
