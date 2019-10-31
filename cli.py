@@ -12,7 +12,7 @@ class SoftwareInstallerCLI:
 
 	def __init__(self):
 		self.service = SoftwareService()
-		self.valid_flags = set(['--status', '--source', '--csv', '--user'])
+		self.valid_flags = set(['--status', '--source', '--csv', '--user', '-y'])
 
 	def do_command(self, cmd, args):
 		flags_unparsed = [a for a in args if a.startswith('-')]
@@ -114,7 +114,7 @@ class SoftwareInstallerCLI:
 			apps = self.service.local(None, ['U'])
 		while apps is not None and len(apps) > 0:
 			if not autoconfirm and not specific:
-				self._outputresults(apps, flags)
+				self._outputresults(apps, flags, ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR'])
 				text = input("CONFIRM? [Y/n]: ")
 				if text.lower() != 'y':
 					sys.exit()
@@ -122,9 +122,10 @@ class SoftwareInstallerCLI:
 			if apps is not None and len(apps) > 0:
 				print("WARNING: Some sources cannot only update specific apps, so the list of apps that will be updated has changed.")
 
-	def _outputresults(self, results, flags):
+	def _outputresults(self, results, flags, header=None):
 		table = []
-		header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR', 'DESCRIPTION']
+		if header is None:
+			header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR', 'DESCRIPTION']
 		columns = len(header)
 		maxwidth = [len(header[i]) for i in range(0, columns)]
 		csv = '--csv' in flags
