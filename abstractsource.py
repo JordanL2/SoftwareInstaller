@@ -10,6 +10,8 @@ class AbstractSource:
         self.id = id
         # Nicely formatted title for the source
         self.name = name
+        # After a source's apps are updated, it's checked that the correct version is now installed
+        self.check_updated = True
 
     # Checks if the source is installed and can be used.
     # Returns:

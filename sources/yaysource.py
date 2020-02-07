@@ -16,6 +16,9 @@ class YaySource(AbstractSource):
         super().__init__('yay', 'Yay')
         self.executor = CommandExecutor()
 
+        # Some AUR packages report a different latest version to the one that gets installed
+        self.check_updated = False
+
     def testinstalled(self):
         return self.executor.call('which yay 2>/dev/null', None, None, None, [0, 1]) != ''
 
