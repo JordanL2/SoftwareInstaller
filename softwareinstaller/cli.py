@@ -2,7 +2,6 @@
 
 from softwareinstaller.softwareservice import SoftwareService
 from softwareinstaller.app import App
-from softwareinstaller.tests.testsource import TestSource
 
 import sys
 

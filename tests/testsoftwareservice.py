@@ -2,7 +2,7 @@
 
 from softwareinstaller.app import App
 from softwareinstaller.softwareservice import SoftwareService
-from softwareinstaller.tests.testsource import TestSource
+from testsource import TestSource
 
 import unittest
 

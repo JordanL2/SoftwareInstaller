@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from softwareinstaller.tests.testsoftwareservice import TestSoftwareService
+from testsoftwareservice import TestSoftwareService
 
 import unittest
 
