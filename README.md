@@ -9,6 +9,12 @@ Sources currently supported:
 * Pacman
 * Yay (AUR)
 
+# Installation
+
+```
+sudo pip3 install .
+```
+
 # Usage
 
 ```

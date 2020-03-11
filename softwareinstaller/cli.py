@@ -174,11 +174,15 @@ class SoftwareInstallerCLI:
 		return None
 
 
-cli = SoftwareInstallerCLI()
-scriptpath = sys.argv.pop(0)
-if len(sys.argv) == 0:
-	cli.help()
-else:
-	cmd = sys.argv.pop(0)
-	args = sys.argv.copy()
-	cli.do_command(cmd, args)
+def main():
+	cli = SoftwareInstallerCLI()
+	scriptpath = sys.argv.pop(0)
+	if len(sys.argv) == 0:
+		cli.help()
+	else:
+		cmd = sys.argv.pop(0)
+		args = sys.argv.copy()
+		cli.do_command(cmd, args)
+
+if __name__ == '__main__':
+    main()
