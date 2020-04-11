@@ -2,6 +2,8 @@
 
 from softwareinstaller.app import App
 
+from softwareinstaller.commandexecutor import CommandExecutor
+
 from softwareinstaller.sources.flatpaksource import FlatpakSource
 from softwareinstaller.sources.pacmansource import PacmanSource
 from softwareinstaller.sources.yaysource import YaySource
@@ -12,7 +14,9 @@ from softwareinstaller.notifiers.pkconnotifier import PkconNotifier
 class SoftwareService:
 
     def __init__(self):
-        allsources = [
+        self.executor = CommandExecutor()
+
+        self.allsources = [
 
             # Standard repo sources
             [
@@ -31,18 +35,85 @@ class SoftwareService:
             
         ]
         self.sources = []
-        for sourcegroup in allsources:
+
+        self.allnotifiers = [
+            PkconNotifier(),
+        ]
+        self.notifiers = []
+
+        self.default_config()
+        self.load_config()
+
+        if self.config['sources.autodetect']:
+            self.autoload_sources()
+        else:
+            self.load_sources()
+
+    def default_config(self):
+        self.config_options = {
+            'sources.autodetect': [bool, True]
+        }
+
+        for sourcegroup in self.allsources:
+            for source in sourcegroup:
+                config_id = "sources.{}.enable".format(source.id)
+                self.config_options[config_id] = [bool, False]
+        for notifier in self.allnotifiers:
+            config_id = "notifiers.{}.enable".format(notifier.id)
+            self.config_options[config_id] = [bool, False]
+
+        self.config = dict([(k, v[1]) for k, v in self.config_options.items()])
+
+    def load_config(self):
+        config_dir = "/home/{}/.config".format(self.executor.getuser())
+        filename = "{}/softwareinstaller/config".format(config_dir)
+
+        lines = []
+        try:
+            fh = open(filename, 'r')
+            lines = fh.readlines()
+        except:
+            pass
+
+        for line in lines:
+            line = line.rstrip()
+            try:
+                split_index = line.index('=')
+                key = line[0: split_index]
+                value = line[split_index + 1:]
+                if key not in self.config_options:
+                    raise Exception("No such option: '{}'".format(key))
+                val_type = self.config_options[key][0]
+                if val_type == bool:
+                    if value == 'true':
+                        value = True
+                    elif value == 'false':
+                        value = False
+                    else:
+                        raise Exception("Invalid boolean: '{}'".format(value))
+                self.config[key] = value
+            except Exception as e:
+                print("{}\nInvalid line: {}".format(line, e))
+
+    def autoload_sources(self):
+        for sourcegroup in self.allsources:
             for source in sourcegroup:
                 if source.testinstalled():
                     self.sources.append(source)
                     break
-
-        allnotifiers = [
-            PkconNotifier(),
-        ]
-        self.notifiers = []
-        for notifier in allnotifiers:
+        for notifier in self.allnotifiers:
             if notifier.testinstalled():
+                self.notifiers.append(notifier)
+
+    def load_sources(self):
+        for sourcegroup in self.allsources:
+            for source in sourcegroup:
+                config_id = "sources.{}.enable".format(source.id)
+                if config_id in self.config and self.config[config_id]:
+                    self.sources.append(source)
+        for notifier in self.allnotifiers:
+            config_id = "notifiers.{}.enable".format(notifier.id)
+            if config_id in self.config and self.config[config_id]:
                 self.notifiers.append(notifier)
 
     def getsource(self, sourceid):
