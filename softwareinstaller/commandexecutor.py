@@ -27,6 +27,7 @@ class CommandExecutor:
         
         stdout_result = ''
         stderr_result = ''
+        result_code = None
 
         while True:
             lines = non_blocking_read(proc.stdout)
@@ -41,9 +42,9 @@ class CommandExecutor:
                 if stderr is not None:
                     print(line.rstrip("\n"), file=stderr)
 
-            if proc.poll() is not None:
+            if result_code is not None:
                 break
-        result_code = proc.poll()
+            result_code = proc.poll()
 
         stdout_result = stdout_result.rstrip("\n")
         stderr_result = stderr_result.rstrip("\n")
