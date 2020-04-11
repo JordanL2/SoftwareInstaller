@@ -1,6 +1,18 @@
 #!/usr/bin/python3
 
 import subprocess
+import os
+import fcntl
+
+
+def non_blocking_read(output):
+    fd = output.fileno()
+    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+    try:
+        return output.readline()
+    except:
+        return ""
 
 
 class CommandExecutor:
@@ -17,16 +29,16 @@ class CommandExecutor:
         stderr_result = ''
         #print(command)
         while proc.poll() is None:
-            line = proc.stdout.readline()
+            line = non_blocking_read(proc.stdout)
             #print(line.rstrip("\n"))
             stdout_result += line
             if stdout is not None:
-                print(line, file=stdout)
+                print(line.rstrip("\n"), file=stdout)
             
-            #line = proc.stderr.readline()
-            #stderr_result += line
-            #if stderr is not None:
-            #    print(line, file=stderr)
+            line = non_blocking_read(proc.stderr)
+            stderr_result += line
+            if stderr is not None:
+                print(line.rstrip("\n"), file=stderr)
         result_code = proc.poll()
         #print(result_code)
 
