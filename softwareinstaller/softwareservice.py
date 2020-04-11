@@ -51,7 +51,9 @@ class SoftwareService:
 
     def default_config(self):
         self.config_options = {
-            'sources.autodetect': [bool, True]
+            'sources.autodetect': [bool, True],
+            'update.tasks.pre': [list, []],
+            'update.tasks.post': [list, []]
         }
 
         for sourcegroup in self.allsources:
@@ -91,7 +93,9 @@ class SoftwareService:
                         value = False
                     else:
                         raise Exception("Invalid boolean: '{}'".format(value))
-                self.config[key] = value
+                    self.config[key] = value
+                elif val_type == list:
+                    self.config[key].append(value)
             except Exception as e:
                 print("{}\nInvalid line: {}".format(line, e))
 
@@ -181,6 +185,9 @@ class SoftwareService:
             raise Exception("App was not removed")
 
     def update(self, apps, autoconfirm):
+        for task in self.config['update.tasks.pre']:
+            self.executor.call(task)
+
         for sourceid in apps.copy().keys():
             source = self.getsource(sourceid)
             updatedlist = source.update(apps[sourceid], autoconfirm)
@@ -200,6 +207,9 @@ class SoftwareService:
 
         for notifier in self.notifiers:
             notifier.notify()
+
+        for task in self.config['update.tasks.post']:
+            self.executor.call(task)
 
         return None
 
