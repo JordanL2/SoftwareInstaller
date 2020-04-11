@@ -10,9 +10,9 @@ def non_blocking_read(output):
     fl = fcntl.fcntl(fd, fcntl.F_GETFL)
     fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
     try:
-        return output.readline()
+        return output.readlines()
     except:
-        return ""
+        return []
 
 
 class CommandExecutor:
@@ -27,20 +27,23 @@ class CommandExecutor:
         
         stdout_result = ''
         stderr_result = ''
-        #print(command)
-        while proc.poll() is None:
-            line = non_blocking_read(proc.stdout)
-            #print(line.rstrip("\n"))
-            stdout_result += line
-            if stdout is not None:
-                print(line.rstrip("\n"), file=stdout)
+
+        while True:
+            lines = non_blocking_read(proc.stdout)
+            for line in lines:
+                stdout_result += line
+                if stdout is not None:
+                    print(line.rstrip("\n"), file=stdout)
             
-            line = non_blocking_read(proc.stderr)
-            stderr_result += line
-            if stderr is not None:
-                print(line.rstrip("\n"), file=stderr)
+            lines = non_blocking_read(proc.stderr)
+            for line in lines:
+                stderr_result += line
+                if stderr is not None:
+                    print(line.rstrip("\n"), file=stderr)
+
+            if proc.poll() is not None:
+                break
         result_code = proc.poll()
-        #print(result_code)
 
         stdout_result = stdout_result.rstrip("\n")
         stderr_result = stderr_result.rstrip("\n")
