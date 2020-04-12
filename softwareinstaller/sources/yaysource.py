@@ -69,17 +69,23 @@ class YaySource(AbstractSource):
             if row[0] == 'Version':
                 apps[-1].version = row[1]
         # if version is None:
-        #     version = None
-        #     table = self.executor.call("yay -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
-        #     for row in table:
-        #         if row[0] == 'Description':
-        #             desc = row[1]
-        #     if desc is None:
-        #         return None
+
+        founds_ids = [a.id for a in apps]
+        for appid in appids:
+            if appid not in founds_ids:
+                app = App(self, appid, appid, None, None, installedids.get(appid), False)
+                version = None
+                table = self.executor.call("yay -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
+                for row in table:
+                    if row[0] == 'Description':
+                        desc = row[1]
+                if desc is None:
+                    return None
+                apps.append(app)
+
 
         if self.service.debug['performance']:
             print("yay getapp {}".format(time.perf_counter() - start_time))
-        #return App(self, appid, appid, desc, version, installedids.get(appid), False)
         return apps
 
     def install(self, app):
