@@ -191,9 +191,9 @@ class FlatpakSource(AbstractSource):
     def _get_remote_info(self):
         start_time = time.perf_counter()
         remote_apps = {}
-        remotes = self.executor.call("sudo -u {0} flatpak remotes | cut -f1".format(self.user)).splitlines()
+        remotes = self.executor.call("sudo -u {} flatpak remotes | cut -f1".format(self.user)).splitlines()
         for remote in remotes:
-            table = self.executor.call("flatpak remote-ls {} --columns=application,branch,commit,version".format(remote), self.remote_regex, None, True)
+            table = self.executor.call("sudo -u {} flatpak --user remote-ls {} --columns=application,branch,commit,version".format(self.user, remote), self.remote_regex, None, True)
             for row in table:
                 id = row[0]
                 branch = row[1]
