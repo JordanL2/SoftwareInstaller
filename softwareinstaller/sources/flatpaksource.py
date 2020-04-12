@@ -9,7 +9,7 @@ from xml.etree import ElementTree
 
 class FlatpakSource(AbstractSource):
 
-    ids_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
+    ids_regex = re.compile(r'^(\S*\s+)(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
     description_regex = re.compile(r'^\s*([^\:]+?)\:\s+(.+)$')
     name_description_regex = re.compile(r'^([^\-]+)\s+\-\s+(.+)$')
 
@@ -161,14 +161,14 @@ class FlatpakSource(AbstractSource):
         remote_apps = self._get_remote_version()
 
         start_time = time.perf_counter()
-        table = self.executor.call("flatpak list --columns=origin,application,branch,version,active,name", self.ids_regex, None, True)
+        table = self.executor.call("flatpak list --columns=version,origin,application,branch,active,name", self.ids_regex, None, True)
         systemapps = len(table)
-        table += self.executor.call("sudo -u {0} flatpak list --columns=origin,application,branch,version,active,name".format(self.user), self.ids_regex, None, True)
+        table += self.executor.call("sudo -u {0} flatpak list --columns=version,origin,application,branch,active,name".format(self.user), self.ids_regex, None, True)
         results = {}
         for i, row in enumerate(table):
-            appid = self._make_id(row[0], row[1], row[2])
+            appid = self._make_id(row[1], row[2], row[3])
             name = row[5]
-            results[appid] = FlatpakApp(self, appid, name, '', None, row[3], (i >= systemapps), None, row[4])
+            results[appid] = FlatpakApp(self, appid, name, '', None, row[0].strip(), (i >= systemapps), None, row[4])
             if appid in remote_apps:
                 results[appid].version = remote_apps[appid]['version']
         if self.service.debug['performance']:
@@ -179,7 +179,7 @@ class FlatpakSource(AbstractSource):
         start_time = time.perf_counter()
         remote_apps = {}
         for remote in ['flathub']:
-            filename = '/home/jordan/.local/share/flatpak/appstream/flathub/x86_64/ed7b171bddefaa2d221ef1995d5425e88fddd47b33163651ec60f31469a6076f/appstream.xml'
+            filename = "/home/{}/.local/share/flatpak/appstream/{}/x86_64/active/appstream.xml".format(self.user, remote)
             appstream = ElementTree.parse(filename)
             root = appstream.getroot()
             for child in root:
