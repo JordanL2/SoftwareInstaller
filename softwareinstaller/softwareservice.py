@@ -59,11 +59,11 @@ class SoftwareService:
 
         for sourcegroup in self.allsources:
             for source in sourcegroup:
-                config_id = "sources.{}.enable".format(source.id)
-                self.config_options[config_id] = [bool, False]
+                for k, v in source.config_options.items():
+                    self.config_options["sources.{}.{}".format(source.id, k)] = v
         for notifier in self.allnotifiers:
-            config_id = "notifiers.{}.enable".format(notifier.id)
-            self.config_options[config_id] = [bool, False]
+            for k, v in notifier.config_options.items():
+                self.config_options["notifiers.{}.{}".format(notifier.id, k)] = v
 
         self.config = dict([(k, v[1]) for k, v in self.config_options.items()])
 

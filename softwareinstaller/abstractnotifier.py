@@ -7,6 +7,10 @@ class AbstractNotifier:
         self.service = service
         self.id = id
 
+        self.config_options = {
+            "enabled": [bool, False]
+        }
+
     # Checks if the notifier is installed and can be used.
     # Returns:
     #     True - Notifier can be used

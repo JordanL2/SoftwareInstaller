@@ -16,6 +16,11 @@ class AbstractSource:
         # After a source's apps are updated, it's checked that the correct version is now installed
         self.check_updated = True
 
+        self.config_options = {
+            "enabled": [bool, False]
+        }
+
+
     # Checks if the source is installed and can be used.
     # Returns:
     #     True - Source can be used
