@@ -187,14 +187,14 @@ class FlatpakSource(AbstractSource):
                 branch = None
                 remote_version = None
                 for elem in child:
-                    if elem.tag == 'id':
-                        id = elem.text
                     if elem.tag == 'releases':
                         remote_version = list(elem)[0].get('version')
                     if elem.tag == 'bundle':
                         bundle = elem.text
-                        branch = bundle.split('/')[-1]
-                remote_apps["{}:{}:{}".format(remote, id, branch)] = {
+                        id = bundle.split('/')[1]
+                        branch = bundle.split('/')[3]
+                appid = self._make_id(remote, id, branch)
+                remote_apps[appid] = {
                     'version': remote_version
                 }
             if self.service.debug['performance']:
