@@ -22,24 +22,24 @@ class SoftwareService:
 
             # Standard repo sources
             [
-        	   PacmanSource(),
+        	   PacmanSource(self),
             ],
 
             # Arch AUR sources
             [
-                YaySource(),
+                YaySource(self),
             ],
 
             # Flatpak sources
             [ 
-                FlatpakSource(),
+                FlatpakSource(self),
             ],
             
         ]
         self.sources = []
 
         self.allnotifiers = [
-            PkconNotifier(),
+            PkconNotifier(self),
         ]
         self.notifiers = []
 
@@ -50,6 +50,9 @@ class SoftwareService:
             self.autoload_sources()
         else:
             self.load_sources()
+
+        self.output_std = sys.stdout
+        self.output_err = sys.stderr
 
     def default_config(self):
         self.config_options = {
@@ -188,7 +191,7 @@ class SoftwareService:
 
     def update(self, apps, autoconfirm):
         for task in self.config['update.tasks.pre']:
-            self.executor.call(task, stdout=sys.stdout, stderr=sys.stderr)
+            self.executor.call(task, stdout=self.output_std, stderr=self.output_err)
 
         # for sourceid in apps.copy().keys():
         #     source = self.getsource(sourceid)
@@ -211,7 +214,7 @@ class SoftwareService:
         #     notifier.notify()
 
         for task in self.config['update.tasks.post']:
-            self.executor.call(task, stdout=sys.stdout, stderr=sys.stderr)
+            self.executor.call(task, stdout=self.output_std, stderr=self.output_err)
 
         return None
 

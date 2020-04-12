@@ -12,8 +12,8 @@ class PacmanSource(AbstractSource):
     description_regex = re.compile(r'^([^\:]+?)\s+\:\s+(.+)$')
     installed_regex = re.compile(r'^(\S+)\s+(\S+)$')
 
-    def __init__(self):
-        super().__init__('pacman', 'Pacman')
+    def __init__(self, service):
+        super().__init__(service, 'pacman', 'Pacman')
         self.executor = CommandExecutor()
         self.native_only = True #TODO - only set this when an AUR source is in use
 
@@ -74,14 +74,14 @@ class PacmanSource(AbstractSource):
         return App(self, appid, appid, desc, version, installedids.get(appid), False)
 
     def install(self, app):
-        self.executor.call("pacman --noconfirm -S {0}".format(app.id))
+        self.executor.call("pacman --noconfirm -S {0}".format(app.id), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def remove(self, app):
-        self.executor.call("pacman --noconfirm -R {0}".format(app.id))
+        self.executor.call("pacman --noconfirm -R {0}".format(app.id), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def update(self, apps, autoconfirm):
         #TODO if the list of packages to be updated has changed, return the new list of packages
-        self.executor.call("pacman -Syu --noconfirm")
+        self.executor.call("pacman -Syu --noconfirm", stdout=self.service.output_std, stderr=self.service.output_err)
         return None
 
     def _get_installed_ids(self):

@@ -12,8 +12,8 @@ class YaySource(AbstractSource):
     description_regex = re.compile(r'^([^\:]+?)\s+\:\s+(.+)$')
     installed_regex = re.compile(r'^(\S+)\s+(\S+)$')
 
-    def __init__(self):
-        super().__init__('yay', 'Yay')
+    def __init__(self, service):
+        super().__init__(service, 'yay', 'Yay')
         self.executor = CommandExecutor()
 
         # Some AUR packages report a different latest version to the one that gets installed
@@ -71,15 +71,15 @@ class YaySource(AbstractSource):
 
     def install(self, app):
         user = self.executor.getuser()
-        self.executor.call("sudo -u {0} yay --noconfirm -S {1}".format(user, app.id))
+        self.executor.call("sudo -u {0} yay --noconfirm -S {1}".format(user, app.id), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def remove(self, app):
-        self.executor.call("yay --noconfirm -R {0}".format(app.id))
+        self.executor.call("yay --noconfirm -R {0}".format(app.id), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def update(self, apps, autoconfirm):
         user = self.executor.getuser()
         for app in apps:
-            self.executor.call("sudo -u {0} yay -S {1} --noconfirm".format(user, app.id))
+            self.executor.call("sudo -u {0} yay -S {1} --noconfirm".format(user, app.id), stdout=self.service.output_std, stderr=self.service.output_err)
         return None
 
     def _get_installed_ids(self):

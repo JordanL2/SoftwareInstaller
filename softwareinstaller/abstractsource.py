@@ -5,7 +5,8 @@ from softwareinstaller.app import App
 
 class AbstractSource:
 
-    def __init__(self, id, name):
+    def __init__(self, service, id, name):
+        self.service = service
         # Human readable identifer for the source, no spaces, preferably lowercase
         self.id = id
         # Nicely formatted title for the source

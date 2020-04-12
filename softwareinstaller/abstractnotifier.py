@@ -3,7 +3,8 @@
 
 class AbstractNotifier:
 
-    def __init__(self, id):
+    def __init__(self, service, id):
+        self.service = service
         self.id = id
 
     # Checks if the notifier is installed and can be used.

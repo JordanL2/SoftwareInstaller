@@ -12,8 +12,8 @@ class FlatpakSource(AbstractSource):
     description_regex = re.compile(r'^\s*([^\:]+?)\:\s+(.+)$')
     name_description_regex = re.compile(r'^([^\-]+)\s+\-\s+(.+)$')
 
-    def __init__(self):
-        super().__init__('flatpak', 'Flatpak')
+    def __init__(self, service):
+        super().__init__(service, 'flatpak', 'Flatpak')
         self.executor = CommandExecutor()
         self.user = self.executor.getuser()
 
@@ -118,24 +118,24 @@ class FlatpakSource(AbstractSource):
     def install(self, app):
         remote, id, branch = self._split_id(app.id)
         if app.user:
-            self.executor.call("sudo -u {0} flatpak --user install -y {1} {2}".format(self.user, remote, id))
+            self.executor.call("sudo -u {0} flatpak --user install -y {1} {2}".format(self.user, remote, id), stdout=self.service.output_std, stderr=self.service.output_err)
         else:
-            self.executor.call("flatpak install -y {0} {1}".format(remote, id))
+            self.executor.call("flatpak install -y {0} {1}".format(remote, id), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def remove(self, app):
         remote, id, branch = self._split_id(app.id)
         if app.user:
-            self.executor.call("sudo -u {0} flatpak --user remove -y {1}".format(self.user, id))
+            self.executor.call("sudo -u {0} flatpak --user remove -y {1}".format(self.user, id), stdout=self.service.output_std, stderr=self.service.output_err)
         else:
-            self.executor.call("flatpak remove -y {0}".format(id))
+            self.executor.call("flatpak remove -y {0}".format(id), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def update(self, apps, autoconfirm):
         for app in apps:
             remote, id, branch = self._split_id(app.id)
             if app.user:
-                self.executor.call("sudo -u {0} flatpak --user update --assumeyes {1}".format(self.user, id))
+                self.executor.call("sudo -u {0} flatpak --user update --assumeyes {1}".format(self.user, id), stdout=self.service.output_std, stderr=self.service.output_err)
             else:
-                self.executor.call("sudo -u {0} flatpak update --assumeyes {1}".format(self.user, id))
+                self.executor.call("sudo -u {0} flatpak update --assumeyes {1}".format(self.user, id), stdout=self.service.output_std, stderr=self.service.output_err)
         return None
 
     def _make_id(self, remote, id, branch):
