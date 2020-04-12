@@ -34,13 +34,13 @@ class CommandExecutor:
             for line in lines:
                 stdout_result += line
                 if stdout is not None:
-                    print(line.rstrip("\n"), file=stdout)
+                    print(line, end='', file=stdout)
             
             lines = non_blocking_read(proc.stderr)
             for line in lines:
                 stderr_result += line
                 if stderr is not None:
-                    print(line.rstrip("\n"), file=stderr)
+                    print(line, end='', file=stderr)
 
             if result_code is not None:
                 break
