@@ -84,7 +84,7 @@ Each line is a KEY=VALUE pair, eg:
 sources.autodetect=true
 ```
 
-Possible configuration options are:
+## Configuration options
 
 ```
 sources.autodetect=true|false
