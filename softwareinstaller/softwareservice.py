@@ -10,8 +10,6 @@ from softwareinstaller.sources.yaysource import YaySource
 
 from softwareinstaller.notifiers.pkconnotifier import PkconNotifier
 
-import sys
-
 
 class SoftwareService:
 
@@ -45,8 +43,8 @@ class SoftwareService:
 
         self.default_config()
 
-        self.output_std = sys.stdout
-        self.output_err = sys.stderr
+        self.output_std = None
+        self.output_err = None
 
     def default_config(self):
         self.config_options = {

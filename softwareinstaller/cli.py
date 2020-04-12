@@ -16,6 +16,9 @@ class SoftwareInstallerCLI:
             self.service.autoload_sources()
         else:
             self.service.load_sources()
+        
+        self.service.output_std = sys.stdout
+        self.service.output_err = sys.stderr
 
         self.valid_flags = set(['--status', '--source', '--csv', '--user', '-y', '--force'])
 
