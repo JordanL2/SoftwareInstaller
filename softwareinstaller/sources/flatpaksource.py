@@ -170,7 +170,7 @@ class FlatpakSource(AbstractSource):
         return elements
 
     def _get_installed(self):
-        remote_apps = self._get_remote_version()
+        remote_apps = self._get_remote_info()
 
         start_time = time.perf_counter()
         table = self.executor.call("flatpak list --columns=version,origin,application,branch,active,name", self.ids_regex, None, True)
@@ -188,7 +188,7 @@ class FlatpakSource(AbstractSource):
             print("flatpak _get_installed_ids {}".format(time.perf_counter() - start_time))
         return results
 
-    def _get_remote_version(self):
+    def _get_remote_info(self):
         start_time = time.perf_counter()
         remote_apps = {}
         remotes = self.executor.call("sudo -u {0} flatpak remotes | cut -f1".format(self.user)).splitlines()
