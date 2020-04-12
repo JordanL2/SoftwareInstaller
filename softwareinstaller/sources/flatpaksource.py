@@ -10,6 +10,7 @@ from xml.etree import ElementTree
 class FlatpakSource(AbstractSource):
 
     ids_regex = re.compile(r'^(\S*\s+)(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
+    search_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
     description_regex = re.compile(r'^\s*([^\:]+?)\:\s+(.+)$')
     name_description_regex = re.compile(r'^([^\-]+)\s+\-\s+(.+)$')
 
@@ -17,6 +18,7 @@ class FlatpakSource(AbstractSource):
         super().__init__(service, 'flatpak', 'Flatpak')
         self.executor = CommandExecutor()
         self.user = self.executor.getuser()
+        self.config_options['defaultmode'] = [str, 'system']
 
     def testinstalled(self):
         return self.executor.call('which flatpak 2>/dev/null', None, None, None, [0, 1]) != ''
@@ -29,7 +31,7 @@ class FlatpakSource(AbstractSource):
         for term in terms[1:]:
             search_string += " | grep -i \"{0}\"".format(term)
 
-        table = self.executor.call(search_string, self.ids_regex, None, True, [0, 1])
+        table = self.executor.call(search_string, self.search_regex, None, True, [0, 1])
         results = []
         for row in table:
             appid = self._make_id(row[0], row[1], row[2])
@@ -127,6 +129,11 @@ class FlatpakSource(AbstractSource):
 
     def install(self, app):
         remote, id, branch = self._split_id(app.id)
+        if app.user is None:
+            if self.service.config['sources.flatpak.defaultmode'] == 'user':
+                app.user = True
+            else:
+                app.user = False
         if app.user:
             self.executor.call("sudo -u {0} flatpak --user install -y {1} {2}".format(self.user, remote, id), stdout=self.service.output_std, stderr=self.service.output_err)
         else:

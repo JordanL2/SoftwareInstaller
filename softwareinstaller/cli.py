@@ -16,7 +16,7 @@ class SoftwareInstallerCLI:
         self.service.output_std = sys.stdout
         self.service.output_err = sys.stderr
 
-        self.valid_flags = set(['--status', '--source', '--csv', '--user', '-y', '--force', '--DEBUG-performance'])
+        self.valid_flags = set(['--status', '--source', '--csv', '--user', '--system', '-y', '--force', '--DEBUG-performance'])
 
     def load_config(self):
         config_dir = "/home/{}/.config".format(self.service.executor.getuser())
@@ -38,7 +38,9 @@ class SoftwareInstallerCLI:
                 if key not in self.service.config_options:
                     raise Exception("No such option: '{}'".format(key))
                 val_type = self.service.config_options[key][0]
-                if val_type == bool:
+                if val_type == str:
+                	self.service.config[key] = value
+                elif val_type == bool:
                     if value == 'true':
                         value = True
                     elif value == 'false':
@@ -126,7 +128,7 @@ class SoftwareInstallerCLI:
 
     def install(self, args, flags):
         superid = args.pop(0)
-        self.service.install(superid, ('--user' in flags))
+        self.service.install(superid, ('--user' in flags), ('--system' in flags))
 
     def remove(self, args, flags):
         superid = args.pop(0)
