@@ -39,35 +39,48 @@ class YaySource(AbstractSource):
         return results
 
     def local(self, terms):
+        start_time = time.perf_counter()
         installedids = self._get_installed_ids()
-        results = []
-        for appid in installedids.keys():
-            app = self.getapp(appid, installedids)
-            if terms is None or app.match(terms):
-                results.append(app)
+        results = self.getapps(installedids.keys(), installedids)
+        #for appid in installedids.keys():
+        #    app = self.getapp(appid, installedids)
+        #    if terms is None or app.match(terms):
+        #        results.append(app)
+
+        if self.service.debug['performance']:
+            print("yay local {}".format(time.perf_counter() - start_time))
         return results
 
-    def getapp(self, appid, installedids=None):
+    def getapp(self, appid):
+        return self.getapps([appid])[0]
+
+    def getapps(self, appids, installedids=None):
+        start_time = time.perf_counter()
         if installedids is None:
             installedids = self._get_installed_ids()
 
-        table = self.executor.call("yay -Si {0}".format(appid), self.description_regex, None, True, [0, 1])
-        desc = None
-        version = None
+        apps = []
+        table = self.executor.call("yay -Si {0}".format(' '.join(appids)), self.description_regex, None, True, [0, 1])
         for row in table:
+            if row[0] == 'Name':
+                apps.append(App(self, row[1], row[1], None, None, installedids.get(row[1]), False))
             if row[0] == 'Description':
-                desc = row[1]
+                apps[-1].desc = row[1]
             if row[0] == 'Version':
-                version = row[1]
-        if version is None:
-            version = None
-            table = self.executor.call("yay -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
-            for row in table:
-                if row[0] == 'Description':
-                    desc = row[1]
-            if desc is None:
-                return None
-        return App(self, appid, appid, desc, version, installedids.get(appid), False)
+                apps[-1].version = row[1]
+        # if version is None:
+        #     version = None
+        #     table = self.executor.call("yay -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
+        #     for row in table:
+        #         if row[0] == 'Description':
+        #             desc = row[1]
+        #     if desc is None:
+        #         return None
+
+        if self.service.debug['performance']:
+            print("yay getapp {}".format(time.perf_counter() - start_time))
+        #return App(self, appid, appid, desc, version, installedids.get(appid), False)
+        return apps
 
     def install(self, app):
         user = self.executor.getuser()

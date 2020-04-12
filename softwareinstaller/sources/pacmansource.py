@@ -37,6 +37,8 @@ class PacmanSource(AbstractSource):
         return results
 
     def local(self, terms):
+        start_time = time.perf_counter()
+
         remoteresults = dict([(a.id, a) for a in self.search(['']) if a.installed != ''])
         results = []
         installedids = self._get_installed_ids()
@@ -48,9 +50,14 @@ class PacmanSource(AbstractSource):
                 app = self.getapp(id, installedids, True)
             if app is not None and (terms is None or app.match(terms)):
                 results.append(app)
+
+        if self.service.debug['performance']:
+            print("pacman local {}".format(time.perf_counter() - start_time))
         return results
 
     def getapp(self, appid, installedids=None, skipremote=False):
+        start_time = time.perf_counter()
+
         if installedids is None:
             installedids = self._get_installed_ids()
 
@@ -71,6 +78,9 @@ class PacmanSource(AbstractSource):
                     desc = row[1]
             if desc is None:
                 return None
+
+        if self.service.debug['performance']:
+            print("pacman getapp {}".format(time.perf_counter() - start_time))
         return App(self, appid, appid, desc, version, installedids.get(appid), False)
 
     def install(self, app):
