@@ -69,3 +69,56 @@ All available updates are shown in a table, and confirmation is required before 
 If -y flag is given, the update is performed without asking for confirmation.
 
 If --force flag is given, update process will run even if there are no updates available, to force the running of pre/post tasks. This implicitly runs the update without asking for confirmation.
+
+
+# Configuration
+
+Optionally, you can configure the tool with a config file placed at
+```
+~/.config/softwareinstaller/config
+```
+
+Each line is a KEY=VALUE pair, eg:
+
+```
+sources.autodetect=true
+```
+
+Possible configuration options are:
+
+```
+sources.autodetect=true|false
+```
+
+Default: true
+
+Automatically detects available sources by checking for installed tools.
+
+
+```
+sources.\<SOURCE_ID\>.enable=true|false
+```
+
+Explicitly enables or disables a given source.
+
+
+```
+notifiers.\<NOTIFIER_ID\>.enable=true|false
+```
+
+Explicitly enables or disables a given notifier.
+
+
+```
+update.tasks.pre
+```
+
+Adds a script or command to be run before an update run. Can be a shell command. This option can be given as many times as needed, and will run each task in the order given.
+
+
+```
+update.tasks.post
+```
+
+Adds a script or command to be run after an update run. Can be a shell command. This option can be given as many times as needed, and will run each task in the order given.
+
