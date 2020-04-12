@@ -7,8 +7,8 @@ import re
 
 class TestSource(AbstractSource):
 
-    def __init__(self, id='test', name='TestSource'):
-        super().__init__(id, name)
+    def __init__(self, service, id='test', name='TestSource'):
+        super().__init__(service, id, name)
         self.installed = dict([(a.id, a) for a in [
             App(self, 'app1', 'Test App 1', 'Test1 desc', '0.1', '0.1', False),
             App(self, 'app2', 'Test App 2', 'Test2 desc', '0.2', '0.2', False),

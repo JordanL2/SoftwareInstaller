@@ -12,8 +12,8 @@ class TestSoftwareService(unittest.TestCase):
     def setUp(self):
         self.service = SoftwareService()
         self.service.sources = [
-            TestSource('test1', 'TestSource1'),
-            TestSource('test2', 'TestSource2'),
+            TestSource(self.service, 'test1', 'TestSource1'),
+            TestSource(self.service, 'test2', 'TestSource2'),
         ]
 
 
@@ -170,7 +170,7 @@ class TestSoftwareService(unittest.TestCase):
         self.assertEqual(len(toupdate), 0)
 
     def test_update_listchanged1(self):
-        self.service.sources[0] = TestSourceUpdateListChanges('test1', 'TestSource1')
+        self.service.sources[0] = TestSourceUpdateListChanges(self.service, 'test1', 'TestSource1')
         toupdate = self.service.local(None, ['U'])
         self.assertTrue(len(toupdate) > 0)
         results = self.service.update(toupdate, False)
@@ -179,7 +179,7 @@ class TestSoftwareService(unittest.TestCase):
         self.assertTrue('test2' in results)
 
     def test_update_listchanged2(self):
-        self.service.sources[1] = TestSourceUpdateListChanges('test2', 'TestSource2')
+        self.service.sources[1] = TestSourceUpdateListChanges(self.service, 'test2', 'TestSource2')
         toupdate = self.service.local(None, ['U'])
         self.assertTrue(len(toupdate) > 0)
         results = self.service.update(toupdate, False)
@@ -188,28 +188,28 @@ class TestSoftwareService(unittest.TestCase):
         self.assertEqual(results['test2'][0].id, 'app4')
 
     def test_update_listchanged_autoconfirm(self):
-        self.service.sources[0] = TestSourceUpdateListChanges('test1', 'TestSource1')
+        self.service.sources[0] = TestSourceUpdateListChanges(self.service, 'test1', 'TestSource1')
         toupdate = self.service.local(None, ['U'])
         self.assertTrue(len(toupdate) > 0)
         results = self.service.update(toupdate, True)
         self.assertIsNone(results)
 
     def test_update_notupdated1(self):
-        self.service.sources[0] = TestSourceUpdateFails('test1', 'TestSource1')
+        self.service.sources[0] = TestSourceUpdateFails(self.service, 'test1', 'TestSource1')
         toupdate = self.service.local(None, ['U'])
         self.assertTrue(len(toupdate) > 0)
         with self.assertRaises(Exception):
             results = self.service.update(toupdate, False)
 
     def test_update_notupdated2(self):
-        self.service.sources[1] = TestSourceUpdateFails('test2', 'TestSource2')
+        self.service.sources[1] = TestSourceUpdateFails(self.service, 'test2', 'TestSource2')
         toupdate = self.service.local(None, ['U'])
         self.assertTrue(len(toupdate) > 0)
         with self.assertRaises(Exception):
             results = self.service.update(toupdate, False)
 
     def test_update_new_update_available(self):
-        self.service.sources[0] = TestSourceNewUpdateAvailable('test1', 'TestSource1')
+        self.service.sources[0] = TestSourceNewUpdateAvailable(self.service, 'test1', 'TestSource1')
         toupdate = self.service.local(None, ['U'])
         self.assertTrue(len(toupdate) > 0)
         results = self.service.update(toupdate, False)
