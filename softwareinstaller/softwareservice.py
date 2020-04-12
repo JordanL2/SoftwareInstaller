@@ -44,12 +44,6 @@ class SoftwareService:
         self.notifiers = []
 
         self.default_config()
-        self.load_config()
-
-        if self.config['sources.autodetect']:
-            self.autoload_sources()
-        else:
-            self.load_sources()
 
         self.output_std = sys.stdout
         self.output_err = sys.stderr
@@ -70,39 +64,6 @@ class SoftwareService:
             self.config_options[config_id] = [bool, False]
 
         self.config = dict([(k, v[1]) for k, v in self.config_options.items()])
-
-    def load_config(self):
-        config_dir = "/home/{}/.config".format(self.executor.getuser())
-        filename = "{}/softwareinstaller/config".format(config_dir)
-
-        lines = []
-        try:
-            fh = open(filename, 'r')
-            lines = fh.readlines()
-        except:
-            pass
-
-        for line in lines:
-            line = line.rstrip()
-            try:
-                split_index = line.index('=')
-                key = line[0: split_index]
-                value = line[split_index + 1:]
-                if key not in self.config_options:
-                    raise Exception("No such option: '{}'".format(key))
-                val_type = self.config_options[key][0]
-                if val_type == bool:
-                    if value == 'true':
-                        value = True
-                    elif value == 'false':
-                        value = False
-                    else:
-                        raise Exception("Invalid boolean: '{}'".format(value))
-                    self.config[key] = value
-                elif val_type == list:
-                    self.config[key].append(value)
-            except Exception as e:
-                print("{}\nInvalid line: {}".format(line, e))
 
     def autoload_sources(self):
         for sourcegroup in self.allsources:
