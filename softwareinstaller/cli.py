@@ -11,11 +11,7 @@ class SoftwareInstallerCLI:
     def __init__(self):
         self.service = SoftwareService()
         self.load_config()
-
-        if self.service.config['sources.autodetect']:
-            self.service.autoload_sources()
-        else:
-            self.service.load_sources()
+        self.service.load_sources()
         
         self.service.output_std = sys.stdout
         self.service.output_err = sys.stderr

@@ -63,26 +63,26 @@ class SoftwareService:
 
         self.config = dict([(k, v[1]) for k, v in self.config_options.items()])
 
-    def autoload_sources(self):
-        for sourcegroup in self.allsources:
-            for source in sourcegroup:
-                if source.testinstalled():
-                    self.sources.append(source)
-                    break
-        for notifier in self.allnotifiers:
-            if notifier.testinstalled():
-                self.notifiers.append(notifier)
-
     def load_sources(self):
-        for sourcegroup in self.allsources:
-            for source in sourcegroup:
-                config_id = "sources.{}.enable".format(source.id)
+        if self.config['sources.autodetect']:
+            for sourcegroup in self.allsources:
+                for source in sourcegroup:
+                    if source.testinstalled():
+                        self.sources.append(source)
+                        break
+            for notifier in self.allnotifiers:
+                if notifier.testinstalled():
+                    self.notifiers.append(notifier)
+        else:
+            for sourcegroup in self.allsources:
+                for source in sourcegroup:
+                    config_id = "sources.{}.enable".format(source.id)
+                    if config_id in self.config and self.config[config_id]:
+                        self.sources.append(source)
+            for notifier in self.allnotifiers:
+                config_id = "notifiers.{}.enable".format(notifier.id)
                 if config_id in self.config and self.config[config_id]:
-                    self.sources.append(source)
-        for notifier in self.allnotifiers:
-            config_id = "notifiers.{}.enable".format(notifier.id)
-            if config_id in self.config and self.config[config_id]:
-                self.notifiers.append(notifier)
+                    self.notifiers.append(notifier)
 
     def getsource(self, sourceid):
         for source in self.sources:
