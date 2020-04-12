@@ -80,7 +80,7 @@ class YaySource(AbstractSource):
 
 
         if self.service.debug['performance']:
-            print("yay getapp {}".format(time.perf_counter() - start_time))
+            print("yay getapps {}".format(time.perf_counter() - start_time))
         return apps
 
     def install(self, app):

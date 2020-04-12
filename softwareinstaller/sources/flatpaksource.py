@@ -13,6 +13,7 @@ class FlatpakSource(AbstractSource):
     search_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
     description_regex = re.compile(r'^\s*([^\:]+?)\:\s+(.+)$')
     name_description_regex = re.compile(r'^([^\-]+)\s+\-\s+(.+)$')
+    remote_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$')
 
     def __init__(self, service):
         super().__init__(service, 'flatpak', 'Flatpak')
@@ -44,12 +45,16 @@ class FlatpakSource(AbstractSource):
         return results
 
     def local(self, terms):
+        start_time = time.perf_counter()
+
         installedids = self._get_installed()
         results = []
         for appid, localapp in installedids.items():
             if terms is None or localapp.match(terms):
-                localapp.remote_checksum = self._get_remote_checksum(appid)
                 results.append(localapp)
+
+        if self.service.debug['performance']:
+            print("flatpak local {}".format(time.perf_counter() - start_time))
         return results
 
     def getapp(self, appid, local_info=True, remote_info=True):
@@ -178,6 +183,7 @@ class FlatpakSource(AbstractSource):
             results[appid] = FlatpakApp(self, appid, name, '', None, row[0].strip(), (i >= systemapps), None, row[4])
             if appid in remote_apps:
                 results[appid].version = remote_apps[appid]['version']
+                results[appid].remote_checksum = remote_apps[appid]['remote_checksum']
         if self.service.debug['performance']:
             print("flatpak _get_installed_ids {}".format(time.perf_counter() - start_time))
         return results
@@ -187,53 +193,19 @@ class FlatpakSource(AbstractSource):
         remote_apps = {}
         remotes = self.executor.call("sudo -u {0} flatpak remotes | cut -f1".format(self.user)).splitlines()
         for remote in remotes:
-            filename = "/home/{}/.local/share/flatpak/appstream/{}/x86_64/active/appstream.xml".format(self.user, remote)
-            appstream = ElementTree.parse(filename)
-            root = appstream.getroot()
-            for child in root:
-                id = None
-                branch = None
-                remote_version = None
-                for elem in child:
-                    if elem.tag == 'releases':
-                        remote_version = list(elem)[0].get('version')
-                    if elem.tag == 'bundle':
-                        bundle = elem.text
-                        id = bundle.split('/')[1]
-                        branch = bundle.split('/')[3]
+            table = self.executor.call("flatpak remote-ls {} --columns=application,branch,commit,version".format(remote), self.remote_regex, None, True)
+            for row in table:
+                id = row[0]
+                branch = row[1]
                 appid = self._make_id(remote, id, branch)
                 remote_apps[appid] = {
-                    'version': remote_version
+                    'version': row[3],
+                    'remote_checksum': row[2]
                 }
             if self.service.debug['performance']:
                 print("flatpak _get_installed_ids parse appstream {} {}".format(remote, time.perf_counter() - start_time))
+            start_time = time.perf_counter()
         return remote_apps
-
-    def _get_remote_checksum(self, appid):
-        start_time = time.perf_counter()
-        remote, id, branch = self._split_id(appid)
-
-        remote_checksum = None
-
-        output = self.executor.call("flatpak remote-info --cached --show-commit {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
-        for line in output.splitlines():
-            match = self.name_description_regex.match(line)
-            if match:
-                row = match.groups()
-                if app.name == '':
-                    app.name = row[0]
-                if app.desc == '':
-                    app.desc = row[1]
-            match = self.description_regex.match(line)
-            if match:
-                row = match.groups()
-                if row[0] == 'Commit':
-                    remote_checksum = row[1]
-
-        if self.service.debug['performance']:
-            print("flatpak _get_remote_checksum {}".format(time.perf_counter() - start_time))
-
-        return remote_checksum
 
 
 class FlatpakApp(App):
@@ -247,7 +219,7 @@ class FlatpakApp(App):
         indicator = 'N'
         if self.local_checksum is not None:
             indicator = 'I'
-            if self.remote_checksum != self.local_checksum and self.remote_checksum is not None:
+            if self.remote_checksum is not None and self.remote_checksum != self.local_checksum and self.remote_checksum is not None:
                 indicator = 'U'
         return indicator
 
