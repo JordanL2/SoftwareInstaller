@@ -42,10 +42,6 @@ class YaySource(AbstractSource):
         start_time = time.perf_counter()
         installedids = self._get_installed_ids()
         results = self.getapps(installedids.keys(), installedids)
-        #for appid in installedids.keys():
-        #    app = self.getapp(appid, installedids)
-        #    if terms is None or app.match(terms):
-        #        results.append(app)
 
         if self.service.debug['performance']:
             print("yay local {}".format(time.perf_counter() - start_time))
@@ -68,7 +64,6 @@ class YaySource(AbstractSource):
                 apps[-1].desc = row[1]
             if row[0] == 'Version':
                 apps[-1].version = row[1]
-        # if version is None:
 
         founds_ids = [a.id for a in apps]
         for appid in appids:
