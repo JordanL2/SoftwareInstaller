@@ -178,7 +178,8 @@ class FlatpakSource(AbstractSource):
     def _get_remote_version(self):
         start_time = time.perf_counter()
         remote_apps = {}
-        for remote in ['flathub']:
+        remotes = self.executor.call("sudo -u {0} flatpak remotes | cut -f1".format(self.user)).splitlines()
+        for remote in remotes:
             filename = "/home/{}/.local/share/flatpak/appstream/{}/x86_64/active/appstream.xml".format(self.user, remote)
             appstream = ElementTree.parse(filename)
             root = appstream.getroot()
