@@ -11,7 +11,7 @@ class SoftwareInstallerCLI:
 
 	def __init__(self):
 		self.service = SoftwareService()
-		self.valid_flags = set(['--status', '--source', '--csv', '--user', '-y'])
+		self.valid_flags = set(['--status', '--source', '--csv', '--user', '-y', '--force'])
 
 	def do_command(self, cmd, args):
 		flags_unparsed = [a for a in args if a.startswith('-')]
@@ -52,7 +52,7 @@ class SoftwareInstallerCLI:
 		print("info <REF>")
 		print("install <REF> [--user]")
 		print("remove <REF>")
-		print("update [<REF>...] [-y]")
+		print("update [<REF>...] [-y] [--force")
 
 	def search(self, args, flags):
 		filters = self._get_status_flag(flags)
@@ -93,6 +93,7 @@ class SoftwareInstallerCLI:
 
 	def update(self, args, flags):
 		autoconfirm = '-y' in flags
+		forcerun = '--force' in flags
 		apps = None
 		specific = False
 		if len(args) > 0:
@@ -111,8 +112,9 @@ class SoftwareInstallerCLI:
 						raise Exception("App {0} requested to be updated, but no update available".format(app.id))
 		else:
 			apps = self.service.local(None, ['U'])
-		while apps is not None and len(apps) > 0:
-			if not autoconfirm and not specific:
+		runtimes = 0
+		while (forcerun and runtimes == 0) or (apps is not None and len(apps) > 0):
+			if not autoconfirm and not specific and not forcerun:
 				self._outputresults(apps, flags, ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR'])
 				text = input("CONFIRM? [Y/n]: ")
 				if text.lower() != 'y':
@@ -120,6 +122,7 @@ class SoftwareInstallerCLI:
 			apps = self.service.update(apps, autoconfirm)
 			if apps is not None and len(apps) > 0:
 				print("WARNING: Some sources cannot only update specific apps, so the list of apps that will be updated has changed.")
+			runtimes += 1
 
 	def _outputresults(self, results, flags, header=None):
 		table = []

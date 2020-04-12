@@ -60,10 +60,12 @@ remove <REF>
 Uninstall package.
 
 ```
-update [<REF>...] [-y]
+update [<REF>...] [-y] [--force]
 ```
 Updates packages. By default updates everything, if one or more `<REF>` is given will only update those packages.
 
 All available updates are shown in a table, and confirmation is required before proceeding.
 
 If -y flag is given, the update is performed without asking for confirmation.
+
+If --force flag is given, update process will run even if there are no updates available, to force the running of pre/post tasks. This implicitly runs the update without asking for confirmation.
