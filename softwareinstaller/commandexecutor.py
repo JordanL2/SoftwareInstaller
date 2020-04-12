@@ -58,7 +58,7 @@ class CommandExecutor:
         stdout_result, stderr_result, result_code = self.execute_proc(command, stdout, stderr)
         
         if successcodes is not None and result_code not in successcodes:
-            raise Exception("Command: {0}\nReturn Code: {1}\nStandard Output: {2}\nError Output: {3}".format(command, result.returncode, stdout_result, stderr_result))
+            raise Exception("Command: {0}\nReturn Code: {1}\nStandard Output: {2}\nError Output: {3}".format(command, result_code, stdout_result, stderr_result))
         
         if regex is None:
             return stdout_result
