@@ -16,7 +16,7 @@ class SoftwareInstallerCLI:
         self.service.output_std = sys.stdout
         self.service.output_err = sys.stderr
 
-        self.valid_flags = set(['--status', '--source', '--csv', '--user', '-y', '--force'])
+        self.valid_flags = set(['--status', '--source', '--csv', '--user', '-y', '--force', '--DEBUG-performance'])
 
     def load_config(self):
         config_dir = "/home/{}/.config".format(self.service.executor.getuser())
@@ -64,6 +64,9 @@ class SoftwareInstallerCLI:
             if key not in self.valid_flags:
                 raise Exception("Invalid flag: {0}".format(key))
             flags[key] = value
+
+        if '--DEBUG-performance' in flags:
+        	self.service.debug['performance'] = True
 
         if cmd == 'search':
             self.search(args, flags)
@@ -165,7 +168,7 @@ class SoftwareInstallerCLI:
     def _outputresults(self, results, flags, header=None):
         table = []
         if header is None:
-            header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR', 'DESCRIPTION']
+            header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR']
         columns = len(header)
         maxwidth = [len(header[i]) for i in range(0, columns)]
         csv = '--csv' in flags

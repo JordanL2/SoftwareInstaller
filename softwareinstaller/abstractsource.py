@@ -2,6 +2,8 @@
 
 from softwareinstaller.app import App
 
+import time
+
 
 class AbstractSource:
 

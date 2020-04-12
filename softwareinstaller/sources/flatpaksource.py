@@ -8,7 +8,7 @@ import re
 
 class FlatpakSource(AbstractSource):
 
-    ids_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
+    ids_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
     description_regex = re.compile(r'^\s*([^\:]+?)\:\s+(.+)$')
     name_description_regex = re.compile(r'^([^\-]+)\s+\-\s+(.+)$')
 
@@ -41,76 +41,92 @@ class FlatpakSource(AbstractSource):
         return results
 
     def local(self, terms):
-        installedids = self._get_installed_ids()
+        installedids = self._get_installed()
         results = []
         for appid in installedids:
             localapp = installedids[appid]
             if terms is None or localapp.match(terms):
-                app = self.getapp(appid)
-                if app is None:
+                remoteapp = self.getapp(appid, local_info=False)
+                if remoteapp is None:
                     if len(appid.split('.')) >= 3: # Workaround due to some flatpak apps having invalid IDs
                         raise Exception("Could not find app {0} in results".format(appid))
                 else:
-                    results.append(app)
+                    localapp.version = remoteapp.version
+                    localapp.remote_checksum = remoteapp.remote_checksum
+                    results.append(localapp)
         return results
 
-    def getapp(self, appid):
+    def getapp(self, appid, local_info=True, remote_info=True):
+        start_time = time.perf_counter()
         remote, id, branch = self._split_id(appid)
         app = FlatpakApp(self, appid, '', '', None, None, False, None, None)
 
-        output = self.executor.call("sudo -u {0} flatpak info {1}//{2}".format(self.user, id, branch), None, None, True, [0, 1])
-        for line in output.splitlines():
-            match = self.name_description_regex.match(line)
-            if match:
-                app.user = True
-                row = match.groups()
-                if app.name == '':
-                    app.name = row[0]
-                if app.desc == '':
-                    app.desc = row[1]
-            match = self.description_regex.match(line)
-            if match:
-                row = match.groups()
-                if row[0] == 'Version':
-                    app.installed = row[1]
-                if row[0] == 'Commit':
-                    app.local_checksum = row[1]
+        if local_info:
+            output = self.executor.call("sudo -u {0} flatpak info {1}//{2}".format(self.user, id, branch), None, None, True, [0, 1])
+            for line in output.splitlines():
+                match = self.name_description_regex.match(line)
+                if match:
+                    app.user = True
+                    row = match.groups()
+                    if app.name == '':
+                        app.name = row[0]
+                    if app.desc == '':
+                        app.desc = row[1]
+                match = self.description_regex.match(line)
+                if match:
+                    row = match.groups()
+                    if row[0] == 'Version':
+                        app.installed = row[1]
+                    if row[0] == 'Commit':
+                        app.local_checksum = row[1]
 
-        output = self.executor.call("flatpak info {0}//{1}".format(id, branch), None, None, True, [0, 1])
-        for line in output.splitlines():
-            match = self.name_description_regex.match(line)
-            if match:
-                app.user = False
-                row = match.groups()
-                if app.name == '':
-                    app.name = row[0]
-                if app.desc == '':
-                    app.desc = row[1]
-            match = self.description_regex.match(line)
-            if match:
-                row = match.groups()
-                if row[0] == 'Version':
-                    app.installed = row[1]
-                if row[0] == 'Commit':
-                    app.local_checksum = row[1]
+            if self.service.debug['performance']:
+                print("flatpak getapp local user {}".format(time.perf_counter() - start_time))
+            start_time = time.perf_counter()
 
-        output = self.executor.call("flatpak remote-info {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
-        for line in output.splitlines():
-            match = self.name_description_regex.match(line)
-            if match:
-                row = match.groups()
-                if app.name == '':
-                    app.name = row[0]
-                if app.desc == '':
-                    app.desc = row[1]
-            match = self.description_regex.match(line)
-            if match:
-                row = match.groups()
-                if row[0] == 'Version':
-                    app.version = row[1]
-                if row[0] == 'Commit':
-                    app.remote_checksum = row[1]
-        
+            output = self.executor.call("flatpak info {0}//{1}".format(id, branch), None, None, True, [0, 1])
+            for line in output.splitlines():
+                match = self.name_description_regex.match(line)
+                if match:
+                    app.user = False
+                    row = match.groups()
+                    if app.name == '':
+                        app.name = row[0]
+                    if app.desc == '':
+                        app.desc = row[1]
+                match = self.description_regex.match(line)
+                if match:
+                    row = match.groups()
+                    if row[0] == 'Version':
+                        app.installed = row[1]
+                    if row[0] == 'Commit':
+                        app.local_checksum = row[1]
+
+            if self.service.debug['performance']:
+                print("flatpak getapp local system {}".format(time.perf_counter() - start_time))
+            start_time = time.perf_counter()
+
+        if remote_info:
+            output = self.executor.call("flatpak remote-info --cached {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
+            for line in output.splitlines():
+                match = self.name_description_regex.match(line)
+                if match:
+                    row = match.groups()
+                    if app.name == '':
+                        app.name = row[0]
+                    if app.desc == '':
+                        app.desc = row[1]
+                match = self.description_regex.match(line)
+                if match:
+                    row = match.groups()
+                    if row[0] == 'Version':
+                        app.version = row[1]
+                    if row[0] == 'Commit':
+                        app.remote_checksum = row[1]
+
+            if self.service.debug['performance']:
+                print("flatpak getapp remote {}".format(time.perf_counter() - start_time))
+
         if app.local_checksum is None and app.remote_checksum is None:
             return None
         return app
@@ -147,21 +163,24 @@ class FlatpakSource(AbstractSource):
             raise Exception("{0} is not a valid Flatpak app ID".format(appid))
         return elements
 
-    def _get_installed_ids(self):
-        table = self.executor.call("flatpak list --columns=origin,application,branch,description", self.ids_regex, None, True)
+    def _get_installed(self):
+        start_time = time.perf_counter()
+        table = self.executor.call("flatpak list --columns=origin,application,branch,version,latest,description", self.ids_regex, None, True)
         systemapps = len(table)
-        table += self.executor.call("sudo -u {0} flatpak list --columns=origin,application,branch,description".format(self.user), self.ids_regex, None, True)
+        table += self.executor.call("sudo -u {0} flatpak list --columns=origin,application,branch,version,latest,description".format(self.user), self.ids_regex, None, True)
         results = {}
         for i, row in enumerate(table):
             appid = self._make_id(row[0], row[1], row[2])
-            name = row[3]
+            name = row[5]
             desc = ''
             match = self.name_description_regex.match(name)
             if match:
                 matchgroups = match.groups()
                 name = matchgroups[0]
                 desc = matchgroups[1]
-            results[appid] = FlatpakApp(self, appid, name, desc, None, None, (i >= systemapps), None, None)
+            results[appid] = FlatpakApp(self, appid, name, desc, None, row[3], (i >= systemapps), None, row[4])
+        if self.service.debug['performance']:
+            print("flatpak _get_installed_ids {}".format(time.perf_counter() - start_time))
         return results
 
 

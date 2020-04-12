@@ -46,6 +46,10 @@ class SoftwareService:
         self.output_std = None
         self.output_err = None
 
+        self.debug = {
+            'performance': False
+        }
+
     def default_config(self):
         self.config_options = {
             'sources.autodetect': [bool, True],
