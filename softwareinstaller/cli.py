@@ -189,8 +189,7 @@ class SoftwareInstallerCLI:
                     result.name,
                     (result.version if result.version is not None else '[Not Found]'),
                     (result.installed if result.installed is not None else ''),
-                    (('USER' if result.user else 'SYSTEM') if result.isinstalled() else ''),
-                    result.desc
+                    (('USER' if result.user else 'SYSTEM') if result.isinstalled() else '')
                 ]
                 if not csv:
                     for i in range(0, columns):

@@ -9,7 +9,7 @@ from xml.etree import ElementTree
 
 class FlatpakSource(AbstractSource):
 
-    ids_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
+    ids_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
     description_regex = re.compile(r'^\s*([^\:]+?)\:\s+(.+)$')
     name_description_regex = re.compile(r'^([^\-]+)\s+\-\s+(.+)$')
 
@@ -161,15 +161,14 @@ class FlatpakSource(AbstractSource):
         remote_apps = self._get_remote_version()
 
         start_time = time.perf_counter()
-        table = self.executor.call("flatpak list --columns=origin,application,branch,version,active,name,description", self.ids_regex, None, True)
+        table = self.executor.call("flatpak list --columns=origin,application,branch,version,active,name", self.ids_regex, None, True)
         systemapps = len(table)
-        table += self.executor.call("sudo -u {0} flatpak list --columns=origin,application,branch,version,active,name,description".format(self.user), self.ids_regex, None, True)
+        table += self.executor.call("sudo -u {0} flatpak list --columns=origin,application,branch,version,active,name".format(self.user), self.ids_regex, None, True)
         results = {}
         for i, row in enumerate(table):
             appid = self._make_id(row[0], row[1], row[2])
             name = row[5]
-            desc = row[6]
-            results[appid] = FlatpakApp(self, appid, name, desc, None, row[3], (i >= systemapps), None, row[4])
+            results[appid] = FlatpakApp(self, appid, name, '', None, row[3], (i >= systemapps), None, row[4])
             if appid in remote_apps:
                 results[appid].version = remote_apps[appid]['version']
         if self.service.debug['performance']:
