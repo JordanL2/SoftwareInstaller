@@ -8,8 +8,6 @@ from softwareinstaller.sources.flatpaksource import FlatpakSource
 from softwareinstaller.sources.pacmansource import PacmanSource
 from softwareinstaller.sources.yaysource import YaySource
 
-from softwareinstaller.notifiers.pkconnotifier import PkconNotifier
-
 
 class SoftwareService:
 
@@ -36,11 +34,6 @@ class SoftwareService:
         ]
         self.sources = []
 
-        self.allnotifiers = [
-            PkconNotifier(self),
-        ]
-        self.notifiers = []
-
         self.default_config()
 
         self.output_std = None
@@ -53,7 +46,6 @@ class SoftwareService:
     def default_config(self):
         self.config_options = {
             'sources.autodetect': [bool, True],
-            'notifiers.autodetect': [bool, True],
             'install.tasks.pre': [list, []],
             'install.tasks.post': [list, []],
             'remove.tasks.pre': [list, []],
@@ -66,9 +58,6 @@ class SoftwareService:
             for source in sourcegroup:
                 for k, v in source.config_options.items():
                     self.config_options["sources.{}.{}".format(source.id, k)] = v
-        for notifier in self.allnotifiers:
-            for k, v in notifier.config_options.items():
-                self.config_options["notifiers.{}.{}".format(notifier.id, k)] = v
 
         self.config = dict([(k, v[1]) for k, v in self.config_options.items()])
 
@@ -85,15 +74,6 @@ class SoftwareService:
                     config_id = "sources.{}.enable".format(source.id)
                     if config_id in self.config and self.config[config_id]:
                         self.sources.append(source)
-        if self.config['notifiers.autodetect']:
-            for notifier in self.allnotifiers:
-                if notifier.testinstalled():
-                    self.notifiers.append(notifier)
-        else:
-            for notifier in self.allnotifiers:
-                config_id = "notifiers.{}.enable".format(notifier.id)
-                if config_id in self.config and self.config[config_id]:
-                    self.notifiers.append(notifier)
 
     def getsource(self, sourceid):
         for source in self.sources:
@@ -208,9 +188,6 @@ class SoftwareService:
                             raise Exception("App {0} wasn't successfully updated".format(app.id))
 
             del apps[sourceid]
-
-        for notifier in self.notifiers:
-            notifier.notify()
 
         for task in self.config['update.tasks.post']:
             print("\n*** UPDATE POST TASK: {} ***".format(task), file=self.output_std)

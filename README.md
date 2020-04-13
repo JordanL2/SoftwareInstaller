@@ -101,21 +101,6 @@ sources.\<SOURCE_ID\>.enable=true|false
 
 Explicitly enables or disables a given source (has no effect if sources.autodetect is 'true').
 
-```
-notifiers.autodetect=true|false
-```
-
-Default: true
-
-Automatically detects available sources by checking for installed tools.
-
-
-```
-notifiers.\<NOTIFIER_ID\>.enable=true|false
-```
-
-Explicitly enables or disables a given notifier (has no effect if notifiers.autodetect is 'true').
-
 
 ```
 install.tasks.pre
