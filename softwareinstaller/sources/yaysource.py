@@ -26,6 +26,8 @@ class YaySource(AbstractSource):
         self.executor.call("yay -Sy")
 
     def search(self, terms):
+        start_time = time.perf_counter()
+
         installedids = self._get_installed_ids()
 
         search_string = "yay -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\"".format(terms[0])
@@ -36,6 +38,8 @@ class YaySource(AbstractSource):
         results = []
         for row in table:
             results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0]), False))
+
+        self.log_performance("yay search {}".format(time.perf_counter() - start_time))
         return results
 
     def local(self, terms):

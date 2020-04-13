@@ -24,6 +24,8 @@ class PacmanSource(AbstractSource):
         self.executor.call("pacman -Sy")
 
     def search(self, terms):
+        start_time = time.perf_counter()
+
         installedids = self._get_installed_ids()
 
         search_string = "pacman -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - -".format(terms[0])
@@ -34,6 +36,8 @@ class PacmanSource(AbstractSource):
         results = []
         for row in table:
             results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0]), False))
+
+        self.log_performance("pacman search {}".format(time.perf_counter() - start_time))
         return results
 
     def local(self, terms):

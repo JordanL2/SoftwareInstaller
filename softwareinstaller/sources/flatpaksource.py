@@ -28,6 +28,8 @@ class FlatpakSource(AbstractSource):
         pass
 
     def search(self, terms):
+        start_time = time.perf_counter()
+
         all_apps = self._get_installed(getall=True)
         results = {}
         for user in False, True:
@@ -42,6 +44,8 @@ class FlatpakSource(AbstractSource):
             for row in table:
                 appid = self._make_id(row[0], row[1], row[2])
                 results[appid] = all_apps[appid]
+
+        self.log_performance("flatpak search {}".format(time.perf_counter() - start_time))
         return results.values()
 
     def local(self, terms):
