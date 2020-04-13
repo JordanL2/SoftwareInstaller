@@ -132,12 +132,10 @@ class SoftwareService:
             app.user = None
 
         for task in self.config['install.tasks.pre']:
-            if self.output_std is not None:
-                print("\n*** INSTALL PRE TASK: {} ***".format(task), file=self.output_std)
+            self.log("\n*** INSTALL PRE TASK: {} ***".format(task))
             self.executor.call(task, stdout=self.output_std, stderr=self.output_err)
         
-        if self.output_std is not None:
-            print("\n*** INSTALL APP: {} ***".format(superid), file=self.output_std)
+        self.log("\n*** INSTALL APP: {} ***".format(superid))
         app.install()
 
         app = self.getapp(superid)
@@ -145,8 +143,7 @@ class SoftwareService:
             raise Exception("App was not installed")
 
         for task in self.config['install.tasks.post']:
-            if self.output_std is not None:
-                print("\n*** INSTALL POST TASK: {} ***".format(task), file=self.output_std)
+            self.log("\n*** INSTALL POST TASK: {} ***".format(task))
             self.executor.call(task, stdout=self.output_std, stderr=self.output_err)
         
     def remove(self, superid):
@@ -155,12 +152,10 @@ class SoftwareService:
             raise Exception("App is not installed")
 
         for task in self.config['remove.tasks.pre']:
-            if self.output_std is not None:
-                print("\n*** REMOVE PRE TASK: {} ***".format(task), file=self.output_std)
+            self.log("\n*** REMOVE PRE TASK: {} ***".format(task))
             self.executor.call(task, stdout=self.output_std, stderr=self.output_err)
 
-        if self.output_std is not None:
-            print("\n*** REMOVE APP: {} ***".format(superid), file=self.output_std)
+        self.log("\n*** REMOVE APP: {} ***".format(superid))
         app.remove()
 
         app = self.getapp(superid)
@@ -168,20 +163,17 @@ class SoftwareService:
             raise Exception("App was not removed")
 
         for task in self.config['remove.tasks.post']:
-            if self.output_std is not None:
-                print("\n*** REMOVE POST TASK: {} ***".format(task), file=self.output_std)
+            self.log("\n*** REMOVE POST TASK: {} ***".format(task))
             self.executor.call(task, stdout=self.output_std, stderr=self.output_err)
 
     def update(self, apps, autoconfirm):
         for task in self.config['update.tasks.pre']:
-            if self.output_std is not None:
-                print("\n*** UPDATE PRE TASK: {} ***".format(task), file=self.output_std)
+            self.log("\n*** UPDATE PRE TASK: {} ***".format(task))
             self.executor.call(task, stdout=self.output_std, stderr=self.output_err)
 
         for sourceid in apps.copy().keys():
             source = self.getsource(sourceid)
-            if self.output_std is not None:
-                print("\n*** UPDATE SOURCE: {} ***".format(source.name), file=self.output_std)
+            self.log("\n*** UPDATE SOURCE: {} ***".format(source.name))
             updatedlist = source.update(apps[sourceid], autoconfirm)
             if updatedlist is not None:
                 apps[sourceid] = updatedlist
@@ -198,11 +190,14 @@ class SoftwareService:
             del apps[sourceid]
 
         for task in self.config['update.tasks.post']:
-            if self.output_std is not None:
-                print("\n*** UPDATE POST TASK: {} ***".format(task), file=self.output_std)
+            self.log("\n*** UPDATE POST TASK: {} ***".format(task))
             self.executor.call(task, stdout=self.output_std, stderr=self.output_err)
 
         return None
+
+    def log(self, message):
+        if self.output_std is not None:
+            print(message, file=self.output_std)
 
     def _split_superid(self, superid):
         i = superid.index(':')
