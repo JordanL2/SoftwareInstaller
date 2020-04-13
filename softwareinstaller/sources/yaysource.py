@@ -41,7 +41,11 @@ class YaySource(AbstractSource):
     def local(self, terms):
         start_time = time.perf_counter()
         installedids = self._get_installed_ids()
-        results = self.getapps(installedids.keys(), installedids)
+        results = []
+        apps = self.getapps(installedids.keys(), installedids)
+        for app in apps:
+            if terms is None or app.match(terms):
+                results.append(app)
 
         if self.service.debug['performance']:
             print("yay local {}".format(time.perf_counter() - start_time))
@@ -59,7 +63,7 @@ class YaySource(AbstractSource):
         table = self.executor.call("yay -Si {0}".format(' '.join(appids)), self.description_regex, None, True, [0, 1])
         for row in table:
             if row[0] == 'Name':
-                apps.append(App(self, row[1], row[1], None, None, installedids.get(row[1]), False))
+                apps.append(App(self, row[1], row[1], '', None, installedids.get(row[1]), False))
             if row[0] == 'Description':
                 apps[-1].desc = row[1]
             if row[0] == 'Version':
@@ -68,7 +72,7 @@ class YaySource(AbstractSource):
         founds_ids = [a.id for a in apps]
         for appid in appids:
             if appid not in founds_ids:
-                app = App(self, appid, appid, None, None, installedids.get(appid), False)
+                app = App(self, appid, appid, '', None, installedids.get(appid), False)
                 version = None
                 table = self.executor.call("yay -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
                 for row in table:
