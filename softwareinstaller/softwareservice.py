@@ -38,6 +38,9 @@ class SoftwareService:
 
         self.output_std = None
         self.output_err = None
+        self.output_log = {
+            'performance': None
+        }
 
         self.debug = {
             'performance': False

@@ -81,5 +81,5 @@ class AbstractSource:
 
 
     def log_performance(self, message):
-        if self.service.debug['performance'] and self.service.output_err is not None:
-            print(message, file=self.service.output_err)
+        if self.service.debug['performance'] and self.service.output_log['performance'] is not None:
+            print(message, file=self.service.output_log['performance'])

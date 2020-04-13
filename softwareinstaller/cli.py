@@ -15,6 +15,7 @@ class SoftwareInstallerCLI:
         
         self.service.output_std = sys.stdout
         self.service.output_err = sys.stderr
+        self.service.output_log['performance'] = sys.stderr
 
         self.valid_flags = set(['--status', '--source', '--csv', '--user', '--system', '-y', '--force', '--DEBUG-performance'])
 
