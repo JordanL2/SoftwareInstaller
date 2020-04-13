@@ -96,7 +96,7 @@ Automatically detects available sources by checking for installed tools.
 
 
 ```
-sources.\<SOURCE_ID\>.enable=true|false
+sources.<SOURCE_ID>.enable=true|false
 ```
 
 Explicitly enables or disables a given source (has no effect if sources.autodetect is 'true').
