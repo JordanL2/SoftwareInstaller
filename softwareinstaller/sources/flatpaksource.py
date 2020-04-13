@@ -189,27 +189,30 @@ class FlatpakSource(AbstractSource):
     def _get_remote_info(self):
         start_time = time.perf_counter()
         remote_apps = {}
+        remotes_done = set()
         for user in False, True:
             if user:
                 remotes = self.executor.call("sudo -u {} flatpak remotes | cut -f1".format(self.user)).splitlines()
             else:
                 remotes = self.executor.call("flatpak remotes | cut -f1").splitlines()
             for remote in remotes:
-                if user:
-                    table = self.executor.call("sudo -u {} flatpak --user remote-ls {} --columns=application,branch,commit,version".format(self.user, remote), self.remote_regex, None, True)
-                else:
-                    table = self.executor.call("flatpak remote-ls {} --columns=application,branch,commit,version".format(remote), self.remote_regex, None, True)
-                for row in table:
-                    id = row[0]
-                    branch = row[1]
-                    appid = self._make_id(remote, id, branch)
-                    remote_apps[appid] = {
-                        'version': row[3],
-                        'remote_checksum': row[2]
-                    }
-                if self.service.debug['performance']:
-                    print("flatpak _get_installed_ids parse appstream {} {}".format(remote, time.perf_counter() - start_time))
-                start_time = time.perf_counter()
+                if remote not in remotes_done:
+                    if user:
+                        table = self.executor.call("sudo -u {} flatpak --user remote-ls {} --columns=application,branch,commit,version".format(self.user, remote), self.remote_regex, None, True)
+                    else:
+                        table = self.executor.call("flatpak remote-ls {} --columns=application,branch,commit,version".format(remote), self.remote_regex, None, True)
+                    for row in table:
+                        id = row[0]
+                        branch = row[1]
+                        appid = self._make_id(remote, id, branch)
+                        remote_apps[appid] = {
+                            'version': row[3],
+                            'remote_checksum': row[2]
+                        }
+                    if self.service.debug['performance']:
+                        print("flatpak _get_installed_ids parse appstream {} {}".format(remote, time.perf_counter() - start_time))
+                    start_time = time.perf_counter()
+                    remotes_done.add(remote)
         return remote_apps
 
 
