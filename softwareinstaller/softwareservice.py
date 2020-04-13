@@ -53,6 +53,7 @@ class SoftwareService:
     def default_config(self):
         self.config_options = {
             'sources.autodetect': [bool, True],
+            'notifiers.autodetect': [bool, True],
             'install.tasks.pre': [list, []],
             'install.tasks.post': [list, []],
             'remove.tasks.pre': [list, []],
@@ -78,15 +79,17 @@ class SoftwareService:
                     if source.testinstalled():
                         self.sources.append(source)
                         break
-            for notifier in self.allnotifiers:
-                if notifier.testinstalled():
-                    self.notifiers.append(notifier)
         else:
             for sourcegroup in self.allsources:
                 for source in sourcegroup:
                     config_id = "sources.{}.enable".format(source.id)
                     if config_id in self.config and self.config[config_id]:
                         self.sources.append(source)
+        if self.config['notifiers.autodetect']:
+            for notifier in self.allnotifiers:
+                if notifier.testinstalled():
+                    self.notifiers.append(notifier)
+        else:
             for notifier in self.allnotifiers:
                 config_id = "notifiers.{}.enable".format(notifier.id)
                 if config_id in self.config and self.config[config_id]:

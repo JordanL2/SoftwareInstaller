@@ -99,26 +99,41 @@ Automatically detects available sources by checking for installed tools.
 sources.\<SOURCE_ID\>.enable=true|false
 ```
 
-Explicitly enables or disables a given source.
+Explicitly enables or disables a given source (has no effect if sources.autodetect is 'true').
+
+```
+notifiers.autodetect=true|false
+```
+
+Default: true
+
+Automatically detects available sources by checking for installed tools.
 
 
 ```
 notifiers.\<NOTIFIER_ID\>.enable=true|false
 ```
 
-Explicitly enables or disables a given notifier.
+Explicitly enables or disables a given notifier (has no effect if notifiers.autodetect is 'true').
 
 
 ```
+install.tasks.pre
+install.tasks.post
+remove.tasks.pre
+remove.tasks.post
 update.tasks.pre
-```
-
-Adds a script or command to be run before an update run. Can be a shell command. This option can be given as many times as needed, and will run each task in the order given.
-
-
-```
 update.tasks.post
 ```
 
-Adds a script or command to be run after an update run. Can be a shell command. This option can be given as many times as needed, and will run each task in the order given.
+Adds a script or command to be run before or after an install, remove or update run. Can be a shell command. These options can each be given as many times as needed, and will run each task in the order given.
 
+### Flatpak Configuration Options
+
+```
+sources.flatpak.defaultmode=system|user
+```
+
+Default: system
+
+Determines whether the flatpak source will default to installing apps in user mode or system mode.
