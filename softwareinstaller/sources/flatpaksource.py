@@ -13,7 +13,7 @@ class FlatpakSource(AbstractSource):
     search_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
     description_regex = re.compile(r'^\s*([^\:]+?)\:\s+(.+)$')
     name_description_regex = re.compile(r'^([^\-]+)\s+\-\s+(.+)$')
-    remote_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$')
+    remote_regex = re.compile(r'^(\S*\s+)(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
 
     def __init__(self, service):
         super().__init__(service, 'flatpak', 'Flatpak')
@@ -28,6 +28,7 @@ class FlatpakSource(AbstractSource):
         pass
 
     def search(self, terms):
+        all_apps = self._get_installed(getall=True)
         results = {}
         for user in False, True:
             if user:
@@ -40,12 +41,7 @@ class FlatpakSource(AbstractSource):
             table = self.executor.call(search_string, self.search_regex, None, True, [0, 1])
             for row in table:
                 appid = self._make_id(row[0], row[1], row[2])
-                app = self.getapp(appid)
-                if app is None:
-                    if len(appid.split('.')) >= 3: # Workaround due to some flatpak apps having invalid IDs
-                        raise Exception("Could not find app {0} in results".format(appid))
-                else:
-                    results[appid] = app
+                results[appid] = all_apps[appid]
         return results.values()
 
     def local(self, terms):
@@ -185,7 +181,7 @@ class FlatpakSource(AbstractSource):
             raise Exception("{0} is not a valid Flatpak app ID".format(appid))
         return elements
 
-    def _get_installed(self):
+    def _get_installed(self, getall=False):
         remote_apps = self._get_remote_info()
 
         start_time = time.perf_counter()
@@ -200,6 +196,12 @@ class FlatpakSource(AbstractSource):
             if appid in remote_apps:
                 results[appid].version = remote_apps[appid]['version']
                 results[appid].remote_checksum = remote_apps[appid]['remote_checksum']
+
+        if getall:
+            for appid, app in remote_apps.items():
+                if appid not in results:
+                    results[appid] = FlatpakApp(self, appid, app['name'], '', app['version'], None, None, app['remote_checksum'], None)
+
         self.log_performance("flatpak _get_installed_ids {}".format(time.perf_counter() - start_time))
         return results
 
@@ -212,16 +214,17 @@ class FlatpakSource(AbstractSource):
             for remote in remotes:
                 if remote not in remotes_done:
                     if user:
-                        table = self.executor.call("sudo -u {} flatpak --user remote-ls {} --columns=application,branch,commit,version".format(self.user, remote), self.remote_regex, None, True)
+                        table = self.executor.call("sudo -u {} flatpak --user remote-ls {} --columns=version,application,branch,commit,name".format(self.user, remote), self.remote_regex, None, True)
                     else:
-                        table = self.executor.call("flatpak remote-ls {} --columns=application,branch,commit,version".format(remote), self.remote_regex, None, True)
+                        table = self.executor.call("flatpak remote-ls {} --columns=version,application,branch,commit,name".format(remote), self.remote_regex, None, True)
                     for row in table:
-                        id = row[0]
-                        branch = row[1]
+                        id = row[1]
+                        branch = row[2]
                         appid = self._make_id(remote, id, branch)
                         remote_apps[appid] = {
-                            'version': row[3],
-                            'remote_checksum': row[2]
+                            'version': row[0],
+                            'remote_checksum': row[3],
+                            'name': row[4]
                         }
                     self.log_performance("flatpak _get_installed_ids parse appstream {} {}".format(remote, time.perf_counter() - start_time))
                     start_time = time.perf_counter()
