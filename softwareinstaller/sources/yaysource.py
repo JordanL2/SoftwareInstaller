@@ -9,7 +9,7 @@ import re
 class YaySource(AbstractSource):
 
     search_regex = re.compile(r'^[^\/]+\/(\S+)\s+(\S+)\s+(\S+)\s+[^\,]+,(.*)$')
-    description_regex = re.compile(r'^([^\:]+?)\s+\:\s+(.+)$')
+    description_regex = re.compile(r'^\s*([^\:]+?)\s+\:\s+(.+)$')
     installed_regex = re.compile(r'^(\S+)\s+(\S+)$')
 
     def __init__(self, service):
@@ -77,11 +77,8 @@ class YaySource(AbstractSource):
                 table = self.executor.call("yay -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
                 for row in table:
                     if row[0] == 'Description':
-                        desc = row[1]
-                if desc is None:
-                    return None
+                        app.desc = row[1]
                 apps.append(app)
-
 
         if self.service.debug['performance']:
             print("yay getapps {}".format(time.perf_counter() - start_time))

@@ -118,7 +118,7 @@ class SoftwareInstallerCLI:
         app = self.service.getapp(superid)
         print('     Name:', app.name)
         print('     Desc:', app.desc)
-        print('  Version:', app.version)
+        print('  Version:', (app.version if app.version is not None else '[Not Found]'))
         if app.installed is not None:
             print('Installed:', app.installed)
         if app.isinstalled():
