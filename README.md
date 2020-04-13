@@ -80,8 +80,6 @@ Optionally, you can configure the tool with a config file placed at
 
 Each line is a KEY=VALUE pair.
 
-```
-
 ## Configuration options
 
 ```
