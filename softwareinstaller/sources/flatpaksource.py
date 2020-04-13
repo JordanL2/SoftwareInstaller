@@ -28,21 +28,25 @@ class FlatpakSource(AbstractSource):
         pass
 
     def search(self, terms):
-        search_string = "flatpak search \"{0}\" --columns=remotes,application,branch,description".format(terms[0])
-        for term in terms[1:]:
-            search_string += " | grep -i \"{0}\"".format(term)
-
-        table = self.executor.call(search_string, self.search_regex, None, True, [0, 1])
-        results = []
-        for row in table:
-            appid = self._make_id(row[0], row[1], row[2])
-            app = self.getapp(appid)
-            if app is None:
-                if len(appid.split('.')) >= 3: # Workaround due to some flatpak apps having invalid IDs
-                    raise Exception("Could not find app {0} in results".format(appid))
+        results = {}
+        for user in False, True:
+            if user:
+                search_string = "sudo -u {0} flatpak search --user \"{1}\" --columns=remotes,application,branch,description".format(self.user, terms[0])
             else:
-                results.append(app)
-        return results
+                search_string = "flatpak search \"{0}\" --columns=remotes,application,branch,description".format(terms[0])
+            for term in terms[1:]:
+                search_string += " | grep -i \"{0}\"".format(term)
+
+            table = self.executor.call(search_string, self.search_regex, None, True, [0, 1])
+            for row in table:
+                appid = self._make_id(row[0], row[1], row[2])
+                app = self.getapp(appid)
+                if app is None:
+                    if len(appid.split('.')) >= 3: # Workaround due to some flatpak apps having invalid IDs
+                        raise Exception("Could not find app {0} in results".format(appid))
+                else:
+                    results[appid] = app
+        return results.values()
 
     def local(self, terms):
         start_time = time.perf_counter()
@@ -106,6 +110,27 @@ class FlatpakSource(AbstractSource):
             print("flatpak getapp local system {}".format(time.perf_counter() - start_time))
         start_time = time.perf_counter()
 
+        output = self.executor.call("sudo -u {0} flatpak remote-info {1} {2}//{3}".format(self.user, remote, id, branch), None, None, True, [0, 1])
+        for line in output.splitlines():
+            match = self.name_description_regex.match(line)
+            if match:
+                row = match.groups()
+                if app.name == '':
+                    app.name = row[0]
+                if app.desc == '':
+                    app.desc = row[1]
+            match = self.description_regex.match(line)
+            if match:
+                row = match.groups()
+                if row[0] == 'Version':
+                    app.version = row[1]
+                if row[0] == 'Commit':
+                    app.remote_checksum = row[1]
+
+        if self.service.debug['performance']:
+            print("flatpak getapp remote user {}".format(time.perf_counter() - start_time))
+        start_time = time.perf_counter()
+
         output = self.executor.call("flatpak remote-info {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
         for line in output.splitlines():
             match = self.name_description_regex.match(line)
@@ -124,7 +149,7 @@ class FlatpakSource(AbstractSource):
                     app.remote_checksum = row[1]
 
         if self.service.debug['performance']:
-            print("flatpak getapp remote {}".format(time.perf_counter() - start_time))
+            print("flatpak getapp remote system {}".format(time.perf_counter() - start_time))
 
         if app.local_checksum is None and app.remote_checksum is None:
             return None
@@ -191,10 +216,7 @@ class FlatpakSource(AbstractSource):
         remote_apps = {}
         remotes_done = set()
         for user in False, True:
-            if user:
-                remotes = self.executor.call("sudo -u {} flatpak remotes | cut -f1".format(self.user)).splitlines()
-            else:
-                remotes = self.executor.call("flatpak remotes | cut -f1").splitlines()
+            remotes = self._get_remotes(user)
             for remote in remotes:
                 if remote not in remotes_done:
                     if user:
@@ -214,6 +236,12 @@ class FlatpakSource(AbstractSource):
                     start_time = time.perf_counter()
                     remotes_done.add(remote)
         return remote_apps
+
+    def _get_remotes(self, user):
+        if user:
+            return self.executor.call("sudo -u {} flatpak remotes | cut -f1".format(self.user)).splitlines()
+        else:
+            return self.executor.call("flatpak remotes | cut -f1").splitlines()
 
 
 class FlatpakApp(App):
