@@ -45,7 +45,7 @@ class FlatpakSource(AbstractSource):
                 appid = self._make_id(row[0], row[1], row[2])
                 results[appid] = all_apps[appid]
 
-        self.log_performance("flatpak search {}".format(time.perf_counter() - start_time))
+        self.log('performance', "flatpak search {}".format(time.perf_counter() - start_time))
         return results.values()
 
     def local(self, terms):
@@ -57,7 +57,7 @@ class FlatpakSource(AbstractSource):
             if terms is None or localapp.match(terms):
                 results.append(localapp)
 
-        self.log_performance("flatpak local {}".format(time.perf_counter() - start_time))
+        self.log('performance', "flatpak local {}".format(time.perf_counter() - start_time))
         return results
 
     def getapp(self, appid):
@@ -82,7 +82,7 @@ class FlatpakSource(AbstractSource):
                     app.installed = row[1]
                 if row[0] == 'Commit':
                     app.local_checksum = row[1]
-        self.log_performance("flatpak getapp local user {}".format(time.perf_counter() - start_time))
+        self.log('performance', "flatpak getapp local user {}".format(time.perf_counter() - start_time))
         start_time = time.perf_counter()
 
         if app.local_checksum is None:
@@ -103,7 +103,7 @@ class FlatpakSource(AbstractSource):
                         app.installed = row[1]
                     if row[0] == 'Commit':
                         app.local_checksum = row[1]
-            self.log_performance("flatpak getapp local system {}".format(time.perf_counter() - start_time))
+            self.log('performance', "flatpak getapp local system {}".format(time.perf_counter() - start_time))
             start_time = time.perf_counter()
 
         output = self.executor.call("sudo -u {0} flatpak remote-info {1} {2}//{3}".format(self.user, remote, id, branch), None, None, True, [0, 1])
@@ -122,7 +122,7 @@ class FlatpakSource(AbstractSource):
                     app.version = row[1]
                 if row[0] == 'Commit':
                     app.remote_checksum = row[1]
-        self.log_performance("flatpak getapp remote user {}".format(time.perf_counter() - start_time))
+        self.log('performance', "flatpak getapp remote user {}".format(time.perf_counter() - start_time))
         start_time = time.perf_counter()
 
         if app.remote_checksum is None:
@@ -142,7 +142,7 @@ class FlatpakSource(AbstractSource):
                         app.version = row[1]
                     if row[0] == 'Commit':
                         app.remote_checksum = row[1]
-            self.log_performance("flatpak getapp remote system {}".format(time.perf_counter() - start_time))
+            self.log('performance', "flatpak getapp remote system {}".format(time.perf_counter() - start_time))
 
         if app.local_checksum is None and app.remote_checksum is None:
             return None
@@ -206,7 +206,7 @@ class FlatpakSource(AbstractSource):
                 if appid not in results:
                     results[appid] = FlatpakApp(self, appid, app['name'], '', app['version'], None, None, app['remote_checksum'], None)
 
-        self.log_performance("flatpak _get_installed_ids {}".format(time.perf_counter() - start_time))
+        self.log('performance', "flatpak _get_installed_ids {}".format(time.perf_counter() - start_time))
         return results
 
     def _get_remote_info(self):
@@ -230,7 +230,7 @@ class FlatpakSource(AbstractSource):
                             'remote_checksum': row[3],
                             'name': row[4]
                         }
-                    self.log_performance("flatpak _get_installed_ids parse appstream {} {}".format(remote, time.perf_counter() - start_time))
+                    self.log('performance', "flatpak _get_installed_ids parse appstream {} {}".format(remote, time.perf_counter() - start_time))
                     start_time = time.perf_counter()
                     remotes_done.add(remote)
         return remote_apps

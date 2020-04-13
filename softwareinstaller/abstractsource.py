@@ -80,6 +80,6 @@ class AbstractSource:
         raise Exception("Must override this method")
 
 
-    def log_performance(self, message):
-        if self.service.debug['performance'] and self.service.output_log['performance'] is not None:
-            print(message, file=self.service.output_log['performance'])
+    def log(self, output, message):
+        if self.service.debug[output] and output in self.service.output_log and self.service.output_log[output] is not None:
+            print(message, file=self.service.output_log[output])

@@ -37,7 +37,7 @@ class PacmanSource(AbstractSource):
         for row in table:
             results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0]), False))
 
-        self.log_performance("pacman search {}".format(time.perf_counter() - start_time))
+        self.log('performance', "pacman search {}".format(time.perf_counter() - start_time))
         return results
 
     def local(self, terms):
@@ -55,7 +55,7 @@ class PacmanSource(AbstractSource):
             if app is not None and (terms is None or app.match(terms)):
                 results.append(app)
 
-        self.log_performance("pacman local {}".format(time.perf_counter() - start_time))
+        self.log('performance', "pacman local {}".format(time.perf_counter() - start_time))
         return results
 
     def getapp(self, appid, installedids=None, skipremote=False):
@@ -82,7 +82,7 @@ class PacmanSource(AbstractSource):
             if desc is None:
                 return None
 
-        self.log_performance("pacman getapp {}".format(time.perf_counter() - start_time))
+        self.log('performance', "pacman getapp {}".format(time.perf_counter() - start_time))
         return App(self, appid, appid, desc, version, installedids.get(appid), False)
 
     def install(self, app):

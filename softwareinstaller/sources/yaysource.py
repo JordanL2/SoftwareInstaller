@@ -39,7 +39,7 @@ class YaySource(AbstractSource):
         for row in table:
             results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0]), False))
 
-        self.log_performance("yay search {}".format(time.perf_counter() - start_time))
+        self.log('performance', "yay search {}".format(time.perf_counter() - start_time))
         return results
 
     def local(self, terms):
@@ -51,7 +51,7 @@ class YaySource(AbstractSource):
             if terms is None or app.match(terms):
                 results.append(app)
 
-        self.log_performance("yay local {}".format(time.perf_counter() - start_time))
+        self.log('performance', "yay local {}".format(time.perf_counter() - start_time))
         return results
 
     def getapp(self, appid):
@@ -83,7 +83,7 @@ class YaySource(AbstractSource):
                         app.desc = row[1]
                 apps.append(app)
 
-        self.log_performance("yay getapps {}".format(time.perf_counter() - start_time))
+        self.log('performance', "yay getapps {}".format(time.perf_counter() - start_time))
         return apps
 
     def install(self, app):
