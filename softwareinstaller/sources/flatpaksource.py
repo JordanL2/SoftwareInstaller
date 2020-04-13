@@ -57,76 +57,74 @@ class FlatpakSource(AbstractSource):
             print("flatpak local {}".format(time.perf_counter() - start_time))
         return results
 
-    def getapp(self, appid, local_info=True, remote_info=True):
+    def getapp(self, appid):
         start_time = time.perf_counter()
         remote, id, branch = self._split_id(appid)
         app = FlatpakApp(self, appid, '', '', None, None, False, None, None)
 
-        if local_info:
-            output = self.executor.call("sudo -u {0} flatpak info {1}//{2}".format(self.user, id, branch), None, None, True, [0, 1])
-            for line in output.splitlines():
-                match = self.name_description_regex.match(line)
-                if match:
-                    app.user = True
-                    row = match.groups()
-                    if app.name == '':
-                        app.name = row[0]
-                    if app.desc == '':
-                        app.desc = row[1]
-                match = self.description_regex.match(line)
-                if match:
-                    row = match.groups()
-                    if row[0] == 'Version':
-                        app.installed = row[1]
-                    if row[0] == 'Commit':
-                        app.local_checksum = row[1]
+        output = self.executor.call("sudo -u {0} flatpak info {1}//{2}".format(self.user, id, branch), None, None, True, [0, 1])
+        for line in output.splitlines():
+            match = self.name_description_regex.match(line)
+            if match:
+                app.user = True
+                row = match.groups()
+                if app.name == '':
+                    app.name = row[0]
+                if app.desc == '':
+                    app.desc = row[1]
+            match = self.description_regex.match(line)
+            if match:
+                row = match.groups()
+                if row[0] == 'Version':
+                    app.installed = row[1]
+                if row[0] == 'Commit':
+                    app.local_checksum = row[1]
 
-            if self.service.debug['performance']:
-                print("flatpak getapp local user {}".format(time.perf_counter() - start_time))
-            start_time = time.perf_counter()
+        if self.service.debug['performance']:
+            print("flatpak getapp local user {}".format(time.perf_counter() - start_time))
+        start_time = time.perf_counter()
 
-            output = self.executor.call("flatpak info {0}//{1}".format(id, branch), None, None, True, [0, 1])
-            for line in output.splitlines():
-                match = self.name_description_regex.match(line)
-                if match:
-                    app.user = False
-                    row = match.groups()
-                    if app.name == '':
-                        app.name = row[0]
-                    if app.desc == '':
-                        app.desc = row[1]
-                match = self.description_regex.match(line)
-                if match:
-                    row = match.groups()
-                    if row[0] == 'Version':
-                        app.installed = row[1]
-                    if row[0] == 'Commit':
-                        app.local_checksum = row[1]
+        output = self.executor.call("flatpak info {0}//{1}".format(id, branch), None, None, True, [0, 1])
+        for line in output.splitlines():
+            match = self.name_description_regex.match(line)
+            if match:
+                app.user = False
+                row = match.groups()
+                if app.name == '':
+                    app.name = row[0]
+                if app.desc == '':
+                    app.desc = row[1]
+            match = self.description_regex.match(line)
+            if match:
+                row = match.groups()
+                if row[0] == 'Version':
+                    app.installed = row[1]
+                if row[0] == 'Commit':
+                    app.local_checksum = row[1]
 
-            if self.service.debug['performance']:
-                print("flatpak getapp local system {}".format(time.perf_counter() - start_time))
-            start_time = time.perf_counter()
+        if self.service.debug['performance']:
+            print("flatpak getapp local system {}".format(time.perf_counter() - start_time))
+        start_time = time.perf_counter()
 
-        if remote_info:
-            output = self.executor.call("flatpak remote-info --cached {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
-            for line in output.splitlines():
-                match = self.name_description_regex.match(line)
-                if match:
-                    row = match.groups()
-                    if app.name == '':
-                        app.name = row[0]
-                    if app.desc == '':
-                        app.desc = row[1]
-                match = self.description_regex.match(line)
-                if match:
-                    row = match.groups()
-                    if row[0] == 'Version':
-                        app.version = row[1]
-                    if row[0] == 'Commit':
-                        app.remote_checksum = row[1]
+        output = self.executor.call("flatpak remote-info {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
+        for line in output.splitlines():
+            match = self.name_description_regex.match(line)
+            if match:
+                row = match.groups()
+                if app.name == '':
+                    app.name = row[0]
+                if app.desc == '':
+                    app.desc = row[1]
+            match = self.description_regex.match(line)
+            if match:
+                row = match.groups()
+                if row[0] == 'Version':
+                    app.version = row[1]
+                if row[0] == 'Commit':
+                    app.remote_checksum = row[1]
 
-            if self.service.debug['performance']:
-                print("flatpak getapp remote {}".format(time.perf_counter() - start_time))
+        if self.service.debug['performance']:
+            print("flatpak getapp remote {}".format(time.perf_counter() - start_time))
 
         if app.local_checksum is None and app.remote_checksum is None:
             return None
