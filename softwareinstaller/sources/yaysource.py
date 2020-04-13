@@ -47,8 +47,7 @@ class YaySource(AbstractSource):
             if terms is None or app.match(terms):
                 results.append(app)
 
-        if self.service.debug['performance']:
-            print("yay local {}".format(time.perf_counter() - start_time))
+        self.log_performance("yay local {}".format(time.perf_counter() - start_time))
         return results
 
     def getapp(self, appid):
@@ -80,8 +79,7 @@ class YaySource(AbstractSource):
                         app.desc = row[1]
                 apps.append(app)
 
-        if self.service.debug['performance']:
-            print("yay getapps {}".format(time.perf_counter() - start_time))
+        self.log_performance("yay getapps {}".format(time.perf_counter() - start_time))
         return apps
 
     def install(self, app):

@@ -57,8 +57,7 @@ class FlatpakSource(AbstractSource):
             if terms is None or localapp.match(terms):
                 results.append(localapp)
 
-        if self.service.debug['performance']:
-            print("flatpak local {}".format(time.perf_counter() - start_time))
+        self.log_performance("flatpak local {}".format(time.perf_counter() - start_time))
         return results
 
     def getapp(self, appid):
@@ -84,8 +83,7 @@ class FlatpakSource(AbstractSource):
                 if row[0] == 'Commit':
                     app.local_checksum = row[1]
 
-        if self.service.debug['performance']:
-            print("flatpak getapp local user {}".format(time.perf_counter() - start_time))
+        self.log_performance("flatpak getapp local user {}".format(time.perf_counter() - start_time))
         start_time = time.perf_counter()
 
         output = self.executor.call("flatpak info {0}//{1}".format(id, branch), None, None, True, [0, 1])
@@ -106,8 +104,7 @@ class FlatpakSource(AbstractSource):
                 if row[0] == 'Commit':
                     app.local_checksum = row[1]
 
-        if self.service.debug['performance']:
-            print("flatpak getapp local system {}".format(time.perf_counter() - start_time))
+        self.log_performance("flatpak getapp local system {}".format(time.perf_counter() - start_time))
         start_time = time.perf_counter()
 
         output = self.executor.call("sudo -u {0} flatpak remote-info {1} {2}//{3}".format(self.user, remote, id, branch), None, None, True, [0, 1])
@@ -127,8 +124,7 @@ class FlatpakSource(AbstractSource):
                 if row[0] == 'Commit':
                     app.remote_checksum = row[1]
 
-        if self.service.debug['performance']:
-            print("flatpak getapp remote user {}".format(time.perf_counter() - start_time))
+        self.log_performance("flatpak getapp remote user {}".format(time.perf_counter() - start_time))
         start_time = time.perf_counter()
 
         output = self.executor.call("flatpak remote-info {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
@@ -148,8 +144,7 @@ class FlatpakSource(AbstractSource):
                 if row[0] == 'Commit':
                     app.remote_checksum = row[1]
 
-        if self.service.debug['performance']:
-            print("flatpak getapp remote system {}".format(time.perf_counter() - start_time))
+        self.log_performance("flatpak getapp remote system {}".format(time.perf_counter() - start_time))
 
         if app.local_checksum is None and app.remote_checksum is None:
             return None
@@ -207,8 +202,7 @@ class FlatpakSource(AbstractSource):
             if appid in remote_apps:
                 results[appid].version = remote_apps[appid]['version']
                 results[appid].remote_checksum = remote_apps[appid]['remote_checksum']
-        if self.service.debug['performance']:
-            print("flatpak _get_installed_ids {}".format(time.perf_counter() - start_time))
+        self.log_performance("flatpak _get_installed_ids {}".format(time.perf_counter() - start_time))
         return results
 
     def _get_remote_info(self):
@@ -231,8 +225,7 @@ class FlatpakSource(AbstractSource):
                             'version': row[3],
                             'remote_checksum': row[2]
                         }
-                    if self.service.debug['performance']:
-                        print("flatpak _get_installed_ids parse appstream {} {}".format(remote, time.perf_counter() - start_time))
+                    self.log_performance("flatpak _get_installed_ids parse appstream {} {}".format(remote, time.perf_counter() - start_time))
                     start_time = time.perf_counter()
                     remotes_done.add(remote)
         return remote_apps

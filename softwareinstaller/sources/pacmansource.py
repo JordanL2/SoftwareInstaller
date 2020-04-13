@@ -51,8 +51,7 @@ class PacmanSource(AbstractSource):
             if app is not None and (terms is None or app.match(terms)):
                 results.append(app)
 
-        if self.service.debug['performance']:
-            print("pacman local {}".format(time.perf_counter() - start_time))
+        self.log_performance("pacman local {}".format(time.perf_counter() - start_time))
         return results
 
     def getapp(self, appid, installedids=None, skipremote=False):
@@ -79,8 +78,7 @@ class PacmanSource(AbstractSource):
             if desc is None:
                 return None
 
-        if self.service.debug['performance']:
-            print("pacman getapp {}".format(time.perf_counter() - start_time))
+        self.log_performance("pacman getapp {}".format(time.perf_counter() - start_time))
         return App(self, appid, appid, desc, version, installedids.get(appid), False)
 
     def install(self, app):

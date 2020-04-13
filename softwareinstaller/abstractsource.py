@@ -78,3 +78,8 @@ class AbstractSource:
     #     list of App instances if the list has changed, otherwise None
     def update(self, apps, autoconfirm):
         raise Exception("Must override this method")
+
+
+    def log_performance(self, message):
+        if self.service.debug['performance'] and self.service.output_err is not None:
+            print(message, file=self.service.output_err)
