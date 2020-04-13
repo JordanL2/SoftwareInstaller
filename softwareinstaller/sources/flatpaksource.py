@@ -82,30 +82,29 @@ class FlatpakSource(AbstractSource):
                     app.installed = row[1]
                 if row[0] == 'Commit':
                     app.local_checksum = row[1]
-
         self.log_performance("flatpak getapp local user {}".format(time.perf_counter() - start_time))
         start_time = time.perf_counter()
 
-        output = self.executor.call("flatpak info {0}//{1}".format(id, branch), None, None, True, [0, 1])
-        for line in output.splitlines():
-            match = self.name_description_regex.match(line)
-            if match:
-                app.user = False
-                row = match.groups()
-                if app.name == '':
-                    app.name = row[0]
-                if app.desc == '':
-                    app.desc = row[1]
-            match = self.description_regex.match(line)
-            if match:
-                row = match.groups()
-                if row[0] == 'Version':
-                    app.installed = row[1]
-                if row[0] == 'Commit':
-                    app.local_checksum = row[1]
-
-        self.log_performance("flatpak getapp local system {}".format(time.perf_counter() - start_time))
-        start_time = time.perf_counter()
+        if app.local_checksum is None:
+            output = self.executor.call("flatpak info {0}//{1}".format(id, branch), None, None, True, [0, 1])
+            for line in output.splitlines():
+                match = self.name_description_regex.match(line)
+                if match:
+                    app.user = False
+                    row = match.groups()
+                    if app.name == '':
+                        app.name = row[0]
+                    if app.desc == '':
+                        app.desc = row[1]
+                match = self.description_regex.match(line)
+                if match:
+                    row = match.groups()
+                    if row[0] == 'Version':
+                        app.installed = row[1]
+                    if row[0] == 'Commit':
+                        app.local_checksum = row[1]
+            self.log_performance("flatpak getapp local system {}".format(time.perf_counter() - start_time))
+            start_time = time.perf_counter()
 
         output = self.executor.call("sudo -u {0} flatpak remote-info {1} {2}//{3}".format(self.user, remote, id, branch), None, None, True, [0, 1])
         for line in output.splitlines():
@@ -123,28 +122,27 @@ class FlatpakSource(AbstractSource):
                     app.version = row[1]
                 if row[0] == 'Commit':
                     app.remote_checksum = row[1]
-
         self.log_performance("flatpak getapp remote user {}".format(time.perf_counter() - start_time))
         start_time = time.perf_counter()
 
-        output = self.executor.call("flatpak remote-info {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
-        for line in output.splitlines():
-            match = self.name_description_regex.match(line)
-            if match:
-                row = match.groups()
-                if app.name == '':
-                    app.name = row[0]
-                if app.desc == '':
-                    app.desc = row[1]
-            match = self.description_regex.match(line)
-            if match:
-                row = match.groups()
-                if row[0] == 'Version':
-                    app.version = row[1]
-                if row[0] == 'Commit':
-                    app.remote_checksum = row[1]
-
-        self.log_performance("flatpak getapp remote system {}".format(time.perf_counter() - start_time))
+        if app.remote_checksum is None:
+            output = self.executor.call("flatpak remote-info {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
+            for line in output.splitlines():
+                match = self.name_description_regex.match(line)
+                if match:
+                    row = match.groups()
+                    if app.name == '':
+                        app.name = row[0]
+                    if app.desc == '':
+                        app.desc = row[1]
+                match = self.description_regex.match(line)
+                if match:
+                    row = match.groups()
+                    if row[0] == 'Version':
+                        app.version = row[1]
+                    if row[0] == 'Commit':
+                        app.remote_checksum = row[1]
+            self.log_performance("flatpak getapp remote system {}".format(time.perf_counter() - start_time))
 
         if app.local_checksum is None and app.remote_checksum is None:
             return None
