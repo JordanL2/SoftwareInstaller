@@ -17,7 +17,7 @@ class AbstractSource:
         self.check_updated = True
 
         self.config_options = {
-            "enabled": [bool, False]
+            "enable": [bool, None]
         }
 
 

@@ -66,9 +66,11 @@ class SoftwareService:
         if self.config['sources.autodetect']:
             for sourcegroup in self.allsources:
                 for source in sourcegroup:
-                    if source.testinstalled():
-                        self.sources.append(source)
-                        break
+                    config_id = "sources.{}.enable".format(source.id)
+                    if self.config[config_id] != False:
+                        if source.testinstalled():
+                            self.sources.append(source)
+                            break
         else:
             for sourcegroup in self.allsources:
                 for source in sourcegroup:
