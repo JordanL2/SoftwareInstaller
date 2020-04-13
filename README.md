@@ -78,10 +78,8 @@ Optionally, you can configure the tool with a config file placed at
 ~/.config/softwareinstaller/config
 ```
 
-Each line is a KEY=VALUE pair, eg:
+Each line is a KEY=VALUE pair.
 
-```
-sources.autodetect=true
 ```
 
 ## Configuration options
@@ -103,12 +101,12 @@ Explicitly enables or disables a given source (has no effect if sources.autodete
 
 
 ```
-install.tasks.pre
-install.tasks.post
-remove.tasks.pre
-remove.tasks.post
-update.tasks.pre
-update.tasks.post
+install.tasks.pre=<COMMAND>
+install.tasks.post=<COMMAND>
+remove.tasks.pre=<COMMAND>
+remove.tasks.post=<COMMAND>
+update.tasks.pre=<COMMAND>
+update.tasks.post=<COMMAND>
 ```
 
 Adds a script or command to be run before or after an install, remove or update run. Can be a shell command. These options can each be given as many times as needed, and will run each task in the order given.
