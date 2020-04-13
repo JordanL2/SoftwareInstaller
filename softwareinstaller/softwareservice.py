@@ -173,7 +173,7 @@ class SoftwareService:
 
         for sourceid in apps.copy().keys():
             source = self.getsource(sourceid)
-            print("\n*** UPDATE SOURCE: {} ***".format(source.name()), file=self.output_std)
+            print("\n*** UPDATE SOURCE: {} ***".format(source.name), file=self.output_std)
             updatedlist = source.update(apps[sourceid], autoconfirm)
             if updatedlist is not None:
                 apps[sourceid] = updatedlist
