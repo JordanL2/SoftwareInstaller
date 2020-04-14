@@ -83,6 +83,15 @@ Each line is a KEY=VALUE pair.
 ## Configuration options
 
 ```
+ref.delimiter=<DELIMITER>
+```
+
+Default: %
+
+Determines the delimiter in application references.
+
+
+```
 sources.autodetect=true|false
 ```
 
