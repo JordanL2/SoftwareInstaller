@@ -108,6 +108,8 @@ class FlatpakSource(AbstractSource):
 
         output = self.executor.call("sudo -u {0} flatpak remote-info {1} {2}//{3}".format(self.user, remote, id, branch), None, None, True, [0, 1])
         for line in output.splitlines():
+            if app.version is None:
+                app.version = ''
             match = self.name_description_regex.match(line)
             if match:
                 row = match.groups()
@@ -128,6 +130,8 @@ class FlatpakSource(AbstractSource):
         if app.remote_checksum is None:
             output = self.executor.call("flatpak remote-info {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
             for line in output.splitlines():
+                if app.version is None:
+                    app.version = ''
                 match = self.name_description_regex.match(line)
                 if match:
                     row = match.groups()
