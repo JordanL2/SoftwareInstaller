@@ -188,7 +188,7 @@ class SoftwareInstallerCLI:
                 row = [
                     indicator,
                     result.source.name,
-                    result.superid(),
+                    self.service.make_superid(sourceid, result.id),
                     result.name,
                     (result.version if result.version is not None else '[Not Found]'),
                     (result.installed if result.installed is not None else ''),

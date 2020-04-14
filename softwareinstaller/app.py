@@ -30,9 +30,6 @@ class App:
 	def remove(self):
 		self.source.remove(self)
 
-	def superid(self):
-		return self.source.id + ':' + self.id
-
 	def match(self, terms):
 		for term in terms:
 			if not (term.lower() in self.name.lower() or term.lower() in self.id.lower() or term.lower() in self.desc.lower()):

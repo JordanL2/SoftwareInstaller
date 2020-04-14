@@ -46,6 +46,7 @@ class SoftwareService:
 
     def default_config(self):
         self.config_options = {
+            'ref.delimiter': [str, ':'],
             'sources.autodetect': [bool, True],
             'install.tasks.pre': [list, []],
             'install.tasks.post': [list, []],
@@ -113,7 +114,7 @@ class SoftwareService:
         return results
 
     def getapp(self, superid):
-        sourceid, appid = self._split_superid(superid)
+        sourceid, appid = self.split_superid(superid)
         source = self.getsource(sourceid)
         if source is None:
             raise Exception("No such sourceid")
@@ -202,6 +203,9 @@ class SoftwareService:
         if self.output_std is not None:
             print(message, file=self.output_std)
 
-    def _split_superid(self, superid):
-        i = superid.index(':')
+    def make_superid(self, source_id, app_id):
+        return source_id + self.config['ref.delimiter'] + app_id
+
+    def split_superid(self, superid):
+        i = superid.index(self.config['ref.delimiter'])
         return (superid[0:i], superid[i + 1:])
