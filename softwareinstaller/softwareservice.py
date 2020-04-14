@@ -46,7 +46,7 @@ class SoftwareService:
 
     def default_config(self):
         self.config_options = {
-            'ref.delimiter': [str, ':'],
+            'apps.ref.delimiter': [str, ':'],
             'sources.autodetect': [bool, True],
             'install.tasks.pre': [list, []],
             'install.tasks.post': [list, []],
@@ -204,8 +204,8 @@ class SoftwareService:
             print(message, file=self.output_std)
 
     def make_superid(self, source_id, app_id):
-        return source_id + self.config['ref.delimiter'] + app_id
+        return source_id + self.config['apps.ref.delimiter'] + app_id
 
     def split_superid(self, superid):
-        i = superid.index(self.config['ref.delimiter'])
+        i = superid.index(self.config['apps.ref.delimiter'])
         return (superid[0:i], superid[i + 1:])

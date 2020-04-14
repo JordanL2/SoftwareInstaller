@@ -83,7 +83,7 @@ Each line is a KEY=VALUE pair.
 ## Configuration options
 
 ```
-ref.delimiter=<DELIMITER>
+apps.ref.delimiter=<DELIMITER>
 ```
 
 Default: :

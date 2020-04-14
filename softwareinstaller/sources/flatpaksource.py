@@ -177,10 +177,10 @@ class FlatpakSource(AbstractSource):
         return None
 
     def _make_id(self, remote, id, branch):
-        return "{1}{0}{2}{0}{3}".format(self.service.config['ref.delimiter'], remote, id, branch)
+        return "{1}{0}{2}{0}{3}".format(self.service.config['apps.ref.delimiter'], remote, id, branch)
 
     def _split_id(self, appid):
-        elements = appid.split(self.service.config['ref.delimiter'])
+        elements = appid.split(self.service.config['apps.ref.delimiter'])
         if len(elements) != 3:
             raise Exception("{0} is not a valid Flatpak app ID".format(appid))
         return elements
