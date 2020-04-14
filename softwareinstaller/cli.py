@@ -180,12 +180,11 @@ class SoftwareInstallerCLI:
         for sourceid in results.keys():
             for result in sorted(results[sourceid], key=lambda x: x.name.lower()):
                 indicator = result.status()
-                if indicator == 'N':
-                    indicator = ''
-                    if not as_csv:
+                if not as_csv:
+                    if indicator == 'N':
                         indicator = '   '
-                else:
-                    indicator = "[{0}]".format(indicator)
+                    else:
+                        indicator = "[{0}]".format(indicator)
                 row = [
                     indicator,
                     result.source.name,
