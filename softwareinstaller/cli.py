@@ -177,7 +177,7 @@ class SoftwareInstallerCLI:
         csv = '--csv' in flags
         noheader = '--noheader' in flags
         for sourceid in results.keys():
-            for result in results[sourceid]:
+            for result in sorted(results[sourceid], key=lambda x: x.id):
                 indicator = result.status()
                 if indicator == 'N':
                     indicator = ''

@@ -226,7 +226,7 @@ class FlatpakSource(AbstractSource):
                         branch = row[2]
                         appid = self._make_id(remote, id, branch)
                         remote_apps[appid] = {
-                            'version': row[0],
+                            'version': row[0].strip(),
                             'remote_checksum': row[3],
                             'name': row[4]
                         }
