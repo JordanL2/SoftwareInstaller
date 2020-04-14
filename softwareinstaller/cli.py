@@ -3,6 +3,7 @@
 from softwareinstaller.softwareservice import SoftwareService
 from softwareinstaller.app import App
 
+import csv
 import sys
 
 
@@ -174,14 +175,14 @@ class SoftwareInstallerCLI:
             header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR']
         columns = len(header)
         maxwidth = [len(header[i]) for i in range(0, columns)]
-        csv = '--csv' in flags
+        as_csv = '--csv' in flags
         noheader = '--noheader' in flags
         for sourceid in results.keys():
             for result in sorted(results[sourceid], key=lambda x: x.name.lower()):
                 indicator = result.status()
                 if indicator == 'N':
                     indicator = ''
-                    if not csv:
+                    if not as_csv:
                         indicator = '   '
                 else:
                     indicator = "[{0}]".format(indicator)
@@ -194,16 +195,16 @@ class SoftwareInstallerCLI:
                     (result.installed if result.installed is not None else ''),
                     (('USER' if result.user else 'SYSTEM') if result.isinstalled() else '')
                 ]
-                if not csv:
+                if not as_csv:
                     for i in range(0, columns):
                         if len(row[i]) > maxwidth[i]:
                             maxwidth[i] = len(row[i])
                 table.append(row)
-        if csv:
+        if as_csv:
+            csvwriter = csv.writer(sys.stdout)
             if not noheader:
-                print(str.join(' ', ["\"{0}\"".format(a) for a in header]))
-            for row in table:
-                print(str.join(',', ["\"{0}\"".format(a) for a in row]))
+                csvwriter.writerow(header)
+            csvwriter.writerows(table)
         else:
             if not noheader and len(table) > 0:
                 print(str.join(' ', [format(header[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
