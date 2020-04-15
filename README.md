@@ -18,7 +18,7 @@ sudo pip3 install .
 # Usage
 
 ```
-search <NAME> [--csv] [--noheader] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]] [--columns=<COLUMN>[,<COLUMN>...]]
+search <NAME> [--source=<SOURCE>[,<SOURCE>...]] [--status=N,I,U] [--csv] [--noheader] [--columns=<COLUMN>[,<COLUMN>...]]
 ```
 Search all sources for any package matching `<NAME>`.
 Status indicator:
@@ -26,16 +26,16 @@ Status indicator:
 	* `[I]` - Installed, up to date
 	* `[U]` - Installed, an update is available.
 
-If the --csv flag is present, outputs table in CSV format.
-
-The --noheader flag suppresses the header row.
+The --source argument restricts searches to the given source(s), identified by the source ID. Multiple sources are possible, seperated by a comma, e.g. "flatpak,pacman".
 
 The --status argument filters the results based on its installation status. Multiple status types are possible, seperated by a comma, e.g. "I,U".
 * N - Not installed
 * I - Installed, up to date
 * U - Installed, an update is available
 
-The --source argument only searches the given source(s), identified by the source ID. Multiple sources are possible, seperated by a comma, e.g. "flatpak,pacman".
+If the --csv flag is present, outputs table in CSV format.
+
+The --noheader flag suppresses the header row.
 
 The --columns argument lets you define the columns in the search results. The available columns are:
 
@@ -48,11 +48,11 @@ The --columns argument lets you define the columns in the search results. The av
 * FOR
 
 ```
-local [<NAME>] [--csv] [--noheader] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]] [--columns=<COLUMN>[,<COLUMN>...]]
+local [<NAME>] [--source=<SOURCE>[,<SOURCE>...]] [--status=N,I,U] [--csv] [--noheader] [--columns=<COLUMN>[,<COLUMN>...]]
 ```
 Search locally installed packages for any package matching `<NAME>`. `<NAME>` is optional, if not given returns all packages. The table format is the same as `search`.
 
-The --csv, --noheader, --status, --source and --columns arguments work the same as they do for `search`.
+The --source, --status, --csv, --noheader and --columns arguments work the same as they do for `search`.
 
 ```
 info <REF>
