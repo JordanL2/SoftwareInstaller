@@ -21,10 +21,11 @@ sudo pip3 install .
 search <NAME> [--source=<SOURCE>[,<SOURCE>...]] [--status=N,I,U] [--csv] [--noheader] [--columns=<COLUMN>[,<COLUMN>...]]
 ```
 Search all sources for any package matching `<NAME>`.
+	
 Status indicator:
-	* Blank - Uninstalled
-	* `[I]` - Installed, up to date
-	* `[U]` - Installed, an update is available.
+* Blank - Uninstalled
+* `[I]` - Installed, up to date
+* `[U]` - Installed, an update is available.
 
 The --source argument restricts searches to the given source(s), identified by the source ID. Multiple sources are possible, seperated by a comma, e.g. "flatpak,pacman".
 
