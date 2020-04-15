@@ -160,7 +160,7 @@ class SoftwareInstallerCLI:
         runtimes = 0
         while (forcerun and runtimes == 0) or (apps is not None and len(apps) > 0):
             if not autoconfirm and not specific and not forcerun:
-                self._outputresults(apps, flags, ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR'])
+                self._outputresults(apps, flags, ['SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR'])
                 text = input("CONFIRM? [Y/n]: ")
                 if text.lower() != 'y':
                     sys.exit()
@@ -185,19 +185,19 @@ class SoftwareInstallerCLI:
                         indicator = '   '
                     else:
                         indicator = "[{0}]".format(indicator)
-                row = [
-                    indicator,
-                    result.source.name,
-                    self.service.make_superid(sourceid, result.id),
-                    result.name,
-                    (result.version if result.version is not None else '[Not Found]'),
-                    (result.installed if result.installed is not None else ''),
-                    (('USER' if result.user else 'SYSTEM') if result.isinstalled() else '')
-                ]
+                row = {
+                    'STATUS': indicator,
+                    'SOURCE': result.source.name,
+                    'REF': self.service.make_superid(sourceid, result.id),
+                    'NAME': result.name,
+                    'AVAILABLE': (result.version if result.version is not None else '[Not Found]'),
+                    'INSTALLED': (result.installed if result.installed is not None else ''),
+                    'FOR': (('USER' if result.user else 'SYSTEM') if result.isinstalled() else ''),
+                }
                 if not as_csv:
                     for i in range(0, columns):
-                        if len(row[i]) > maxwidth[i]:
-                            maxwidth[i] = len(row[i])
+                        if len(row[header[i]]) > maxwidth[i]:
+                            maxwidth[i] = len(row[header[i]])
                 table.append(row)
         if as_csv:
             csvwriter = csv.writer(sys.stdout)
@@ -208,7 +208,7 @@ class SoftwareInstallerCLI:
             if not noheader and len(table) > 0:
                 print(str.join(' ', [format(header[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
             for row in table:
-                print(str.join(' ', [format(row[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
+                print(str.join(' ', [format(row[header[i]], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
 
     def _get_status_flag(self, flags):
         if '--status' in flags:
