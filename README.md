@@ -18,7 +18,7 @@ sudo pip3 install .
 # Usage
 
 ```
-search <NAME> [--csv] [--noheader] [--status=N,I,U]  [--source=<SOURCE>[,<SOURCE>...]]
+search <NAME> [--csv] [--noheader] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]] [--columns=<COLUMN>[,<COLUMN>...]]
 ```
 Search all sources for any package matching `<NAME>`.
 Status indicator:
@@ -37,12 +37,22 @@ The --status argument filters the results based on its installation status. Mult
 
 The --source argument only searches the given source(s), identified by the source ID. Multiple sources are possible, seperated by a comma, e.g. "flatpak,pacman".
 
+The --columns argument lets you define the columns in the search results. The available columns are:
+
+* STATUS
+* SOURCE
+* REF
+* NAME
+* AVAILABLE
+* INSTALLED
+* FOR
+
 ```
-local [<NAME>] [--csv] [--noheader] [--status=N,I,U]
+local [<NAME>] [--csv] [--noheader] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]] [--columns=<COLUMN>[,<COLUMN>...]]
 ```
 Search locally installed packages for any package matching `<NAME>`. `<NAME>` is optional, if not given returns all packages. The table format is the same as `search`.
 
-The --csv, --noheader, --status and --source arguments work the same as they do for `search`.
+The --csv, --noheader, --status, --source and --columns arguments work the same as they do for `search`.
 
 ```
 info <REF>

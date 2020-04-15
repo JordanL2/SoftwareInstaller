@@ -18,7 +18,7 @@ class SoftwareInstallerCLI:
         self.service.output_err = sys.stderr
         self.service.output_log['performance'] = sys.stderr
 
-        self.valid_flags = set(['--status', '--source', '--csv', '--user', '--system', '-y', '--force', '--DEBUG-performance'])
+        self.valid_flags = set(['--status', '--source', '--csv', '--columns', '--user', '--system', '-y', '--force', '--DEBUG-performance'])
 
     def load_config(self):
         config_dir = "/home/{}/.config".format(self.service.executor.getuser())
@@ -92,8 +92,8 @@ class SoftwareInstallerCLI:
             self.help()
 
     def help(self):
-        print("search <TERM>... [--csv] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]]")
-        print("local [<TERM>...] [--csv] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]]")
+        print("search <TERM>... [--csv] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]] [--columns=<COLUMN>[,<COLUMN>...]]")
+        print("local [<TERM>...] [--csv] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]] [--columns=<COLUMN>[,<COLUMN>...]]")
         print("info <REF>")
         print("install <REF> [--user]")
         print("remove <REF>")
@@ -105,7 +105,10 @@ class SoftwareInstallerCLI:
         if '--source' in flags:
             sources = [self.service.getsource(s) for s in flags['--source'].split(',')]
         results = self.service.search(args, filters, sources)
-        self._outputresults(results, flags)
+        columns = None
+        if '--columns' in flags:
+            columns = flags['--columns'].split(',')
+        self._outputresults(results, flags, columns)
 
     def local(self, args, flags):
         filters = self._get_status_flag(flags)
@@ -113,7 +116,10 @@ class SoftwareInstallerCLI:
         if '--source' in flags:
             sources = [self.service.getsource(s) for s in flags['--source'].split(',')]
         results = self.service.local(args, filters, sources)
-        self._outputresults(results, flags)
+        columns = None
+        if '--columns' in flags:
+            columns = flags['--columns'].split(',')
+        self._outputresults(results, flags, columns)
 
     def info(self, args, flags):
         superid = args.pop(0)
