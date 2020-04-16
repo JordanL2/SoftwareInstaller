@@ -115,7 +115,6 @@ class FlatpakSource(AbstractSource):
                     if row[0] == 'Commit':
                         app.remote_checksum = row[1]
             self.log('performance', "flatpak getapp remote user {}".format(time.perf_counter() - start_time))
-            start_time = time.perf_counter()
 
         else:
             output = self.executor.call("flatpak info --system {0}//{1}".format(id, branch), None, None, True, [0, 1])
