@@ -65,7 +65,7 @@ class FlatpakSource(AbstractSource):
         app = FlatpakApp(self, appid, '', '', None, None, None, None)
 
         if user:
-            output = self.executor.call("sudo -u {0} flatpak info {1}//{2}".format(self.user, id, branch), None, None, True, [0, 1])
+            output = self.executor.call("sudo -u {0} flatpak info --user {1}//{2}".format(self.user, id, branch), None, None, True, [0, 1])
             for line in output.splitlines():
                 match = self.name_description_regex.match(line)
                 if match:
@@ -84,7 +84,7 @@ class FlatpakSource(AbstractSource):
             self.log('performance', "flatpak getapp local user {}".format(time.perf_counter() - start_time))
             start_time = time.perf_counter()
 
-            output = self.executor.call("sudo -u {0} flatpak remote-info {1} {2}//{3}".format(self.user, remote, id, branch), None, None, True, [0, 1])
+            output = self.executor.call("sudo -u {0} flatpak remote-info --user {1} {2}//{3}".format(self.user, remote, id, branch), None, None, True, [0, 1])
             for line in output.splitlines():
                 if app.version is None:
                     app.version = ''
@@ -106,7 +106,7 @@ class FlatpakSource(AbstractSource):
             start_time = time.perf_counter()
 
         else:
-            output = self.executor.call("flatpak info {0}//{1}".format(id, branch), None, None, True, [0, 1])
+            output = self.executor.call("flatpak info --system {0}//{1}".format(id, branch), None, None, True, [0, 1])
             for line in output.splitlines():
                 match = self.name_description_regex.match(line)
                 if match:
@@ -125,7 +125,7 @@ class FlatpakSource(AbstractSource):
             self.log('performance', "flatpak getapp local system {}".format(time.perf_counter() - start_time))
             start_time = time.perf_counter()
 
-            output = self.executor.call("flatpak remote-info {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
+            output = self.executor.call("flatpak remote-info --system {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
             for line in output.splitlines():
                 if app.version is None:
                     app.version = ''
@@ -186,9 +186,9 @@ class FlatpakSource(AbstractSource):
         remote_apps = self._get_remote_info()
 
         start_time = time.perf_counter()
-        table = self.executor.call("flatpak list --columns=version,origin,application,branch,active,name", self.ids_regex, None, True)
+        table = self.executor.call("flatpak list --system --columns=version,origin,application,branch,active,name", self.ids_regex, None, True)
         systemapps = len(table)
-        table += self.executor.call("sudo -u {0} flatpak list --columns=version,origin,application,branch,active,name".format(self.user), self.ids_regex, None, True)
+        table += self.executor.call("sudo -u {0} flatpak list --user --columns=version,origin,application,branch,active,name".format(self.user), self.ids_regex, None, True)
         results = {}
         for i, row in enumerate(table):
             appid = self._make_id(row[1], row[2], row[3], (i >= systemapps))
@@ -209,27 +209,24 @@ class FlatpakSource(AbstractSource):
     def _get_remote_info(self):
         start_time = time.perf_counter()
         remote_apps = {}
-        remotes_done = set()
         for user in False, True:
             remotes = self._get_remotes(user)
             for remote in remotes:
-                if remote not in remotes_done:
-                    if user:
-                        table = self.executor.call("sudo -u {} flatpak --user remote-ls {} --columns=version,application,branch,commit,name".format(self.user, remote), self.remote_regex, None, True)
-                    else:
-                        table = self.executor.call("flatpak remote-ls {} --columns=version,application,branch,commit,name".format(remote), self.remote_regex, None, True)
-                    for row in table:
-                        id = row[1]
-                        branch = row[2]
-                        appid = self._make_id(remote, id, branch, user)
-                        remote_apps[appid] = {
-                            'version': row[0].strip(),
-                            'remote_checksum': row[3],
-                            'name': row[4]
-                        }
-                    self.log('performance', "flatpak _get_installed_ids parse appstream {} {}".format(remote, time.perf_counter() - start_time))
-                    start_time = time.perf_counter()
-                    remotes_done.add(remote)
+                if user:
+                    table = self.executor.call("sudo -u {} flatpak --user remote-ls {} --columns=version,application,branch,commit,name".format(self.user, remote), self.remote_regex, None, True)
+                else:
+                    table = self.executor.call("flatpak remote-ls {} --columns=version,application,branch,commit,name".format(remote), self.remote_regex, None, True)
+                for row in table:
+                    id = row[1]
+                    branch = row[2]
+                    appid = self._make_id(remote, id, branch, user)
+                    remote_apps[appid] = {
+                        'version': row[0].strip(),
+                        'remote_checksum': row[3],
+                        'name': row[4]
+                    }
+                self.log('performance', "flatpak _get_installed_ids parse appstream {} {}".format(remote, time.perf_counter() - start_time))
+                start_time = time.perf_counter()
         return remote_apps
 
     def _get_remotes(self, user):
