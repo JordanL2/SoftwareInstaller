@@ -66,21 +66,33 @@ class FlatpakSource(AbstractSource):
 
         if user:
             output = self.executor.call("sudo -u {0} flatpak info --user {1}//{2}".format(self.user, id, branch), None, None, True, [0, 1])
+            matching_remote = False
+            name = ''
+            desc = ''
+            installed = None
+            local_checksum = None
             for line in output.splitlines():
                 match = self.name_description_regex.match(line)
                 if match:
                     row = match.groups()
-                    if app.name == '':
-                        app.name = row[0]
-                    if app.desc == '':
-                        app.desc = row[1]
+                    if name == '':
+                        name = row[0]
+                    if desc == '':
+                        desc = row[1]
                 match = self.description_regex.match(line)
                 if match:
                     row = match.groups()
                     if row[0] == 'Version':
-                        app.installed = row[1]
+                        installed = row[1]
                     if row[0] == 'Commit':
-                        app.local_checksum = row[1]
+                        local_checksum = row[1]
+                    if row[0] == 'Origin' and row[1] == remote:
+                        matching_remote = True
+            if matching_remote:
+                app.name = name
+                app.desc = desc
+                app.installed = installed
+                app.local_checksum = local_checksum
             self.log('performance', "flatpak getapp local user {}".format(time.perf_counter() - start_time))
             start_time = time.perf_counter()
 
@@ -107,21 +119,33 @@ class FlatpakSource(AbstractSource):
 
         else:
             output = self.executor.call("flatpak info --system {0}//{1}".format(id, branch), None, None, True, [0, 1])
+            matching_remote = False
+            name = ''
+            desc = ''
+            installed = None
+            local_checksum = None
             for line in output.splitlines():
                 match = self.name_description_regex.match(line)
                 if match:
                     row = match.groups()
-                    if app.name == '':
-                        app.name = row[0]
-                    if app.desc == '':
-                        app.desc = row[1]
+                    if name == '':
+                        name = row[0]
+                    if desc == '':
+                        desc = row[1]
                 match = self.description_regex.match(line)
                 if match:
                     row = match.groups()
                     if row[0] == 'Version':
-                        app.installed = row[1]
+                        installed = row[1]
                     if row[0] == 'Commit':
-                        app.local_checksum = row[1]
+                        local_checksum = row[1]
+                    if row[0] == 'Origin' and row[1] == remote:
+                        matching_remote = True
+            if matching_remote:
+                app.name = name
+                app.desc = desc
+                app.installed = installed
+                app.local_checksum = local_checksum
             self.log('performance', "flatpak getapp local system {}".format(time.perf_counter() - start_time))
             start_time = time.perf_counter()
 
