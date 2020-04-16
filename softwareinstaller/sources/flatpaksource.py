@@ -167,9 +167,9 @@ class FlatpakSource(AbstractSource):
         for app in apps:
             remote, id, branch, user = self._split_id(app.id)
             if user:
-                self.executor.call("sudo -u {0} flatpak --user update --assumeyes {1}".format(self.user, id), stdout=self.service.output_std, stderr=self.service.output_err)
+                self.executor.call("sudo -u {0} flatpak update --user --assumeyes {1}".format(self.user, id), stdout=self.service.output_std, stderr=self.service.output_err)
             else:
-                self.executor.call("sudo -u {0} flatpak update --assumeyes {1}".format(self.user, id), stdout=self.service.output_std, stderr=self.service.output_err)
+                self.executor.call("flatpak update --system --assumeyes {0}".format(id), stdout=self.service.output_std, stderr=self.service.output_err)
         return None
 
     def _make_id(self, remote, id, branch, user):
