@@ -222,7 +222,7 @@ class TestSourceUpdateListChanges(TestSource):
 
     def update(self, apps, autoconfirm):
         if not autoconfirm:
-            return [App(self, 'app4', 'Test App 4', 'Test4 desc', '0.5', '0.3', False),]
+            return [App(self, 'app4', 'Test App 4', 'Test4 desc', '0.5', '0.3'),]
         for app in apps:
             if app.id not in self.remote:
                 raise Exception("Could not update {0} - not available in remote")

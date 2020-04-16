@@ -35,7 +35,7 @@ class PacmanSource(AbstractSource):
         table = self.executor.call(search_string, self.search_regex, None, False, [0, 1])
         results = []
         for row in table:
-            results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0]), False))
+            results.append(App(self, row[0], row[0], row[2], row[1], installedids.get(row[0])))
 
         self.log('performance', "pacman search {}".format(time.perf_counter() - start_time))
         return results
@@ -83,7 +83,7 @@ class PacmanSource(AbstractSource):
                 return None
 
         self.log('performance', "pacman getapp {}".format(time.perf_counter() - start_time))
-        return App(self, appid, appid, desc, version, installedids.get(appid), False)
+        return App(self, appid, appid, desc, version, installedids.get(appid))
 
     def install(self, app):
         self.executor.call("pacman --noconfirm -S {0}".format(app.id), stdout=self.service.output_std, stderr=self.service.output_err)

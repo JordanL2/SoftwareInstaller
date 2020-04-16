@@ -124,16 +124,10 @@ class SoftwareService:
             raise Exception("No such appid")
         return app
 
-    def install(self, superid, user=False, system=False):
+    def install(self, superid):
         app = self.getapp(superid)
         if app.isinstalled():
             raise Exception("App is already installed")
-        if user:
-            app.user = True
-        elif system:
-            app.user = False
-        else:
-            app.user = None
 
         for task in self.config['install.tasks.pre']:
             self.log("\n*** INSTALL PRE TASK: {} ***".format(task))

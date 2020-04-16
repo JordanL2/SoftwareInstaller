@@ -10,19 +10,19 @@ class TestSource(AbstractSource):
     def __init__(self, service, id='test', name='TestSource'):
         super().__init__(service, id, name)
         self.installed = dict([(a.id, a) for a in [
-            App(self, 'app1', 'Test App 1', 'Test1 desc', '0.1', '0.1', False),
-            App(self, 'app2', 'Test App 2', 'Test2 desc', '0.2', '0.2', False),
-            App(self, 'app3', 'Test App 3', 'Test3 desc', '0.2', '0.1', False),
-            App(self, 'app4', 'Test App 4', 'Test4 desc', '0.4', '0.3', False),
-            App(self, 'app5', 'Test App 5', 'Test5 desc', None, '0.3', False),
+            App(self, 'app1', 'Test App 1', 'Test1 desc', '0.1', '0.1'),
+            App(self, 'app2', 'Test App 2', 'Test2 desc', '0.2', '0.2'),
+            App(self, 'app3', 'Test App 3', 'Test3 desc', '0.2', '0.1'),
+            App(self, 'app4', 'Test App 4', 'Test4 desc', '0.4', '0.3'),
+            App(self, 'app5', 'Test App 5', 'Test5 desc', None, '0.3'),
         ]])
         self.remote = dict([(a.id, a) for a in [
-            App(self, 'app1', 'Test App 1', 'Test1 desc', '0.1', None, False),
-            App(self, 'app2', 'Test App 2', 'Test2 desc', '0.2', None, False),
-            App(self, 'app3', 'Test App 3', 'Test3 desc', '0.2', None, False),
-            App(self, 'app4', 'Test App 4', 'Test4 desc', '0.4', None, False),
-            App(self, 'app6', 'Test App 6', 'Test6 desc', '0.5', None, False),
-            App(self, 'app7', 'Test App 7', 'Test7 desc', '0.6', None, False),
+            App(self, 'app1', 'Test App 1', 'Test1 desc', '0.1', None),
+            App(self, 'app2', 'Test App 2', 'Test2 desc', '0.2', None),
+            App(self, 'app3', 'Test App 3', 'Test3 desc', '0.2', None),
+            App(self, 'app4', 'Test App 4', 'Test4 desc', '0.4', None),
+            App(self, 'app6', 'Test App 6', 'Test6 desc', '0.5', None),
+            App(self, 'app7', 'Test App 7', 'Test7 desc', '0.6', None),
         ]])
 
     def testinstalled(self):

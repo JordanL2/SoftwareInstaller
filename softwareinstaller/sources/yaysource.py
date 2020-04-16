@@ -37,7 +37,7 @@ class YaySource(AbstractSource):
         table = self.executor.call(search_string, self.search_regex, None, False, [0, 1])
         results = []
         for row in table:
-            results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0]), False))
+            results.append(App(self, row[0], row[0], row[3], row[1], installedids.get(row[0])))
 
         self.log('performance', "yay search {}".format(time.perf_counter() - start_time))
         return results
@@ -66,7 +66,7 @@ class YaySource(AbstractSource):
         table = self.executor.call("yay -Si {0}".format(' '.join(appids)), self.description_regex, None, True, [0, 1])
         for row in table:
             if row[0] == 'Name':
-                apps.append(App(self, row[1], row[1], '', None, installedids.get(row[1]), False))
+                apps.append(App(self, row[1], row[1], '', None, installedids.get(row[1])))
             if row[0] == 'Description':
                 apps[-1].desc = row[1]
             if row[0] == 'Version':
@@ -75,7 +75,7 @@ class YaySource(AbstractSource):
         founds_ids = [a.id for a in apps]
         for appid in appids:
             if appid not in founds_ids:
-                app = App(self, appid, appid, '', None, installedids.get(appid), False)
+                app = App(self, appid, appid, '', None, installedids.get(appid))
                 version = None
                 table = self.executor.call("yay -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
                 for row in table:

@@ -18,7 +18,7 @@ class SoftwareInstallerCLI:
         self.service.output_err = sys.stderr
         self.service.output_log['performance'] = sys.stderr
 
-        self.valid_flags = set(['--status', '--source', '--csv', '--columns', '--user', '--system', '-y', '--force', '--DEBUG-performance'])
+        self.valid_flags = set(['--status', '--source', '--csv', '--columns', '-y', '--force', '--DEBUG-performance'])
 
     def load_config(self):
         config_dir = "/home/{}/.config".format(self.service.executor.getuser())
@@ -95,7 +95,7 @@ class SoftwareInstallerCLI:
         print("search <TERM>... [--csv] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]] [--columns=<COLUMN>[,<COLUMN>...]]")
         print("local [<TERM>...] [--csv] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]] [--columns=<COLUMN>[,<COLUMN>...]]")
         print("info <REF>")
-        print("install <REF> [--user]")
+        print("install <REF>")
         print("remove <REF>")
         print("update [<REF>...] [-y] [--force")
 
@@ -129,14 +129,12 @@ class SoftwareInstallerCLI:
         print('  Version:', (app.version if app.version is not None else '[Not Found]'))
         if app.installed is not None:
             print('Installed:', app.installed)
-        if app.isinstalled():
-            print('      For:', ('Local user' if app.user else 'System'))
         status = {'N': 'Not installed', 'I': 'Installed, up to date', 'U': 'Installed, update available'}[app.status()]
         print('   Status:', status)
 
     def install(self, args, flags):
         superid = args.pop(0)
-        self.service.install(superid, ('--user' in flags), ('--system' in flags))
+        self.service.install(superid)
 
     def remove(self, args, flags):
         superid = args.pop(0)
@@ -166,7 +164,7 @@ class SoftwareInstallerCLI:
         runtimes = 0
         while (forcerun and runtimes == 0) or (apps is not None and len(apps) > 0):
             if not autoconfirm and not specific and not forcerun:
-                self._outputresults(apps, flags, ['SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR'])
+                self._outputresults(apps, flags, ['SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED'])
                 text = input("CONFIRM? [Y/n]: ")
                 if text.lower() != 'y':
                     sys.exit()
@@ -178,7 +176,7 @@ class SoftwareInstallerCLI:
     def _outputresults(self, results, flags, header=None):
         table = []
         if header is None:
-            header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED', 'FOR']
+            header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED']
         columns = len(header)
         maxwidth = [len(header[i]) for i in range(0, columns)]
         as_csv = '--csv' in flags
@@ -198,7 +196,6 @@ class SoftwareInstallerCLI:
                     'NAME': result.name,
                     'AVAILABLE': (result.version if result.version is not None else '[Not Found]'),
                     'INSTALLED': (result.installed if result.installed is not None else ''),
-                    'FOR': (('USER' if result.user else 'SYSTEM') if result.isinstalled() else ''),
                 }
                 if not as_csv:
                     for i in range(0, columns):
