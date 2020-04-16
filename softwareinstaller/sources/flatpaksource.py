@@ -35,7 +35,7 @@ class FlatpakSource(AbstractSource):
             if user:
                 search_string = "sudo -u {0} flatpak search --user \"{1}\" --columns=remotes,application,branch,description".format(self.user, terms[0])
             else:
-                search_string = "flatpak search \"{0}\" --columns=remotes,application,branch,description".format(terms[0])
+                search_string = "flatpak search --system \"{0}\" --columns=remotes,application,branch,description".format(terms[0])
             for term in terms[1:]:
                 search_string += " | grep -i \"{0}\"".format(term)
 
@@ -154,14 +154,14 @@ class FlatpakSource(AbstractSource):
         if user:
             self.executor.call("sudo -u {0} flatpak --user install -y {1} {2}".format(self.user, remote, id), stdout=self.service.output_std, stderr=self.service.output_err)
         else:
-            self.executor.call("flatpak install -y {0} {1}".format(remote, id), stdout=self.service.output_std, stderr=self.service.output_err)
+            self.executor.call("flatpak install --system -y {0} {1}".format(remote, id), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def remove(self, app):
         remote, id, branch, user = self._split_id(app.id)
         if user:
-            self.executor.call("sudo -u {0} flatpak --user remove -y {1}".format(self.user, id), stdout=self.service.output_std, stderr=self.service.output_err)
+            self.executor.call("sudo -u {0} flatpak remove --user -y {1}".format(self.user, id), stdout=self.service.output_std, stderr=self.service.output_err)
         else:
-            self.executor.call("flatpak remove -y {0}".format(id), stdout=self.service.output_std, stderr=self.service.output_err)
+            self.executor.call("flatpak remove --system -y {0}".format(id), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def update(self, apps, autoconfirm):
         for app in apps:
@@ -213,9 +213,9 @@ class FlatpakSource(AbstractSource):
             remotes = self._get_remotes(user)
             for remote in remotes:
                 if user:
-                    table = self.executor.call("sudo -u {} flatpak --user remote-ls {} --columns=version,application,branch,commit,name".format(self.user, remote), self.remote_regex, None, True)
+                    table = self.executor.call("sudo -u {} flatpak remote-ls --user {} --columns=version,application,branch,commit,name".format(self.user, remote), self.remote_regex, None, True)
                 else:
-                    table = self.executor.call("flatpak remote-ls {} --columns=version,application,branch,commit,name".format(remote), self.remote_regex, None, True)
+                    table = self.executor.call("flatpak remote-ls --system {} --columns=version,application,branch,commit,name".format(remote), self.remote_regex, None, True)
                 for row in table:
                     id = row[1]
                     branch = row[2]
@@ -231,9 +231,9 @@ class FlatpakSource(AbstractSource):
 
     def _get_remotes(self, user):
         if user:
-            return self.executor.call("sudo -u {} flatpak remotes | cut -f1".format(self.user)).splitlines()
+            return self.executor.call("sudo -u {} flatpak remotes --user | cut -f1".format(self.user)).splitlines()
         else:
-            return self.executor.call("flatpak remotes | cut -f1").splitlines()
+            return self.executor.call("flatpak remotes --system | cut -f1").splitlines()
 
 
 class FlatpakApp(App):
