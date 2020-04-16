@@ -46,7 +46,6 @@ The --columns argument lets you define the columns in the search results. The av
 * NAME
 * AVAILABLE
 * INSTALLED
-* FOR
 
 ```
 local [<NAME>] [--source=<SOURCE>[,<SOURCE>...]] [--status=N,I,U] [--csv] [--noheader] [--columns=<COLUMN>[,<COLUMN>...]]
@@ -128,13 +127,3 @@ update.tasks.post=<COMMAND>
 ```
 
 Adds a script or command to be run before or after an install, remove or update run. Can be a shell command. These options can each be given as many times as needed, and will run each task in the order given.
-
-### Flatpak Configuration Options
-
-```
-sources.flatpak.defaultmode=system|user
-```
-
-Default: system
-
-Determines whether the flatpak source will default to installing apps in user mode or system mode.

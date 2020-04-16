@@ -20,7 +20,7 @@ class App:
 		self.installed = installed
 
 	def copy(self):
-		return App(self.source, self.id, self.name, self.desc, self.version, self.installed, self.user)
+		return App(self.source, self.id, self.name, self.desc, self.version, self.installed)
 
 	def install(self):
 		self.source.install(self)
