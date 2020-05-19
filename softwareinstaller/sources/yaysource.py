@@ -95,10 +95,38 @@ class YaySource(AbstractSource):
 
     def update(self, apps, autoconfirm):
         user = self.executor.getuser()
-        for app in apps:
+        app_list = self._determine_update_order(apps)
+        for app in app_list:
             self.executor.call("sudo -u {0} yay -S {1} --noconfirm".format(user, app.id), stdout=self.service.output_std, stderr=self.service.output_err)
         return None
 
     def _get_installed_ids(self):
         table = self.executor.call("yay -Qm", self.installed_regex, None, False, [0, 1])
         return dict([(row[0], row[1]) for row in table])
+
+    def _determine_update_order(self, apps):
+        newlist = []
+        appids = dict([(a.id, a) for a in apps])
+        for app in apps:
+            self._add_app_to_list(newlist, app, appids)
+
+        return newlist
+
+    def _add_app_to_list(self, newlist, app, appids):
+        if app not in newlist:
+            deps = self._get_app_deps(app)
+            for dep in deps:
+                if dep in appids:
+                    self._add_app_to_list(newlist, appids[dep], appids)
+            newlist.append(app)
+
+    def _get_app_deps(self, app):
+        table = self.executor.call("yay -Qi {}".format(app.id), self.description_regex, None, True, [0, 1])
+        for row in table:
+            if row[0] == 'Depends On':
+                deps = row[1].split()
+                for i, dep in enumerate(deps):
+                    if '=' in dep:
+                        deps[i] = dep[0 : dep.index('=')]
+                return deps
+        return []
