@@ -160,7 +160,10 @@ class SoftwareInstallerCLI:
                             raise Exception("App {0} requested to be updated, but app is not installed".format(app.id))
                         raise Exception("App {0} requested to be updated, but no update available".format(app.id))
         else:
-            apps = self.service.local(None, ['U'])
+            sources = None
+            if '--source' in flags:
+                sources = [self.service.getsource(s) for s in flags['--source'].split(',')]
+            apps = self.service.local(None, ['U'], sources)
         runtimes = 0
         while (forcerun and runtimes == 0) or (apps is not None and len(apps) > 0):
             if not autoconfirm and not specific and not forcerun:
