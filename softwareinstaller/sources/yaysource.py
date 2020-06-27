@@ -19,18 +19,20 @@ class YaySource(AbstractSource):
         # Some AUR packages report a different latest version to the one that gets installed
         self.check_updated = False
 
+        self.user = self.executor.getuser()
+
     def testinstalled(self):
         return self.executor.call('which yay 2>/dev/null', None, None, None, [0, 1]) != ''
 
     def refresh(self):
-        self.executor.call("yay -Sy")
+        self.executor.call("sudo -u {0} yay -Sy".format(self.user))
 
     def search(self, terms):
         start_time = time.perf_counter()
 
         installedids = self._get_installed_ids()
 
-        search_string = "yay -Ss \"{0}\" | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\"".format(terms[0])
+        search_string = "sudo -u {0} yay -Ss \"{1}\" | sed -e \"s/    //\" | paste -d, - - | grep \"^aur/\"".format(self.user, terms[0])
         for term in terms[1:]:
             search_string += " | grep -i \"{0}\"".format(term)
 
@@ -63,7 +65,7 @@ class YaySource(AbstractSource):
             installedids = self._get_installed_ids()
 
         apps = []
-        table = self.executor.call("yay -Si {0}".format(' '.join(appids)), self.description_regex, None, True, [0, 1])
+        table = self.executor.call("sudo -u {0} yay -Si {1}".format(self.user, ' '.join(appids)), self.description_regex, None, True, [0, 1])
         for row in table:
             if row[0] == 'Name':
                 apps.append(App(self, row[1], row[1], '', None, installedids.get(row[1])))
@@ -77,7 +79,7 @@ class YaySource(AbstractSource):
             if appid not in founds_ids:
                 app = App(self, appid, appid, '', None, installedids.get(appid))
                 version = None
-                table = self.executor.call("yay -Qi {0}".format(appid), self.description_regex, None, True, [0, 1])
+                table = self.executor.call("sudo -u {0} yay -Qi {1}".format(self.user, appid), self.description_regex, None, True, [0, 1])
                 for row in table:
                     if row[0] == 'Description':
                         app.desc = row[1]
@@ -87,21 +89,19 @@ class YaySource(AbstractSource):
         return apps
 
     def install(self, app):
-        user = self.executor.getuser()
-        self.executor.call("sudo -u {0} yay --noconfirm -S {1}".format(user, app.id), stdout=self.service.output_std, stderr=self.service.output_err)
+        self.executor.call("sudo -u {0} yay --noconfirm -S {1}".format(self.user, app.id), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def remove(self, app):
-        self.executor.call("yay --noconfirm -R {0}".format(app.id), stdout=self.service.output_std, stderr=self.service.output_err)
+        self.executor.call("sudo -u {0} yay --noconfirm -R {1}".format(self.user, app.id), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def update(self, apps, autoconfirm):
-        user = self.executor.getuser()
         app_list = self._determine_update_order(apps)
         for app in app_list:
-            self.executor.call("sudo -u {0} yay -S {1} --noconfirm".format(user, app.id), stdout=self.service.output_std, stderr=self.service.output_err)
+            self.executor.call("sudo -u {0} yay -S {1} --noconfirm".format(self.user, app.id), stdout=self.service.output_std, stderr=self.service.output_err)
         return None
 
     def _get_installed_ids(self):
-        table = self.executor.call("yay -Qm", self.installed_regex, None, False, [0, 1])
+        table = self.executor.call("sudo -u {0} yay -Qm".format(self.user), self.installed_regex, None, False, [0, 1])
         return dict([(row[0], row[1]) for row in table])
 
     def _determine_update_order(self, apps):
@@ -121,7 +121,7 @@ class YaySource(AbstractSource):
             newlist.append(app)
 
     def _get_app_deps(self, app):
-        table = self.executor.call("yay -Qi {}".format(app.id), self.description_regex, None, True, [0, 1])
+        table = self.executor.call("sudo -u {0} yay -Qi {1}".format(self.user, app.id), self.description_regex, None, True, [0, 1])
         for row in table:
             if row[0] == 'Depends On':
                 deps = row[1].split()

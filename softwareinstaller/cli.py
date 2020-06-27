@@ -168,7 +168,7 @@ class SoftwareInstallerCLI:
         while (forcerun and runtimes == 0) or (apps is not None and len(apps) > 0):
             if not autoconfirm and not specific and not forcerun:
                 self._outputresults(apps, flags, ['SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED'])
-                text = input("CONFIRM? [Y/n]: ")
+                text = input("CONFIRM? [y/N]: ")
                 if text.lower() != 'y':
                     sys.exit()
             apps = self.service.update(apps, autoconfirm)
