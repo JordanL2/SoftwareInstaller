@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 
-import subprocess
-import os
 import fcntl
-
+import os
+import subprocess
 import time
 
 
