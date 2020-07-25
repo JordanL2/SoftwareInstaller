@@ -9,11 +9,11 @@ from xml.etree import ElementTree
 
 class FlatpakSource(AbstractSource):
 
-    ids_regex = re.compile(r'^(\S*\s+)(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
-    search_regex = re.compile(r'^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
+    ids_regex = re.compile(r'^([^\t]*)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(.*)$')
+    search_regex = re.compile(r'^([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t*(.*)$')
     description_regex = re.compile(r'^\s*([^\:]+?)\:\s+(.+)$')
     name_description_regex = re.compile(r'^([^\-]+)\s+\-\s+(.+)$')
-    remote_regex = re.compile(r'^(\S*\s+)(\S+)\s+(\S+)\s+(\S+)\s*(.*)$')
+    remote_regex = re.compile(r'^([^\t]*)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(.*)$')
 
     def __init__(self, service):
         super().__init__(service, 'flatpak', 'Flatpak')
