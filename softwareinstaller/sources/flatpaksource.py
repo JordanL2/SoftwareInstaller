@@ -9,11 +9,11 @@ from xml.etree import ElementTree
 
 class FlatpakSource(AbstractSource):
 
-    ids_regex = re.compile(r'^([^\t]*)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(.*)$')
-    search_regex = re.compile(r'^([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t*(.*)$')
+    ids_regex = re.compile(r'^([^\t]*)\t+([^\t]+)\t+([^\t]+)\t+([^\t]+)\t+([^\t]+)\t*([^\t]*)$')
+    search_regex = re.compile(r'^([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t*([^\t]*)$')
     description_regex = re.compile(r'^\s*([^\:]+?)\:\s+(.+)$')
     name_description_regex = re.compile(r'^([^\-]+)\s+\-\s+(.+)$')
-    remote_regex = re.compile(r'^([^\t]*)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(.*)$')
+    remote_regex = re.compile(r'^([^\t]*)\t+([^\t]+)\t+([^\t]+)\t+([^\t]+)\t*([^\t]*)$')
 
     def __init__(self, service):
         super().__init__(service, 'flatpak', 'Flatpak')
@@ -196,6 +196,9 @@ class FlatpakSource(AbstractSource):
         return None
 
     def _make_id(self, remote, id, branch, user):
+        # Sometimes flatpak search returns ids with the '.desktop' missing
+        if len([l for l in id if l == '.']) < 2:
+            id += '.desktop'
         return "{1}{0}{2}{0}{3}{0}{4}".format(self.service.config['apps.ref.delimiter'], remote, id, branch, ('user' if user else 'system'))
 
     def _split_id(self, appid):
@@ -209,9 +212,9 @@ class FlatpakSource(AbstractSource):
         remote_apps = self._get_remote_info()
 
         start_time = time.perf_counter()
-        table = self.executor.call("flatpak list --system --columns=version,origin,application,branch,active,name", self.ids_regex, None, True)
+        table = self.executor.call("flatpak list --system --columns=version,origin,application,branch,active,name", self.ids_regex)
         systemapps = len(table)
-        table += self.executor.call("sudo -u {0} flatpak list --user --columns=version,origin,application,branch,active,name".format(self.user), self.ids_regex, None, True)
+        table += self.executor.call("sudo -u {0} flatpak list --user --columns=version,origin,application,branch,active,name".format(self.user), self.ids_regex)
         results = {}
         for i, row in enumerate(table):
             appid = self._make_id(row[1], row[2], row[3], (i >= systemapps))
@@ -236,9 +239,9 @@ class FlatpakSource(AbstractSource):
             remotes = self._get_remotes(user)
             for remote in remotes:
                 if user:
-                    table = self.executor.call("sudo -u {} flatpak remote-ls --user {} --columns=version,application,branch,commit,name".format(self.user, remote), self.remote_regex, None, True)
+                    table = self.executor.call("sudo -u {} flatpak remote-ls --user {} --columns=version,application,branch,commit,name".format(self.user, remote), self.remote_regex)
                 else:
-                    table = self.executor.call("flatpak remote-ls --system {} --columns=version,application,branch,commit,name".format(remote), self.remote_regex, None, True)
+                    table = self.executor.call("flatpak remote-ls --system {} --columns=version,application,branch,commit,name".format(remote), self.remote_regex)
                 for row in table:
                     id = row[1]
                     branch = row[2]
