@@ -86,38 +86,13 @@ class ZypperSource(AbstractSource):
                 'desc': '',
             }
 
-        # Get available versions for each package
-        appid = None
-        arch = None
-        available_version = None
+        notinstalledids = self._get_not_installed_ids()
         
-        cmd = "zypper search --not-installed-only --verbose"
-        out = self.executor.call(cmd)
-        for line in out.split("\n"):
-            name_match = self.local_name.match(line)
-            if name_match:
-                if appid is not None:
-                    appdataid = "{}|{}".format(appid, arch)
-                    if appdataid in appdatas:
-                        appdatas[appdataid]['available_version'] = available_version
-                available_version = None
-                appid = name_match.group(1)
-                continue
-            installed_match = self.local_installed.match(line)
-            if installed_match:
-                available_version = installed_match.group(1)
-                continue
-            arch_match = self.local_arch.match(line)
-            if arch_match:
-                arch = arch_match.group(1)
-                continue
-        if appid is not None:
-            appdataid = "{}|{}".format(appid, arch)
-            if appdataid in appdatas:
-                appdatas[appdataid]['available_version'] = available_version
-        
-        for appdata in appdatas.values():
-            app = App(self, appdata['appid'], appdata['appid'], appdata['desc'], appdata['available_version'], appdata['installed_version'])
+        for appdataid, appdata in appdatas.items():
+            available_version = appdata['available_version']
+            if appdataid in notinstalledids:
+                available_version = notinstalledids[appdataid]
+            app = App(self, appdata['appid'], appdata['appid'], appdata['desc'], available_version, appdata['installed_version'])
             if app is not None and (terms is None or app.match(terms)):
                 results.append(app)
 
@@ -172,3 +147,8 @@ class ZypperSource(AbstractSource):
         cmd = "zypper search --installed-only --details"
         table = self.executor.call(cmd, self.installed_regex, None, True)
         return dict([(row[1], row[3]) for row in table])
+
+    def _get_not_installed_ids(self):
+        cmd = "zypper search --not-installed-only --details"
+        table = self.executor.call(cmd, self.installed_regex, None, True)
+        return dict([("{}|{}".format(row[1], row[4]), row[3]) for row in table])
