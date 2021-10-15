@@ -6,6 +6,7 @@ from softwareinstaller.commandexecutor import CommandExecutor
 
 from softwareinstaller.sources.flatpaksource import FlatpakSource
 from softwareinstaller.sources.pacmansource import PacmanSource
+from softwareinstaller.sources.zyppersource import ZypperSource
 from softwareinstaller.sources.yaysource import YaySource
 
 
@@ -19,6 +20,7 @@ class SoftwareService:
             # Standard repo sources
             [
         	   PacmanSource(self),
+        	   ZypperSource(self),
             ],
 
             # Arch AUR sources
