@@ -114,7 +114,7 @@ class ZypperSource(AbstractSource):
         is_installed = False
         
         start_time = time.perf_counter()
-        cmd = "zypper search --verbose"
+        cmd = r'zypper search --verbose | grep -E "\\||buildtime"'
         out = self.executor.call(cmd)
         self.log('performance', "zypper _get cmd {}".format(time.perf_counter() - start_time))
         
