@@ -8,11 +8,11 @@ import re
 
 class ZypperSource(AbstractSource):
     
-    installed_regex = re.compile(r'^(\S*)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(.+)$')
     info_version = re.compile(r'Version\s+:\s+(\S+)')
     info_installed_uptodate = re.compile(r'Status\s*:\s*up\-to\-date\s*')
     info_installed_outofdate = re.compile(r'Status\s*:\s*out\-of\-date\s+\(version (\S+) installed\)\s*')
     info_desc = re.compile(r'Description\s*:\s*')
+    search_regex = re.compile(r'^(\S*)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(.+)$')
     verbose_regex = re.compile(r'\s*([^:]+):\s*(.*)')
 
     def __init__(self, service):
@@ -29,8 +29,7 @@ class ZypperSource(AbstractSource):
     def search(self, terms):
         start_time = time.perf_counter()
 
-        installed = self._get_installed()
-        allapps = self._get_all()
+        installed, allapps = self._get()
         
         results = []
         for appdataid, appdata in allapps.items():
@@ -47,8 +46,7 @@ class ZypperSource(AbstractSource):
     def local(self, terms):
         start_time = time.perf_counter()
         
-        installed = self._get_installed()
-        allapps = self._get_all()
+        installed, allapps = self._get()
         
         results = []
         for appdataid, appdata in installed.items():
@@ -106,40 +104,43 @@ class ZypperSource(AbstractSource):
         self.executor.call("zypper update -y", stdout=self.service.output_std, stderr=self.service.output_err)
         return None
 
-    def _get_installed(self):
-        return self._get('--installed-only')
-
-    def _get_not_installed(self):
-        return self._get('--not-installed-only')
-
-    def _get_all(self):
-        return self._get('')
-
-    def _get(self, flags):
-        cmd = "zypper search {0} --verbose".format(flags)
-        table = self.executor.call(cmd, self.verbose_regex, None, True)
-        results = {}
+    def _get(self):
+        installed = {}
+        allapps = {}
         
         appid = None
         arch = None
         version = None
+        is_installed = False
         
-        for row in table:
-            if row[0] == 'name':
-                appid = row[1]
-            elif row[0] == 'arch':
-                arch = row[1]
-            elif row[0] == 'evr':
-                version = row[1]
-            elif row[0] == 'buildtime':
-                buildtime = row[1]
-                appdataid = "{}|{}".format(appid, arch)
-                if (appdataid not in results or buildtime > results[appdataid]['buildtime']) and arch in self.arch:
-                    results[appdataid] = {
-                        'appid': appid,
-                        'arch': arch,
-                        'version': version,
-                        'buildtime': buildtime,
-                    }
+        cmd = "zypper search --verbose"
+        out = self.executor.call(cmd)
+        for line in out.split("\n"):
+            search_match = self.search_regex.match(line)
+            if search_match:
+                is_installed = search_match.group(1) in ['i', 'i+']
+                appid = search_match.group(2)
+                version = search_match.group(4)
+                arch = search_match.group(5)
+                continue
+            
+            if arch in self.arch:
+                verbose_match = self.verbose_regex.match(line)
+                if verbose_match:
+                    if verbose_match.group(1) == 'buildtime':
+                        buildtime = verbose_match.group(2)
+                        appdataid = "{}|{}".format(appid, arch)
+                        result = {
+                            'appid': appid,
+                            'arch': arch,
+                            'version': version,
+                            'buildtime': buildtime,
+                        }
+                        if is_installed:
+                            installed[appdataid] = result
+                        if appdataid not in allapps:
+                            allapps[appdataid] = result
+                        elif buildtime > allapps[appdataid]['buildtime']:
+                            allapps[appdataid]['version'] = version
 
-        return results
+        return installed, allapps
