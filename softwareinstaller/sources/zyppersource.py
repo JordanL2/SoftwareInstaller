@@ -13,6 +13,7 @@ class ZypperSource(AbstractSource):
     info_installed_uptodate = re.compile(r'Status\s*:\s*up\-to\-date\s*')
     info_installed_outofdate = re.compile(r'Status\s*:\s*out\-of\-date\s+\(version (\S+) installed\)\s*')
     info_desc = re.compile(r'Description\s*:\s*')
+    verbose_regex = re.compile(r'\s*([^:]+):\s*(.*)')
 
     def __init__(self, service):
         super().__init__(service, 'zypper', 'Zypper')
@@ -47,13 +48,13 @@ class ZypperSource(AbstractSource):
         start_time = time.perf_counter()
         
         installed = self._get_installed()
-        notinstalled = self._get_not_installed()
+        allapps = self._get_all()
         
         results = []
         for appdataid, appdata in installed.items():
             available_version = appdata['version']
-            if appdataid in notinstalled:
-                available_version = notinstalled[appdataid]['version']
+            if appdataid in allapps:
+                available_version = allapps[appdataid]['version']
             app = App(self, appdata['appid'], appdata['appid'], '', available_version, appdata['version'])
             if app is not None and (terms is None or app.match(terms)):
                 results.append(app)
@@ -115,15 +116,30 @@ class ZypperSource(AbstractSource):
         return self._get('')
 
     def _get(self, flags):
-        cmd = "zypper search {0} --details".format(flags)
-        table = self.executor.call(cmd, self.installed_regex, None, True)
+        cmd = "zypper search {0} --verbose".format(flags)
+        table = self.executor.call(cmd, self.verbose_regex, None, True)
         results = {}
+        
+        appid = None
+        arch = None
+        version = None
+        
         for row in table:
-            appdataid = "{}|{}".format(row[1], row[4])
-            if appdataid not in results or results[appdataid]['version'] < row[3]:
-                results[appdataid] = {
-                    'appid': row[1],
-                    'arch': row[4],
-                    'version': row[3],
-                }
+            if row[0] == 'name':
+                appid = row[1]
+            elif row[0] == 'arch':
+                arch = row[1]
+            elif row[0] == 'evr':
+                version = row[1]
+            elif row[0] == 'buildtime':
+                buildtime = row[1]
+                appdataid = "{}|{}".format(appid, arch)
+                if appdataid not in results or buildtime > results[appdataid]['buildtime']:
+                    results[appdataid] = {
+                        'appid': appid,
+                        'arch': arch,
+                        'version': version,
+                        'buildtime': buildtime,
+                    }
+
         return results
