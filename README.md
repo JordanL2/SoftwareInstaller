@@ -7,6 +7,7 @@ Software installer to provide single interface for multiple software sources: so
 Sources currently supported:
 * Flatpak
 * Pacman
+* Zypper
 * Yay (AUR)
 
 # Installation
