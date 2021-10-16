@@ -8,7 +8,7 @@ import re
 
 class ZypperSource(AbstractSource):
     
-    installed_regex = re.compile(r'^(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(.+)$')
+    installed_regex = re.compile(r'^(\S*)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(.+)$')
     info_version = re.compile(r'Version\s+:\s+(\S+)')
     info_installed_uptodate = re.compile(r'Status\s*:\s*up\-to\-date\s*')
     info_installed_outofdate = re.compile(r'Status\s*:\s*out\-of\-date\s+\(version (\S+) installed\)\s*')
@@ -17,7 +17,7 @@ class ZypperSource(AbstractSource):
     def __init__(self, service):
         super().__init__(service, 'zypper', 'Zypper')
         self.executor = CommandExecutor()
-        self.native_only = True #TODO - only set this when an AUR source is in use
+        self.arch = ['x86_64', 'noarch'] #TODO - configurable or auto-calculated
 
     def testinstalled(self):
         return self.executor.call('which zypper 2>/dev/null', None, None, None, [0, 1]) != ''
@@ -28,7 +28,17 @@ class ZypperSource(AbstractSource):
     def search(self, terms):
         start_time = time.perf_counter()
 
-
+        installed = self._get_installed()
+        allapps = self._get_all()
+        
+        results = []
+        for appdataid, appdata in allapps.items():
+            installed_version = None
+            if appdataid in installed:
+                installed_version = installed[appdataid]['version']
+            app = App(self, appdata['appid'], appdata['appid'], '', appdata['version'], installed_version)
+            if app is not None and (terms is None or app.match(terms)):
+                results.append(app)
 
         self.log('performance', "zypper search {}".format(time.perf_counter() - start_time))
         return results
@@ -41,10 +51,10 @@ class ZypperSource(AbstractSource):
         
         results = []
         for appdataid, appdata in installed.items():
-            available_version = appdata['installed_version']
+            available_version = appdata['version']
             if appdataid in notinstalled:
-                available_version = notinstalled[appdataid]['available_version']
-            app = App(self, appdata['appid'], appdata['appid'], '', available_version, appdata['installed_version'])
+                available_version = notinstalled[appdataid]['version']
+            app = App(self, appdata['appid'], appdata['appid'], '', available_version, appdata['version'])
             if app is not None and (terms is None or app.match(terms)):
                 results.append(app)
 
@@ -96,19 +106,19 @@ class ZypperSource(AbstractSource):
         return None
 
     def _get_installed(self):
-        cmd = "zypper search --installed-only --details"
-        table = self.executor.call(cmd, self.installed_regex, None, True)
-        return dict([("{}|{}".format(row[1], row[4]), {
-            'appid': row[1],
-            'arch': row[4],
-            'installed_version': row[3],
-        }) for row in table])
+        return self._get('--installed-only')
 
     def _get_not_installed(self):
-        cmd = "zypper search --not-installed-only --details"
+        return self._get('--not-installed-only')
+
+    def _get_all(self):
+        return self._get('')
+
+    def _get(self, flags):
+        cmd = "zypper search {0} --details".format(flags)
         table = self.executor.call(cmd, self.installed_regex, None, True)
         return dict([("{}|{}".format(row[1], row[4]), {
             'appid': row[1],
             'arch': row[4],
-            'available_version': row[3],
-        }) for row in table])
+            'version': row[3],
+        }) for row in table if row[4] in self.arch])
