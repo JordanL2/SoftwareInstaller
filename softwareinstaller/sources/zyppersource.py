@@ -117,8 +117,13 @@ class ZypperSource(AbstractSource):
     def _get(self, flags):
         cmd = "zypper search {0} --details".format(flags)
         table = self.executor.call(cmd, self.installed_regex, None, True)
-        return dict([("{}|{}".format(row[1], row[4]), {
-            'appid': row[1],
-            'arch': row[4],
-            'version': row[3],
-        }) for row in table if row[4] in self.arch])
+        results = {}
+        for row in table:
+            appdataid = "{}|{}".format(row[1], row[4])
+            if appdataid not in results or results[appdataid]['version'] < row[3]:
+                results[appdataid] = {
+                    'appid': row[1],
+                    'arch': row[4],
+                    'version': row[3],
+                }
+        return results
