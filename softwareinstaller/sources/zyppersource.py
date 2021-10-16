@@ -13,7 +13,7 @@ class ZypperSource(AbstractSource):
     info_installed_outofdate = re.compile(r'Status\s*:\s*out\-of\-date\s+\(version (\S+) installed\)\s*')
     info_desc = re.compile(r'Description\s*:\s*')
     search_regex = re.compile(r'^(\S*)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(.+)$')
-    verbose_regex = re.compile(r'\s*([^:]+):\s*(.*)')
+    verbose_buildtime_regex = re.compile(r'\s*buildtime:\s*(.*)')
 
     def __init__(self, service):
         super().__init__(service, 'zypper', 'Zypper')
@@ -129,23 +129,22 @@ class ZypperSource(AbstractSource):
                 continue
             
             if arch in self.arch:
-                verbose_match = self.verbose_regex.match(line)
-                if verbose_match:
-                    if verbose_match.group(1) == 'buildtime':
-                        buildtime = verbose_match.group(2)
-                        appdataid = "{}|{}".format(appid, arch)
-                        result = {
-                            'appid': appid,
-                            'arch': arch,
-                            'version': version,
-                            'buildtime': buildtime,
-                        }
-                        if is_installed:
-                            installed[appdataid] = result
-                        if appdataid not in allapps:
-                            allapps[appdataid] = result
-                        elif buildtime > allapps[appdataid]['buildtime']:
-                            allapps[appdataid]['version'] = version
+                verbose_buildtime_match = self.verbose_buildtime_regex.match(line)
+                if verbose_buildtime_match:
+                    buildtime = verbose_buildtime_match.group(1)
+                    appdataid = "{}|{}".format(appid, arch)
+                    result = {
+                        'appid': appid,
+                        'arch': arch,
+                        'version': version,
+                        'buildtime': buildtime,
+                    }
+                    if is_installed:
+                        installed[appdataid] = result
+                    if appdataid not in allapps:
+                        allapps[appdataid] = result
+                    elif buildtime > allapps[appdataid]['buildtime']:
+                        allapps[appdataid]['version'] = version
         self.log('performance', "zypper _get parsing {}".format(time.perf_counter() - start_time))
 
         return installed, allapps
