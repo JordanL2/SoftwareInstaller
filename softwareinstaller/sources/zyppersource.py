@@ -113,8 +113,12 @@ class ZypperSource(AbstractSource):
         version = None
         is_installed = False
         
+        start_time = time.perf_counter()
         cmd = "zypper search --verbose"
         out = self.executor.call(cmd)
+        self.log('performance', "zypper _get cmd {}".format(time.perf_counter() - start_time))
+        
+        start_time = time.perf_counter()
         for line in out.split("\n"):
             search_match = self.search_regex.match(line)
             if search_match:
@@ -142,5 +146,6 @@ class ZypperSource(AbstractSource):
                             allapps[appdataid] = result
                         elif buildtime > allapps[appdataid]['buildtime']:
                             allapps[appdataid]['version'] = version
+        self.log('performance', "zypper _get parsing {}".format(time.perf_counter() - start_time))
 
         return installed, allapps
