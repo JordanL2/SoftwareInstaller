@@ -13,11 +13,6 @@ class ZypperSource(AbstractSource):
     info_installed_uptodate = re.compile(r'Status\s*:\s*up\-to\-date\s*')
     info_installed_outofdate = re.compile(r'Status\s*:\s*out\-of\-date\s+\(version (\S+) installed\)\s*')
     info_desc = re.compile(r'Description\s*:\s*')
-    local_name = re.compile(r'\s*name:\s*(\S+)\s*')
-    local_desc = re.compile(r'\s*description:\s*')
-    local_packager = re.compile(r'\s*packager:\s*(.*)')
-    local_installed = re.compile(r'\s*evr:\s*(\S+)')
-    local_arch = re.compile(r'\s*arch:\s*(\S+)\s*')
 
     def __init__(self, service):
         super().__init__(service, 'zypper', 'Zypper')
@@ -40,59 +35,16 @@ class ZypperSource(AbstractSource):
 
     def local(self, terms):
         start_time = time.perf_counter()
-
+        
+        installed = self._get_installed()
+        notinstalled = self._get_not_installed()
+        
         results = []
-        
-        appdatas = {}
-        
-        # Get installed versions for each installed package
-        appid = None
-        arch = None
-        installed_version = None
-        #desc = None
-        #found_desc = False
-        
-        cmd = "zypper search --installed-only --verbose"
-        out = self.executor.call(cmd)
-        for line in out.split("\n"):
-            name_match = self.local_name.match(line)
-            if name_match:
-                if appid is not None:
-                    appdatas["{}|{}".format(appid, arch)] = {
-                        'appid': appid,
-                        'arch': arch,
-                        'installed_version': installed_version,
-                        'available_version': installed_version,
-                        'desc': '',
-                    }
-                desc = None
-                installed_version = None
-                appid = name_match.group(1)
-                continue
-            installed_match = self.local_installed.match(line)
-            if installed_match:
-                installed_version = installed_match.group(1)
-                continue
-            arch_match = self.local_arch.match(line)
-            if arch_match:
-                arch = arch_match.group(1)
-                continue
-        if appid is not None:
-            appdatas["{}|{}".format(appid, arch)] = {
-                'appid': appid,
-                'arch': arch,
-                'installed_version': installed_version,
-                'available_version': installed_version,
-                'desc': '',
-            }
-
-        notinstalledids = self._get_not_installed_ids()
-        
-        for appdataid, appdata in appdatas.items():
-            available_version = appdata['available_version']
-            if appdataid in notinstalledids:
-                available_version = notinstalledids[appdataid]
-            app = App(self, appdata['appid'], appdata['appid'], appdata['desc'], available_version, appdata['installed_version'])
+        for appdataid, appdata in installed.items():
+            available_version = appdata['installed_version']
+            if appdataid in notinstalled:
+                available_version = notinstalled[appdataid]['available_version']
+            app = App(self, appdata['appid'], appdata['appid'], '', available_version, appdata['installed_version'])
             if app is not None and (terms is None or app.match(terms)):
                 results.append(app)
 
@@ -143,12 +95,20 @@ class ZypperSource(AbstractSource):
         self.executor.call("zypper update -y", stdout=self.service.output_std, stderr=self.service.output_err)
         return None
 
-    def _get_installed_ids(self):
+    def _get_installed(self):
         cmd = "zypper search --installed-only --details"
         table = self.executor.call(cmd, self.installed_regex, None, True)
-        return dict([(row[1], row[3]) for row in table])
+        return dict([("{}|{}".format(row[1], row[4]), {
+            'appid': row[1],
+            'arch': row[4],
+            'installed_version': row[3],
+        }) for row in table])
 
-    def _get_not_installed_ids(self):
+    def _get_not_installed(self):
         cmd = "zypper search --not-installed-only --details"
         table = self.executor.call(cmd, self.installed_regex, None, True)
-        return dict([("{}|{}".format(row[1], row[4]), row[3]) for row in table])
+        return dict([("{}|{}".format(row[1], row[4]), {
+            'appid': row[1],
+            'arch': row[4],
+            'available_version': row[3],
+        }) for row in table])
