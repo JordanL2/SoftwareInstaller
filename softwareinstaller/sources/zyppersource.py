@@ -134,7 +134,7 @@ class ZypperSource(AbstractSource):
             elif row[0] == 'buildtime':
                 buildtime = row[1]
                 appdataid = "{}|{}".format(appid, arch)
-                if appdataid not in results or buildtime > results[appdataid]['buildtime']:
+                if (appdataid not in results or buildtime > results[appdataid]['buildtime']) and arch in self.arch:
                     results[appdataid] = {
                         'appid': appid,
                         'arch': arch,
