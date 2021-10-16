@@ -72,7 +72,7 @@ class ZypperSource(AbstractSource):
         out = self.executor.call("zypper info {0}".format(appid))
         for line in out.split("\n"):
             if found_desc:
-                desc += line.strip()
+                desc += ' ' + line.strip()
                 continue
             version_match = self.info_version.match(line)
             if version_match:
@@ -92,7 +92,7 @@ class ZypperSource(AbstractSource):
                 desc = ''
         
         self.log('performance', "zypper getapp {}".format(time.perf_counter() - start_time))
-        return App(self, appid, appid, desc, available_version, installed_version)
+        return App(self, appid, appid, desc.strip(), available_version, installed_version)
 
     def install(self, app):
         self.executor.call("zypper install -y {0}".format(app.id), stdout=self.service.output_std, stderr=self.service.output_err)
