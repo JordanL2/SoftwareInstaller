@@ -18,7 +18,7 @@ class ZypperSource(AbstractSource):
     def __init__(self, service):
         super().__init__(service, 'zypper', 'Zypper')
         self.executor = CommandExecutor()
-        self.arch = ['x86_64', 'noarch'] #TODO - configurable or auto-calculated
+        self._init_arch()
         self._init_repos()
 
     def testinstalled(self):
@@ -155,3 +155,9 @@ class ZypperSource(AbstractSource):
         self.repos = { '(System Packages)': 100 }
         for row in table:
             self.repos[row[2]] = int(row[6])
+
+    def _init_arch(self):
+        cmd = r'uname -i'
+        out = self.executor.call(cmd)
+        arch = out.strip()
+        self.arch = ['noarch', arch]
