@@ -13,12 +13,13 @@ class ZypperSource(AbstractSource):
     info_installed_outofdate = re.compile(r'Status\s*:\s*out\-of\-date\s+\(version (\S+) installed\)\s*')
     info_desc = re.compile(r'Description\s*:\s*')
     search_regex = re.compile(r'^(\S*)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(\S+)\s*\|\s*(.+)$')
-    verbose_buildtime_regex = re.compile(r'\s*buildtime:\s*(.*)')
+    repos_regex = re.compile(r'(\d+)\s+\|\s+([^|]+?)\s+\|\s+([^|]+?)\s+\|\s+([^|]+?)\s+\|\s+([^|]+?)\s+\|\s+([^|]+?)\s+\|\s+(\d+)')
 
     def __init__(self, service):
         super().__init__(service, 'zypper', 'Zypper')
         self.executor = CommandExecutor()
         self.arch = ['x86_64', 'noarch'] #TODO - configurable or auto-calculated
+        self._init_repos()
 
     def testinstalled(self):
         return self.executor.call('which zypper 2>/dev/null', None, None, None, [0, 1]) != ''
@@ -114,7 +115,7 @@ class ZypperSource(AbstractSource):
         is_installed = False
         
         start_time = time.perf_counter()
-        cmd = r'zypper search --verbose | grep -E "\\||buildtime"'
+        cmd = r'zypper search --details | tail -n+6'
         out = self.executor.call(cmd)
         self.log('performance', "zypper _get cmd {}".format(time.perf_counter() - start_time))
         
@@ -126,25 +127,31 @@ class ZypperSource(AbstractSource):
                 appid = search_match.group(2)
                 version = search_match.group(4)
                 arch = search_match.group(5)
-                continue
-            
-            if arch in self.arch:
-                verbose_buildtime_match = self.verbose_buildtime_regex.match(line)
-                if verbose_buildtime_match:
-                    buildtime = verbose_buildtime_match.group(1)
-                    appdataid = "{}|{}".format(appid, arch)
+                repo = search_match.group(6)
+                priority = self.repos[repo]
+                appdataid = "{}|{}".format(appid, arch)
+                if arch in self.arch:
                     result = {
                         'appid': appid,
                         'arch': arch,
                         'version': version,
-                        'buildtime': buildtime,
+                        'priority': priority,
                     }
                     if is_installed:
                         installed[appdataid] = result
                     if appdataid not in allapps:
                         allapps[appdataid] = result
-                    elif buildtime > allapps[appdataid]['buildtime']:
+                    elif priority < allapps[appdataid]['priority']:
                         allapps[appdataid]['version'] = version
+                        allapps[appdataid]['priority'] = priority
+            
         self.log('performance', "zypper _get parsing {}".format(time.perf_counter() - start_time))
 
         return installed, allapps
+
+    def _init_repos(self):
+        cmd = r'zypper repos --priority'
+        table = self.executor.call(cmd, self.repos_regex, None, True)
+        self.repos = { '(System Packages)': 100 }
+        for row in table:
+            self.repos[row[2]] = int(row[6])
