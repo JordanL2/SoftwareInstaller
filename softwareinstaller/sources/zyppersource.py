@@ -116,34 +116,32 @@ class ZypperSource(AbstractSource):
         
         start_time = time.perf_counter()
         cmd = r'zypper search --details | tail -n+6'
-        out = self.executor.call(cmd)
+        table = self.executor.call(cmd, self.search_regex)
         self.log('performance', "zypper _get cmd {}".format(time.perf_counter() - start_time))
         
         start_time = time.perf_counter()
-        for line in out.split("\n"):
-            search_match = self.search_regex.match(line)
-            if search_match:
-                is_installed = search_match.group(1) in ['i', 'i+']
-                appid = search_match.group(2)
-                version = search_match.group(4)
-                arch = search_match.group(5)
-                repo = search_match.group(6)
-                priority = self.repos[repo]
-                appdataid = "{}|{}".format(appid, arch)
-                if arch in self.arch:
-                    result = {
-                        'appid': appid,
-                        'arch': arch,
-                        'version': version,
-                        'priority': priority,
-                    }
-                    if is_installed:
-                        installed[appdataid] = result
-                    if appdataid not in allapps:
-                        allapps[appdataid] = result
-                    elif priority < allapps[appdataid]['priority']:
-                        allapps[appdataid]['version'] = version
-                        allapps[appdataid]['priority'] = priority
+        for row in table:
+            is_installed = row[0] in ['i', 'i+']
+            appid = row[1]
+            version = row[3]
+            arch = row[4]
+            repo = row[5]
+            priority = self.repos[repo]
+            appdataid = "{}|{}".format(appid, arch)
+            if arch in self.arch:
+                result = {
+                    'appid': appid,
+                    'arch': arch,
+                    'version': version,
+                    'priority': priority,
+                }
+                if is_installed:
+                    installed[appdataid] = result
+                if appdataid not in allapps:
+                    allapps[appdataid] = result
+                elif priority < allapps[appdataid]['priority']:
+                    allapps[appdataid]['version'] = version
+                    allapps[appdataid]['priority'] = priority
             
         self.log('performance', "zypper _get parsing {}".format(time.perf_counter() - start_time))
 
