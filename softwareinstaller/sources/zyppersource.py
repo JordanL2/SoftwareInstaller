@@ -109,11 +109,6 @@ class ZypperSource(AbstractSource):
         installed = {}
         allapps = {}
         
-        appid = None
-        arch = None
-        version = None
-        is_installed = False
-        
         start_time = time.perf_counter()
         cmd = r'zypper search --details | tail -n+6'
         table = self.executor.call(cmd, self.search_regex)
