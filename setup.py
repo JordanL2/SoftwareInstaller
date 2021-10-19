@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="softwareinstaller",
-    version="1.2.3",
+    version="1.2.4",
     author="Jordan Leppert",
     author_email="jordanleppert@gmail.com",
     description="A tool to search, install and update software from multiple sources",
