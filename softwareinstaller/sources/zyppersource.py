@@ -19,10 +19,15 @@ class ZypperSource(AbstractSource):
         super().__init__(service, 'zypper', 'Zypper')
         self.executor = CommandExecutor()
         self._init_arch()
-        self._init_repos()
+        if self.testinstalled():
+            self._init_repos()
 
     def testinstalled(self):
-        return self.executor.call('which zypper 2>/dev/null', None, None, None, [0, 1]) != ''
+        try:
+            self.executor.call('which zypper')
+        except Exception:
+            return False
+        return True
 
     def refresh(self):
         self.executor.call("zypper refresh")
