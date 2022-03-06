@@ -20,6 +20,12 @@ class FlatpakSource(AbstractSource):
         self.executor = CommandExecutor()
         self.user = self.executor.getuser()
 
+    def _cmd(self, cmd, user):
+        if user:
+            return "sudo -u {0} sh -c \"flatpak --user {1}\"".format(self.user, cmd.replace('"', '\\"'))
+        else:
+            return "flatpak --system {0}".format(cmd)
+
     def testinstalled(self):
         return self.executor.call('which flatpak 2>/dev/null', None, None, None, [0, 1]) != ''
 
@@ -32,10 +38,7 @@ class FlatpakSource(AbstractSource):
         all_apps = self._get_installed(getall=True)
         results = {}
         for user in False, True:
-            if user:
-                search_string = "sudo -u {0} flatpak search --user \"{1}\" --columns=remotes,application,branch,description".format(self.user, terms[0])
-            else:
-                search_string = "flatpak search --system \"{0}\" --columns=remotes,application,branch,description".format(terms[0])
+            search_string = self._cmd("search \"{0}\" --columns=remotes,application,branch,description".format(terms[0]), user)
             for term in terms[1:]:
                 search_string += " | grep -i \"{0}\"".format(term)
 
@@ -65,7 +68,7 @@ class FlatpakSource(AbstractSource):
         app = FlatpakApp(self, appid, '', '', None, None, None, None)
 
         if user:
-            output = self.executor.call("sudo -u {0} flatpak info --user {1}//{2}".format(self.user, id, branch), None, None, True, [0, 1])
+            output = self.executor.call(self._cmd("info {0}//{1}".format(id, branch), True), None, None, True, [0, 1])
             matching_remote = False
             name = ''
             desc = ''
@@ -96,7 +99,7 @@ class FlatpakSource(AbstractSource):
             self.log('performance', "flatpak getapp local user {}".format(time.perf_counter() - start_time))
             start_time = time.perf_counter()
 
-            output = self.executor.call("sudo -u {0} flatpak remote-info --user {1} {2}//{3}".format(self.user, remote, id, branch), None, None, True, [0, 1])
+            output = self.executor.call(self._cmd("remote-info {0} {1}//{2}".format(remote, id, branch), True), None, None, True, [0, 1])
             for line in output.splitlines():
                 if app.version is None:
                     app.version = ''
@@ -117,7 +120,7 @@ class FlatpakSource(AbstractSource):
             self.log('performance', "flatpak getapp remote user {}".format(time.perf_counter() - start_time))
 
         else:
-            output = self.executor.call("flatpak info --system {0}//{1}".format(id, branch), None, None, True, [0, 1])
+            output = self.executor.call(self._cmd("info {0}//{1}".format(id, branch), False), None, None, True, [0, 1])
             matching_remote = False
             name = ''
             desc = ''
@@ -148,7 +151,7 @@ class FlatpakSource(AbstractSource):
             self.log('performance', "flatpak getapp local system {}".format(time.perf_counter() - start_time))
             start_time = time.perf_counter()
 
-            output = self.executor.call("flatpak remote-info --system {0} {1}//{2}".format(remote, id, branch), None, None, True, [0, 1])
+            output = self.executor.call(self._cmd("remote-info {0} {1}//{2}".format(remote, id, branch), False), None, None, True, [0, 1])
             for line in output.splitlines():
                 if app.version is None:
                     app.version = ''
@@ -174,25 +177,16 @@ class FlatpakSource(AbstractSource):
 
     def install(self, app):
         remote, id, branch, user = self._split_id(app.id)
-        if user:
-            self.executor.call("sudo -u {0} flatpak --user install -y {1} {2}".format(self.user, remote, id), stdout=self.service.output_std, stderr=self.service.output_err)
-        else:
-            self.executor.call("flatpak install --system -y {0} {1}".format(remote, id), stdout=self.service.output_std, stderr=self.service.output_err)
+        self.executor.call(self._cmd("install -y {0} {1}".format(remote, id), user), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def remove(self, app):
         remote, id, branch, user = self._split_id(app.id)
-        if user:
-            self.executor.call("sudo -u {0} flatpak remove --user -y {1}".format(self.user, id), stdout=self.service.output_std, stderr=self.service.output_err)
-        else:
-            self.executor.call("flatpak remove --system -y {0}".format(id), stdout=self.service.output_std, stderr=self.service.output_err)
+        self.executor.call(self._cmd("remove -y {0}".format(id), user), stdout=self.service.output_std, stderr=self.service.output_err)
 
     def update(self, apps, autoconfirm):
         for app in apps:
             remote, id, branch, user = self._split_id(app.id)
-            if user:
-                self.executor.call("sudo -u {0} flatpak update --user --assumeyes {1}".format(self.user, id), stdout=self.service.output_std, stderr=self.service.output_err)
-            else:
-                self.executor.call("flatpak update --system --assumeyes {0}".format(id), stdout=self.service.output_std, stderr=self.service.output_err)
+            self.executor.call(self._cmd("update --assumeyes {0}".format(id), user), stdout=self.service.output_std, stderr=self.service.output_err)
         return None
 
     def _make_id(self, remote, id, branch, user):
@@ -212,9 +206,9 @@ class FlatpakSource(AbstractSource):
         remote_apps = self._get_remote_info()
 
         start_time = time.perf_counter()
-        table = self.executor.call("flatpak list --system --columns=version,origin,application,branch,active,name", self.ids_regex)
+        table = self.executor.call(self._cmd("list --columns=version,origin,application,branch,active,name", False), self.ids_regex)
         systemapps = len(table)
-        table += self.executor.call("sudo -u {0} flatpak list --user --columns=version,origin,application,branch,active,name".format(self.user), self.ids_regex)
+        table += self.executor.call(self._cmd("list --columns=version,origin,application,branch,active,name", True), self.ids_regex)
         results = {}
         for i, row in enumerate(table):
             appid = self._make_id(row[1], row[2], row[3], (i >= systemapps))
@@ -238,10 +232,7 @@ class FlatpakSource(AbstractSource):
         for user in False, True:
             remotes = self._get_remotes(user)
             for remote in remotes:
-                if user:
-                    table = self.executor.call("sudo -u {} flatpak remote-ls --user {} --columns=version,application,branch,commit,name".format(self.user, remote), self.remote_regex)
-                else:
-                    table = self.executor.call("flatpak remote-ls --system {} --columns=version,application,branch,commit,name".format(remote), self.remote_regex)
+                table = self.executor.call(self._cmd("remote-ls {} --columns=version,application,branch,commit,name".format(remote), user), self.remote_regex)
                 for row in table:
                     id = row[1]
                     branch = row[2]
@@ -256,10 +247,7 @@ class FlatpakSource(AbstractSource):
         return remote_apps
 
     def _get_remotes(self, user):
-        if user:
-            return self.executor.call("sudo -u {} flatpak remotes --user | cut -f1".format(self.user)).splitlines()
-        else:
-            return self.executor.call("flatpak remotes --system | cut -f1").splitlines()
+        return self.executor.call(self._cmd("remotes | cut -f1", user)).splitlines()
 
 
 class FlatpakApp(App):
