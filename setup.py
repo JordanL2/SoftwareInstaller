@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="softwareinstaller",
-    version="1.2.4",
+    version="1.3.0",
     author="Jordan Leppert",
     author_email="jordanleppert@gmail.com",
     description="A tool to search, install and update software from multiple sources",
@@ -18,6 +18,6 @@ setuptools.setup(
         "License :: OSI Approved :: LGPL-2.1 License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.3',
     entry_points = {'console_scripts': ['si = softwareinstaller.cli:main',], },
 )
