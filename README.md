@@ -18,7 +18,7 @@ sudo pip3 install .
 
 # Usage
 
-## Search
+## Remote Search
 
 ```
 usage: si search [-h] [--source [{flatpak,pacman,yay} ...]] [--status [{N,I,U} ...]] [--column [{STATUS,SOURCE,REF,NAME,AVAILABLE,INSTALLED} ...]] [--csv] [--noheader] TERM [TERM ...]
@@ -38,7 +38,7 @@ options:
   --noheader            suppress outputting the header row
 ```
 
-## Local
+## Local Search
 
 ```
 usage: si local [-h] [--source [{flatpak,pacman,yay} ...]] [--status [{N,I,U} ...]] [--column [{STATUS,SOURCE,REF,NAME,AVAILABLE,INSTALLED} ...]] [--csv] [--noheader] [TERM ...]
@@ -58,7 +58,7 @@ options:
   --noheader            suppress outputting the header row
 ```
 
-## Info
+## Show Package Info
 
 ```
 usage: si info [-h] REF
@@ -70,7 +70,7 @@ options:
   -h, --help  show this help message and exit
 ```
 
-## Install
+## Install Package
 
 ```
 usage: si install [-h] REF
@@ -82,7 +82,7 @@ options:
   -h, --help  show this help message and exit
 ```
 
-## Remove
+## Remove Package
 
 ```
 usage: si remove [-h] REF
@@ -94,7 +94,7 @@ options:
   -h, --help  show this help message and exit
 ```
 
-## Update
+## Update Packages
 
 ```
 usage: si update [-h] [--source [{flatpak,pacman,yay} ...]] [-y] [--force] [REF ...]
