@@ -1,6 +1,6 @@
 # Description
 
-Software installer to provide single interface for multiple software sources: software repo, flatpak etc.
+Software installer to provide single interface for multiple software sources: distro repository, flatpak etc.
 
 # Supported Sources
 
