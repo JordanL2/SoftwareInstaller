@@ -125,7 +125,7 @@ Each line is a KEY=VALUE pair.
 apps.ref.delimiter=<DELIMITER>
 ```
 
-Default: :
+Default: `:`
 
 Determines the delimiter in application references.
 
