@@ -97,7 +97,7 @@ options:
 ## Update Packages
 
 ```
-usage: si update [-h] [--source [{flatpak,pacman,yay} ...]] [-y] [--force] [REF ...]
+usage: si update [-h] [--source [{flatpak,pacman,yay} ...]] [--noconfirm] [--force] [REF ...]
 
 positional arguments:
   REF                   package reference
@@ -106,7 +106,7 @@ options:
   -h, --help            show this help message and exit
   --source [{flatpak,pacman,yay} ...]
                         sources to update
-  -y                    update without asking for confirmation
+  --noconfirm           update without asking for confirmation
   --force               run pre/post tasks even if there are no updates available
 ```
 

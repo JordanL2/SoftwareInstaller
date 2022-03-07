@@ -94,7 +94,7 @@ class SoftwareInstallerCLI:
         update_parser = subparsers.add_parser('update', help='update packages')
         update_parser.add_argument('ref', metavar='REF', nargs='*', help='package reference')
         update_parser.add_argument('--source', nargs='*', choices=sorted([s.id for s in self.service.sources]), help='sources to update')
-        update_parser.add_argument('-y', action='store_true', help='update without asking for confirmation')
+        update_parser.add_argument('--noconfirm', action='store_true', help='update without asking for confirmation')
         update_parser.add_argument('--force', action='store_true', help='run pre/post tasks even if there are no updates available')
         update_parser.set_defaults(func=self.update)
 
@@ -135,7 +135,7 @@ class SoftwareInstallerCLI:
         self.service.remove(args.ref)
 
     def update(self, args):
-        autoconfirm = args.y
+        noconfirm = args.noconfirm
         forcerun = args.force
         apps = None
         specific = False
@@ -160,13 +160,13 @@ class SoftwareInstallerCLI:
             apps = self.service.local(None, ['U'], sources)
         runtimes = 0
         while (forcerun and runtimes == 0) or (apps is not None and len(apps) > 0):
-            if not autoconfirm and not specific and not forcerun:
+            if not noconfirm and not specific and not forcerun:
                 args.column = ['SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED']
                 self._outputresults(apps, args)
                 text = input("CONFIRM? [y/N]: ")
                 if text.lower() != 'y':
                     sys.exit()
-            apps = self.service.update(apps, autoconfirm)
+            apps = self.service.update(apps, noconfirm)
             if apps is not None and len(apps) > 0:
                 print("WARNING: Some sources cannot only update specific apps, so the list of apps that will be updated has changed.")
             runtimes += 1
