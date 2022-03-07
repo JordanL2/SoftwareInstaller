@@ -3,6 +3,7 @@
 from softwareinstaller.softwareservice import SoftwareService
 from softwareinstaller.app import App
 
+import argparse
 import csv
 import sys
 
@@ -13,12 +14,13 @@ class SoftwareInstallerCLI:
         self.service = SoftwareService()
         self.load_config()
         self.service.load_sources()
-        
+
         self.service.output_std = sys.stdout
         self.service.output_err = sys.stderr
         self.service.output_log['performance'] = sys.stderr
 
-        self.valid_flags = set(['--status', '--source', '--csv', '--columns', '-y', '--force', '--DEBUG-performance'])
+        self.default_columns = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED']
+        self.available_columns = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED']
 
     def load_config(self):
         config_dir = "/home/{}/.config".format(self.service.executor.getuser())
@@ -55,75 +57,69 @@ class SoftwareInstallerCLI:
             except Exception as e:
                 print("{}\nInvalid line: {}".format(line, e))
 
-    def do_command(self, cmd, args):
-        flags_unparsed = [a for a in args if a.startswith('-')]
-        args = [a for a in args if not a.startswith('-')]
-        flags = {}
-        for flag in flags_unparsed:
-            key = flag
-            value = True
-            if '=' in flag:
-                key = flag[0:flag.index('=')]
-                value = flag[flag.index('=') + 1:]
-            if key not in self.valid_flags:
-                raise Exception("Invalid flag: {0}".format(key))
-            flags[key] = value
+    def main(self):
+        parser = argparse.ArgumentParser(prog='si')
+        subparsers = parser.add_subparsers(title='subcommands', metavar='action', help='action to perform')
 
-        if '--DEBUG-performance' in flags:
-        	self.service.debug['performance'] = True
+        search_parser = subparsers.add_parser('search', help='search remote sources for packages')
+        search_parser.add_argument('term', metavar='TERM', nargs='+', help='terms to search for')
+        search_parser.add_argument('--source', nargs='*', choices=sorted([s.id for s in self.service.sources]), help='sources to search')
+        search_parser.add_argument('--status', nargs='*', choices=['N', 'I', 'U'], help='filter results on installation status: [N]ot installed, [I]nstalled, [U]pdate available')
+        search_parser.add_argument('--column', nargs='*', choices=self.available_columns, help='choose the columns in results table')
+        search_parser.add_argument('--csv', action='store_true', help='output table in CSV format')
+        search_parser.add_argument('--noheader', action='store_true', help='suppress outputting the header row')
+        search_parser.set_defaults(func=self.search)
 
-        if cmd == 'search':
-            self.search(args, flags)
-        elif cmd == 'local':
-            self.local(args, flags)
-        elif cmd == 'info':
-            self.info(args, flags)
-        elif cmd == 'install':
-            self.install(args, flags)
-        elif cmd == 'remove':
-            self.remove(args, flags)
-        elif cmd == 'update':
-            self.update(args, flags)
-        elif cmd == 'help' or cmd == '--help':
-            self.help()
+        local_parser = subparsers.add_parser('local', help='search local sources for packages')
+        local_parser.add_argument('term', metavar='TERM', nargs='*', help='terms to search for')
+        local_parser.add_argument('--source', nargs='*', choices=sorted([s.id for s in self.service.sources]), help='sources to search')
+        local_parser.add_argument('--status', nargs='*', choices=['N', 'I', 'U'], help='filter results on installation status: [N]ot installed, [I]nstalled, [U]pdate available')
+        local_parser.add_argument('--column', nargs='*', choices=self.available_columns, help='choose the columns in results table')
+        local_parser.add_argument('--csv', action='store_true', help='output table in CSV format')
+        local_parser.add_argument('--noheader', action='store_true', help='suppress outputting the header row')
+        local_parser.set_defaults(func=self.local)
+
+        info_parser = subparsers.add_parser('info', help='show information about a specific package')
+        info_parser.add_argument('ref', metavar='REF', type=str, help='package reference')
+        info_parser.set_defaults(func=self.info)
+
+        install_parser = subparsers.add_parser('install', help='install a package')
+        install_parser.add_argument('ref', metavar='REF', type=str, help='package reference')
+        install_parser.set_defaults(func=self.install)
+
+        remove_parser = subparsers.add_parser('remove', help='remove a package')
+        remove_parser.add_argument('ref', metavar='REF', type=str, help='package reference')
+        remove_parser.set_defaults(func=self.remove)
+
+        update_parser = subparsers.add_parser('update', help='update packages')
+        update_parser.add_argument('ref', metavar='REF', nargs='*', help='package reference')
+        update_parser.add_argument('--source', nargs='*', choices=sorted([s.id for s in self.service.sources]), help='sources to update')
+        update_parser.add_argument('-y', action='store_true', help='update without asking for confirmation')
+        update_parser.add_argument('--force', action='store_true', help='run pre/post tasks even if there are no updates available')
+        update_parser.set_defaults(func=self.update)
+
+        args = parser.parse_args()
+        if not hasattr(args, 'func'):
+            parser.print_help()
         else:
-            print("Unrecognised command '{0}'".format(cmd))
-            print()
-            self.help()
+            args.func(args)
 
-    def help(self):
-        print("search <TERM>... [--csv] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]] [--columns=<COLUMN>[,<COLUMN>...]]")
-        print("local [<TERM>...] [--csv] [--status=N,I,U] [--source=<SOURCE>[,<SOURCE>...]] [--columns=<COLUMN>[,<COLUMN>...]]")
-        print("info <REF>")
-        print("install <REF>")
-        print("remove <REF>")
-        print("update [<REF>...] [-y] [--force")
-
-    def search(self, args, flags):
-        filters = self._get_status_flag(flags)
+    def search(self, args):
         sources = None
-        if '--source' in flags:
-            sources = [self.service.getsource(s) for s in flags['--source'].split(',')]
-        results = self.service.search(args, filters, sources)
-        columns = None
-        if '--columns' in flags:
-            columns = flags['--columns'].split(',')
-        self._outputresults(results, flags, columns)
+        if args.source is not None:
+            sources = [self.service.getsource(s) for s in args.source]
+        results = self.service.search(args.term, args.status, sources)
+        self._outputresults(results, args)
 
-    def local(self, args, flags):
-        filters = self._get_status_flag(flags)
+    def local(self, args):
         sources = None
-        if '--source' in flags:
-            sources = [self.service.getsource(s) for s in flags['--source'].split(',')]
-        results = self.service.local(args, filters, sources)
-        columns = None
-        if '--columns' in flags:
-            columns = flags['--columns'].split(',')
-        self._outputresults(results, flags, columns)
+        if args.source is not None:
+            sources = [self.service.getsource(s) for s in args.source]
+        results = self.service.local(args.term, args.status, sources)
+        self._outputresults(results, args)
 
-    def info(self, args, flags):
-        superid = args.pop(0)
-        app = self.service.getapp(superid)
+    def info(self, args):
+        app = self.service.getapp(args.ref)
         print('     Name:', app.name)
         print('     Desc:', app.desc)
         print('  Version:', (app.version if app.version is not None else '[Not Found]'))
@@ -132,22 +128,20 @@ class SoftwareInstallerCLI:
         status = {'N': 'Not installed', 'I': 'Installed, up to date', 'U': 'Installed, update available'}[app.status()]
         print('   Status:', status)
 
-    def install(self, args, flags):
-        superid = args.pop(0)
-        self.service.install(superid)
+    def install(self, args):
+        self.service.install(args.ref)
 
-    def remove(self, args, flags):
-        superid = args.pop(0)
-        self.service.remove(superid)
+    def remove(self, args):
+        self.service.remove(args.ref)
 
-    def update(self, args, flags):
-        autoconfirm = '-y' in flags
-        forcerun = '--force' in flags
+    def update(self, args):
+        autoconfirm = args.y
+        forcerun = args.force
         apps = None
         specific = False
-        if len(args) > 0:
+        if args.ref is not None and len(args.ref) > 0:
             specific = True
-            applist = [self.service.getapp(i) for i in args]
+            applist = [self.service.getapp(i) for i in args.ref]
             apps = {}
             for app in applist:
                 if app.source.id not in apps:
@@ -161,13 +155,14 @@ class SoftwareInstallerCLI:
                         raise Exception("App {0} requested to be updated, but no update available".format(app.id))
         else:
             sources = None
-            if '--source' in flags:
-                sources = [self.service.getsource(s) for s in flags['--source'].split(',')]
+            if args.source is not None:
+                sources = [self.service.getsource(s) for s in args.source]
             apps = self.service.local(None, ['U'], sources)
         runtimes = 0
         while (forcerun and runtimes == 0) or (apps is not None and len(apps) > 0):
             if not autoconfirm and not specific and not forcerun:
-                self._outputresults(apps, flags, ['SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED'])
+                args.column = ['SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED']
+                self._outputresults(apps, args)
                 text = input("CONFIRM? [y/N]: ")
                 if text.lower() != 'y':
                     sys.exit()
@@ -176,14 +171,15 @@ class SoftwareInstallerCLI:
                 print("WARNING: Some sources cannot only update specific apps, so the list of apps that will be updated has changed.")
             runtimes += 1
 
-    def _outputresults(self, results, flags, header=None):
+    def _outputresults(self, results, args):
         table = []
-        if header is None:
-            header = ['STATUS', 'SOURCE', 'REF', 'NAME', 'AVAILABLE', 'INSTALLED']
+        header = args.column
+        if header is None or len(header) == 0:
+            header = self.default_columns
         columns = len(header)
         maxwidth = [len(header[i]) for i in range(0, columns)]
-        as_csv = '--csv' in flags
-        noheader = '--noheader' in flags
+        as_csv = hasattr(args, 'csv') and args.csv
+        noheader = hasattr(args, 'noheader') and args.noheader
         for sourceid in results.keys():
             for result in sorted(results[sourceid], key=lambda x: x.name.lower()):
                 indicator = result.status()
@@ -192,7 +188,7 @@ class SoftwareInstallerCLI:
                         indicator = '   '
                     else:
                         indicator = "[{0}]".format(indicator)
-                row = {
+                data = {
                     'STATUS': indicator,
                     'SOURCE': result.source.name,
                     'REF': self.service.make_superid(sourceid, result.id),
@@ -202,8 +198,9 @@ class SoftwareInstallerCLI:
                 }
                 if not as_csv:
                     for i in range(0, columns):
-                        if len(row[header[i]]) > maxwidth[i]:
-                            maxwidth[i] = len(row[header[i]])
+                        if len(data[header[i]]) > maxwidth[i]:
+                            maxwidth[i] = len(data[header[i]])
+                row = [data[h] for h in header]
                 table.append(row)
         if as_csv:
             csvwriter = csv.writer(sys.stdout)
@@ -214,7 +211,7 @@ class SoftwareInstallerCLI:
             if not noheader and len(table) > 0:
                 print(str.join(' ', [format(header[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
             for row in table:
-                print(str.join(' ', [format(row[header[i]], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
+                print(str.join(' ', [format(row[i], "<{0}".format(maxwidth[i])) for i in range(0, columns)]))
 
     def _get_status_flag(self, flags):
         if '--status' in flags:
@@ -228,13 +225,7 @@ class SoftwareInstallerCLI:
 
 def main():
     cli = SoftwareInstallerCLI()
-    scriptpath = sys.argv.pop(0)
-    if len(sys.argv) == 0:
-        cli.help()
-    else:
-        cmd = sys.argv.pop(0)
-        args = sys.argv.copy()
-        cli.do_command(cmd, args)
+    cli.main()
 
 if __name__ == '__main__':
     main()

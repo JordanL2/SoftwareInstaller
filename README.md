@@ -18,69 +18,97 @@ sudo pip3 install .
 
 # Usage
 
-```
-search <NAME> [--source=<SOURCE>[,<SOURCE>...]] [--status=N,I,U] [--csv] [--noheader] [--columns=<COLUMN>[,<COLUMN>...]]
-```
-Search all sources for any package matching `<NAME>`.
-	
-Status indicator:
-* Blank - Uninstalled
-* `[I]` - Installed, up to date
-* `[U]` - Installed, an update is available.
-
-The --source argument restricts searches to the given source(s), identified by the source ID. Multiple sources are possible, seperated by a comma, e.g. "flatpak,pacman".
-
-The --status argument filters the results based on its installation status. Multiple status types are possible, seperated by a comma, e.g. "I,U".
-* N - Not installed
-* I - Installed, up to date
-* U - Installed, an update is available
-
-If the --csv flag is present, outputs table in CSV format.
-
-The --noheader flag suppresses the header row.
-
-The --columns argument lets you define the columns in the search results. The available columns are:
-
-* STATUS
-* SOURCE
-* REF
-* NAME
-* AVAILABLE
-* INSTALLED
+## Search
 
 ```
-local [<NAME>] [--source=<SOURCE>[,<SOURCE>...]] [--status=N,I,U] [--csv] [--noheader] [--columns=<COLUMN>[,<COLUMN>...]]
-```
-Search locally installed packages for any package matching `<NAME>`. `<NAME>` is optional, if not given returns all packages. The table format is the same as `search`.
+usage: si search [-h] [--source [{flatpak,pacman,yay} ...]] [--status [{N,I,U} ...]] [--column [{STATUS,SOURCE,REF,NAME,AVAILABLE,INSTALLED} ...]] [--csv] [--noheader] TERM [TERM ...]
 
-The --source, --status, --csv, --noheader and --columns arguments work the same as they do for `search`.
+positional arguments:
+  TERM                  terms to search for
 
+options:
+  -h, --help            show this help message and exit
+  --source [{flatpak,pacman,yay} ...]
+                        sources to search
+  --status [{N,I,U} ...]
+                        filter results on installation status: [N]ot installed, [I]nstalled, [U]pdate available
+  --column [{STATUS,SOURCE,REF,NAME,AVAILABLE,INSTALLED} ...]
+                        choose the columns in results table
+  --csv                 output table in CSV format
+  --noheader            suppress outputting the header row
 ```
-info <REF>
-```
-Show information about a specific package.
 
-```
-install <REF>
-```
-Install package.
-
-```
-remove <REF>
-```
-Uninstall package.
+## Local
 
 ```
-update [<REF>...] [-y] [--force]
+usage: si local [-h] [--source [{flatpak,pacman,yay} ...]] [--status [{N,I,U} ...]] [--column [{STATUS,SOURCE,REF,NAME,AVAILABLE,INSTALLED} ...]] [--csv] [--noheader] [TERM ...]
+
+positional arguments:
+  TERM                  terms to search for
+
+options:
+  -h, --help            show this help message and exit
+  --source [{flatpak,pacman,yay} ...]
+                        sources to search
+  --status [{N,I,U} ...]
+                        filter results on installation status: [N]ot installed, [I]nstalled, [U]pdate available
+  --column [{STATUS,SOURCE,REF,NAME,AVAILABLE,INSTALLED} ...]
+                        choose the columns in results table
+  --csv                 output table in CSV format
+  --noheader            suppress outputting the header row
 ```
-Updates packages. By default updates everything, if one or more `<REF>` is given will only update those packages.
 
-All available updates are shown in a table, and confirmation is required before proceeding.
+## Info
 
-If -y flag is given, the update is performed without asking for confirmation.
+```
+usage: si info [-h] REF
 
-If --force flag is given, update process will run even if there are no updates available, to force the running of pre/post tasks. This implicitly runs the update without asking for confirmation.
+positional arguments:
+  REF         package reference
 
+options:
+  -h, --help  show this help message and exit
+```
+
+## Install
+
+```
+usage: si install [-h] REF
+
+positional arguments:
+  REF         package reference
+
+options:
+  -h, --help  show this help message and exit
+```
+
+## Remove
+
+```
+usage: si remove [-h] REF
+
+positional arguments:
+  REF         package reference
+
+options:
+  -h, --help  show this help message and exit
+```
+
+## Update
+
+```
+usage: si update [-h] [--source [{flatpak,pacman,yay} ...]] [-y] [--force] [REF ...]
+
+positional arguments:
+  REF                   package reference
+
+options:
+  -h, --help            show this help message and exit
+  --source [{flatpak,pacman,yay} ...]
+                        sources to update
+  -y                    update without asking for confirmation
+  --force               run pre/post tasks even if there are no updates available
+```
 
 # Configuration
 
