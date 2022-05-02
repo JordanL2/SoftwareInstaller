@@ -129,12 +129,10 @@ class SoftwareInstallerCLI:
         print('   Status:', status)
 
     def install(self, args):
-        for ref in args.ref:
-            self.service.install(ref)
+        self.service.install(args.ref)
 
     def remove(self, args):
-        for ref in args.ref:
-            self.service.remove(ref)
+        self.service.remove(args.ref)
 
     def update(self, args):
         noconfirm = args.noconfirm

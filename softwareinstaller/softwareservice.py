@@ -29,10 +29,10 @@ class SoftwareService:
             ],
 
             # Flatpak sources
-            [ 
+            [
                 FlatpakSource(self),
             ],
-            
+
         ]
         self.sources = []
 
@@ -126,41 +126,49 @@ class SoftwareService:
             raise Exception("No such appid")
         return app
 
-    def install(self, superid):
-        app = self.getapp(superid)
-        if app.isinstalled():
-            raise Exception("App is already installed")
+    def install(self, superids):
+        if type(superids) != list:
+            superids = [superids]
 
         for task in self.config['install.tasks.pre']:
             self.log("\n*** INSTALL PRE TASK: {} ***".format(task))
             self.executor.call(task, stdout=self.output_std, stderr=self.output_err)
-        
-        self.log("\n*** INSTALL APP: {} ***".format(superid))
-        app.install()
 
-        app = self.getapp(superid)
-        if not app.isinstalled():
-            raise Exception("App was not installed")
+        for superid in superids:
+            app = self.getapp(superid)
+            if app.isinstalled():
+                raise Exception("App is already installed")
+
+            self.log("\n*** INSTALL APP: {} ***".format(superid))
+            app.install()
+
+            app = self.getapp(superid)
+            if not app.isinstalled():
+                raise Exception("App was not installed")
 
         for task in self.config['install.tasks.post']:
             self.log("\n*** INSTALL POST TASK: {} ***".format(task))
             self.executor.call(task, stdout=self.output_std, stderr=self.output_err)
-        
-    def remove(self, superid):
-        app = self.getapp(superid)
-        if not app.isinstalled():
-            raise Exception("App is not installed")
+
+    def remove(self, superids):
+        if type(superids) != list:
+            superids = [superids]
 
         for task in self.config['remove.tasks.pre']:
             self.log("\n*** REMOVE PRE TASK: {} ***".format(task))
             self.executor.call(task, stdout=self.output_std, stderr=self.output_err)
 
-        self.log("\n*** REMOVE APP: {} ***".format(superid))
-        app.remove()
+        for superid in superids:
+            app = self.getapp(superid)
+            if not app.isinstalled():
+                raise Exception("App is not installed")
 
-        app = self.getapp(superid)
-        if app.isinstalled():
-            raise Exception("App was not removed")
+            self.log("\n*** REMOVE APP: {} ***".format(superid))
+            app.remove()
+
+            app = self.getapp(superid)
+            if app.isinstalled():
+                raise Exception("App was not removed")
 
         for task in self.config['remove.tasks.post']:
             self.log("\n*** REMOVE POST TASK: {} ***".format(task))
@@ -178,7 +186,7 @@ class SoftwareService:
             if updatedlist is not None:
                 apps[sourceid] = updatedlist
                 return apps
-            
+
             if source.check_updated:
                 apps_still_to_be_updated = self.local(None, ['U'], [source])
                 if sourceid in apps_still_to_be_updated:
