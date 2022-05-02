@@ -84,11 +84,11 @@ class SoftwareInstallerCLI:
         info_parser.set_defaults(func=self.info)
 
         install_parser = subparsers.add_parser('install', help='install a package')
-        install_parser.add_argument('ref', metavar='REF', type=str, help='package reference')
+        install_parser.add_argument('ref', metavar='REF', nargs='+', help='package reference')
         install_parser.set_defaults(func=self.install)
 
         remove_parser = subparsers.add_parser('remove', help='remove a package')
-        remove_parser.add_argument('ref', metavar='REF', type=str, help='package reference')
+        remove_parser.add_argument('ref', metavar='REF', nargs='+', help='package reference')
         remove_parser.set_defaults(func=self.remove)
 
         update_parser = subparsers.add_parser('update', help='update packages')
@@ -129,10 +129,12 @@ class SoftwareInstallerCLI:
         print('   Status:', status)
 
     def install(self, args):
-        self.service.install(args.ref)
+        for ref in args.ref:
+            self.service.install(ref)
 
     def remove(self, args):
-        self.service.remove(args.ref)
+        for ref in args.ref:
+            self.service.remove(ref)
 
     def update(self, args):
         noconfirm = args.noconfirm

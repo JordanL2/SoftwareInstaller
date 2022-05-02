@@ -27,7 +27,7 @@ class CommandExecutor:
             stderr=subprocess.PIPE,
             universal_newlines=True,
             bufsize=1)
-        
+
         stdout_result = ''
         stderr_result = ''
         result_code = None
@@ -41,7 +41,7 @@ class CommandExecutor:
                 stdout_result += line
                 if stdout is not None:
                     print(line, end='', file=stdout)
-            
+
             lines = non_blocking_read(proc.stderr)
             for line in lines:
                 stderr_result += line
@@ -65,13 +65,13 @@ class CommandExecutor:
             successcodes = [0]
 
         stdout_result, stderr_result, result_code = self.execute_proc(command, stdout, stderr)
-        
+
         if successcodes is not None and result_code not in successcodes:
             raise Exception("Command: {0}\nReturn Code: {1}\nStandard Output: {2}\nError Output: {3}".format(command, result_code, stdout_result, stderr_result))
-        
+
         if regex is None:
             return stdout_result
-        
+
         response = []
         for line in stdout_result.splitlines():
             match = regex.match(line)
